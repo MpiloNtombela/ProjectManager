@@ -1,27 +1,27 @@
 import React, {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 import TextField from "@material-ui/core/TextField";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
 import Button from "@material-ui/core/Button";
-import Grid from "@material-ui/core/Grid";
 import {connect} from "react-redux";
-import {useComponentStyles} from "../../styles/componentStyles";
 import createSnackAlert from "../../../actions/snackAlerts";
 import ForgotPasswordForm from "../ForgotPasswordForm";
 import {forgotPassword} from "../../../actions/auth";
 import {FormSubmitButton} from "../../reuse/ReButtons";
 import Typography from "@material-ui/core/Typography";
+import useCommonStyles from "../../styles/commonStyles";
+import {useComponentStyles} from "../../styles/componentStyles";
+import Box from "@material-ui/core/Box";
 
 const LoginForm = ({auth, errors, handleSubmit, fieldType, setCredentials, createSnackAlert, forgotPassword}) => {
     const isLoading = auth.isLoading;
     const isSubmitting = auth.isSubmitting;
+    const cls = useCommonStyles()
     const classes = useComponentStyles();
     const [open, setOpen] = useState(false)
 
 
     const [errs, setErrs] = useState({
-        email   : '',
+        email: '',
         username: '',
         password: '',
     })
@@ -61,26 +61,24 @@ const LoginForm = ({auth, errors, handleSubmit, fieldType, setCredentials, creat
                            type="password" id="password" autoComplete="current-password"
                            onChange={handleChange} variant="standard" size="small"
                            error={!!errs.password} helperText={errs.password}/>
+                           <Link onClick={(() => setOpen(true))} className={classes.link} to="#">
+                        {"Forgot password?"}</Link>
                 <FormSubmitButton disabled={isLoading || isSubmitting}>
                     {isSubmitting ? "Logging In..." : "Log In"}
                 </FormSubmitButton>
-                <Grid container>
-                    <Grid item xs={12} sm={6}>
-                        <Link onClick={(() => setOpen(true))} className={classes.link} to="#">
-                            {"Forgot password?"}
-                        </Link>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                        <Link className={classes.link} to="/register">
-                            {"No account yet? Sign Up"}
-                        </Link>
-                    </Grid>
-                </Grid>
             </form>
-            <Typography variant="body2">
-                {"No account yet? Sign Up"}
-            </Typography>
-            <Button component={Link} variant="contained" fullWidth color="secondary" to="/register">create account</Button>
+            <Box sx={{my: 1}}>
+                <Typography style={{fontSize: 'x-small'}} variant="body1" className={cls.centered} component='small'>
+                    {"No account yet? create new one"}
+                </Typography>
+            </Box>
+            <Button component={Link}
+                    disableElevation
+                    variant="contained"
+                    fullWidth
+                    color="secondary"
+                    disabled={isLoading || isSubmitting}
+                    to="/register">create account</Button>
             <ForgotPasswordForm
                 auth={auth}
                 createSnackAlert={createSnackAlert}
@@ -93,7 +91,7 @@ const LoginForm = ({auth, errors, handleSubmit, fieldType, setCredentials, creat
 
 const mapStateToProps = state => ({
     errors: state.errors.errors,
-    auth  : state.auth
+    auth: state.auth
 })
 
 export default connect(mapStateToProps, {createSnackAlert, forgotPassword})(LoginForm)

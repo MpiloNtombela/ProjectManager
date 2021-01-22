@@ -132,12 +132,12 @@ const Navbar = ({auth, logout}) => {
                                   vertical  : 'top',
                                   horizontal: 'left',
                               }} classes={{paper: classes.menu}}>
-                            {auth.isAuthenticated && <>
+                            {auth.isAuthenticated && <div>
                             <MenuItem onClick={handleClose}>Profile</MenuItem>
                             <Divider/>
                             <MenuItem onClick={handleClose}>My account</MenuItem>
                             <Divider/>
-                            <MenuItem onClick={logout}>Logout</MenuItem></>}
+                            <MenuItem onClick={logout}>Logout</MenuItem></div>}
                         </Menu>
                     </Toolbar>
                 </Container>
