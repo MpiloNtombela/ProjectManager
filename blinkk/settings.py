@@ -13,6 +13,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY')
 HASHID_USER_SALT = config('HASHID_USER_SALT')
 HASHID_PROJECT_SALT = config('HASHID_PROJECT_SALT')
+HASHID_BOARD_SALT = config('HASHID_BOARD_SALT')
+HASHID_TASK_SALT = config('HASHID_TASK_SALT')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
@@ -31,7 +33,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users.apps.UsersConfig',
-    # 'projects.apps.ProjectsConfig',
+    'projects.apps.ProjectsConfig',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
@@ -134,7 +136,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Africa/Johannesburg'
 
 USE_I18N = True
 
