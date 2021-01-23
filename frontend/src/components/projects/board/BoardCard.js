@@ -6,16 +6,26 @@ import CardContent from "@material-ui/core/CardContent";
 import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemText from "@material-ui/core/ListItemText";
-import ListItemAvatar from "@material-ui/core/ListItemAvatar";
-import Avatar from "@material-ui/core/Avatar";
-import ImageIcon from "@material-ui/icons/Image";
 import Slide from "@material-ui/core/Slide";
-import Divider from "@material-ui/core/Divider";
+import makeStyles from "@material-ui/core/styles/makeStyles";
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    boxShadow: "0 0 5px rgba(0, 0, 0, .2)",
+    borderRadius: theme.shape.borderRadius,
+    margin: theme.spacing(1, 0),
+  },
+
+  title: {
+    fontWeight: "700",
+  },
+}));
 
 function BoardCard({ name, tasks, visibility }) {
   const date = new Date();
+  const classes = useStyles();
   return (
-    <Card>
+    <Card elecation={4}>
       <CardHeader title={name} />
       {visibility && (
         <CardContent>
@@ -24,23 +34,17 @@ function BoardCard({ name, tasks, visibility }) {
               <List>
                 {Object.keys(tasks).map((task, idx) => {
                   return (
-                    <div key={idx}>
-                      <Divider />
-                      <ListItem style={{ padding: 0 }}>
-                        <ListItemAvatar>
-                          <Avatar>
-                            <ImageIcon />
-                          </Avatar>
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={tasks[task]}
-                          secondary={date.toDateString()}
-                        />
-                      </ListItem>
-                    </div>
+                    <ListItem key={idx} className={classes.root}>
+                      <ListItemText
+                        primary={tasks[task]}
+                        secondary={date.toDateString()}
+                        classes={{
+                          root: classes.title,
+                        }}
+                      />
+                    </ListItem>
                   );
                 })}
-                <Divider />
               </List>
             </Slide>
           )}
@@ -53,7 +57,7 @@ function BoardCard({ name, tasks, visibility }) {
 BoardCard.propTypes = {
   name: PropTypes.string,
   tasks: PropTypes.any,
-  visibility: PropTypes.bool
-}
+  visibility: PropTypes.bool,
+};
 
 export default BoardCard;
