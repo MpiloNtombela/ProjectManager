@@ -1,13 +1,17 @@
+import PropTypes from "prop-types";
 import React from "react";
 import TextField from "@material-ui/core/TextField";
-import produce from "immer";
+import produce from 'immer'
 
-const ProjectSetupForm = ({ project, setProject }) => {
+
+
+const ProjectDetailsForm = ({ projectState, setProjectState }) => {
   const handleChange = (e) => {
-    setProject((prevState) => ({
-      ...prevState,
-      [e.target.name]: e.target.value,
-    }));
+    setProjectState(
+      produce(projectState, (draft) => {
+        draft.project[e.target.name] = e.target.value;
+      })
+    );
   };
   return (
     <form>
@@ -17,13 +21,13 @@ const ProjectSetupForm = ({ project, setProject }) => {
         fullWidth
         id="projectName"
         label="Project Name"
-        name="projectName"
+        name="name"
         type="text"
         autoFocus
         onChange={handleChange}
         variant="standard"
         size="small"
-        value={project.projectName}
+        value={projectState.project.name}
       />
       <TextField
         margin="normal"
@@ -36,7 +40,7 @@ const ProjectSetupForm = ({ project, setProject }) => {
         onChange={handleChange}
         variant="standard"
         size="small"
-        value={project.description}
+        value={projectState.project.description}
       />
       <TextField
         margin="normal"
@@ -44,14 +48,30 @@ const ProjectSetupForm = ({ project, setProject }) => {
         fullWidth
         id="deadline"
         label="Project Deadline"
+        type="datetime-local"
         name="deadline"
-        type="datetime"
         onChange={handleChange}
         variant="standard"
         size="small"
+        value={projectState.project.deadline}
+        InputLabelProps={{
+          shrink: true,
+        }}
       />
     </form>
   );
 };
 
-export default ProjectSetupForm;
+ProjectDetailsForm.propTypes = {
+  projectState: PropTypes.shape({
+    project: PropTypes.shape({
+      deadline: PropTypes.string,
+      description: PropTypes.string,
+      name: PropTypes.string,
+    })
+  }),
+  setProjectState: PropTypes.func
+}
+
+
+export default ProjectDetailsForm;
