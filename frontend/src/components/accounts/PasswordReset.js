@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import React, {useState} from 'react';
 import TextField from "@material-ui/core/TextField";
 import {connect} from "react-redux";
@@ -76,6 +77,25 @@ const PasswordReset = ({auth, createSnackAlert, passwordReset, match}) => {
             </Card>
         </Container>
     )
+}
+
+PasswordReset.propTypes = {
+  auth: PropTypes.shape({
+    isAuthenticated: PropTypes.any,
+    isLoading: PropTypes.any,
+    isSubmitting: PropTypes.any,
+    user: PropTypes.shape({
+      username: PropTypes.any
+    })
+  }),
+  createSnackAlert: PropTypes.func,
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      uid: PropTypes.string,
+      token: PropTypes.string
+    })
+  }),
+  passwordReset: PropTypes.func
 }
 
 const mapStateToProps = state => ({

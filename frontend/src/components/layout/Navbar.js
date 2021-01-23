@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import * as React from 'react';
 import CssBaseline from "@material-ui/core/CssBaseline";
 import AppBar from "@material-ui/core/AppBar";
@@ -32,6 +33,7 @@ const useStyles = makeStyles((theme) => ({
     },
     toolbar     : {
         flexWrap: 'wrap',
+        padding : 0
     },
     toolbarTitle: {
         flexGrow: 1,
@@ -81,7 +83,7 @@ const Navbar = ({auth, logout}) => {
             <AppBar
                 position="sticky"
                 color="transparent"
-                elevation={1}
+                elevation={0}
                 className={classes.appBar}
             >
                 <Container classes={{root: classes.noPadding}} maxWidth="xl">
@@ -145,6 +147,18 @@ const Navbar = ({auth, logout}) => {
             {auth.isLoading || auth.isSubmitting ? <LinearProgress/> : <></>}
         </>
     );
+}
+
+Navbar.propTypes = {
+  auth: PropTypes.shape({
+    isAuthenticated: PropTypes.bool,
+    isLoading: PropTypes.bool,
+    isSubmitting: PropTypes.bool,
+    user: PropTypes.shape({
+      username: PropTypes.string
+    })
+  }),
+  logout: PropTypes.func
 }
 
 const mapStateToProps = state => ({

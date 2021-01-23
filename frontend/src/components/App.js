@@ -19,7 +19,7 @@ const Register = lazy(() => import('./accounts/Register'))
 const PasswordChange = lazy(() => import('./accounts/passwordChange'))
 const PasswordReset = lazy(() => import('./accounts/passwordReset'))
 const ConfirmEmail = lazy(() => import('./accounts/ConfirmEmail'))
-const ProjectForm = lazy(() => import('./projects/ProjectForm'))
+const SetupPreviewPage = lazy(() => import('./projects/setup/SetupPreviewPage'))
 // const Error404 = lazy(() => import('./feedback/Error404'))
 
 const App = () => {
@@ -63,7 +63,7 @@ const App = () => {
                         <Suspense fallback={<FormSkeleton/>}>
                             <PrivateRoute path="/profile" component={PasswordChange}/>
                             <Route path="/login" component={Login}/>
-                            <Route path="/test" component={ProjectForm}/>
+                            <Route path="/test" component={SetupPreviewPage}/>
                             <Route path="/register" component={Register}/>
                             <Route path="/api/auth/registration/account-confirm-email/:key/" component={ConfirmEmail}/>
                             <Route path="/api/auth/password/reset/confirm/:uid/:token/" component={PasswordReset}/>

@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import React, {useState} from 'react';
 import {useDispatch} from 'react-redux';
 import {login} from '../../../actions/auth';
@@ -28,6 +29,10 @@ const LoginUsername = ({isAuthenticated}) => {
     return (
         <LoginForm setCredentials={setCredentials} handleSubmit={handleSubmit} fieldType="username"/>
     )
+}
+
+LoginUsername.propTypes = {
+  isAuthenticated: PropTypes.bool
 }
 
 export default LoginUsername

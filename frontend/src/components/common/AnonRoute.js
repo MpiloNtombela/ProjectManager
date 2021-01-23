@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import React from "react";
 import {Redirect, Route} from "react-router-dom";
 import {connect} from "react-redux";
@@ -16,6 +17,14 @@ const AnonRoute = ({component: Component, auth, ...rest}) => (
         }}
     />
 );
+
+AnonRoute.propTypes = {
+  auth: PropTypes.shape({
+    isAuthenticated: PropTypes.bool,
+    isLoading: PropTypes.bool
+  }),
+  component: PropTypes.any
+}
 
 const mapStateToProps = state => ({
     auth: state.auth

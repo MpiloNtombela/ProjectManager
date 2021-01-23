@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import React, {useEffect, useState} from 'react';
 import {Link} from 'react-router-dom';
 import TextField from "@material-ui/core/TextField";
@@ -87,6 +88,23 @@ const LoginForm = ({auth, errors, handleSubmit, fieldType, setCredentials, creat
             />
         </>
     )
+}
+
+LoginForm.propTypes = {
+  auth: PropTypes.shape({
+    isAuthenticated: PropTypes.bool,
+    isLoading: PropTypes.bool,
+    isSubmitting: PropTypes.bool,
+    user: PropTypes.shape({
+      username: PropTypes.string
+    })
+  }),
+  createSnackAlert: PropTypes.func,
+  errors: PropTypes.array,
+  fieldType: PropTypes.string,
+  forgotPassword: PropTypes.func,
+  handleSubmit: PropTypes.func,
+  setCredentials: PropTypes.func
 }
 
 const mapStateToProps = state => ({

@@ -10,12 +10,11 @@ import {useComponentStyles} from "../../styles/componentStyles";
 import {connect} from "react-redux";
 import CardContent from "@material-ui/core/CardContent";
 import Card from "@material-ui/core/Card";
-import {useRouteMatch} from 'react-router-dom/'
-import {Redirect} from "react-router-dom";
+import {Redirect} from 'react-router-dom'
 import useCommonStyles from "../../styles/commonStyles";
 
 
-const Login = ({auth, history}) => {
+const Login = ({auth}) => {
     const isAuthenticated = auth.isAuthenticated;
     const isLoading = auth.isLoading;
     const isSubmitting = auth.isSubmitting;
