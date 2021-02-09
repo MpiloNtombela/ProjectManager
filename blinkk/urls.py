@@ -1,4 +1,6 @@
 from dj_rest_auth.registration.views import VerifyEmailView
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include, re_path
 
@@ -18,7 +20,13 @@ urlpatterns = [
 
     path('api/auth/registration/', include('dj_rest_auth.registration.urls')),
     path('api/auth/', include('dj_rest_auth.urls')),
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path('api-auth/drf/', include('rest_framework.urls')),
     # path('api/u/', include('users.urls')),
-    path('', include("frontend.urls")),
+    path('api/projects/', include('projects.urls')),
 ]
+
+if settings.DEBUG is True:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += path('', include("frontend.urls")),
+else:
+    urlpatterns += path('', include("frontend.urls"))
