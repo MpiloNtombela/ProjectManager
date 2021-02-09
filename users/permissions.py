@@ -9,6 +9,7 @@ class IsPartOfConnectionRequest(permissions.BasePermission):
         return obj.to_user == request.user or obj.from_user == request.user
 
 
+
 class IsNotAlreadyConnected(permissions.BasePermission):
     message = _('Already in your network')
 
