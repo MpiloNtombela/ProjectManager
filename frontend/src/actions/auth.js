@@ -2,23 +2,17 @@ import axios from "axios";
 import * as action from "./types";
 import createSnackAlert from "./snackAlerts";
 import returnErrors from "./errors";
-import { batch } from "react-redux";
+import {batch} from "react-redux";
+import {config, tokenConfig} from "../components/common/axiosConfig";
 
-// axios request headers
-const config = {
-  headers: {
-    Accept: "application/json",
-    "Content-Type": "application/json",
-  },
-};
 
 // CHECK AUTHENTICATED USER TOKEN & LOAD THAT USER
 export const loadUser = () => (dispatch, getState) => {
   // User Loading
-  dispatch({ type: action.USER_LOADING });
+  dispatch({type: action.USER_LOADING});
 
   axios
-    .get("/api/auth/user/", tokenConfig(getState))
+    .get("/api/auth/user/", tokenConfig(getState().auth.token))
     .then((res) => {
       dispatch({
         type: action.USER_LOADED,
@@ -48,8 +42,8 @@ export const login = (credentials) => (dispatch) => {
       });
       dispatch(loadUser());
       dispatch(createSnackAlert("logged in successfully", 200));
-      dispatch({ type: action.CLEAR_ALERTS });
-      dispatch({ type: action.CLEAR_ERRORS });
+      dispatch({type: action.CLEAR_ALERTS});
+      dispatch({type: action.CLEAR_ERRORS});
     })
     .catch((err) => {
       dispatch({
@@ -75,14 +69,14 @@ export const register = (newUser, history) => (dispatch) => {
   axios
     .post("/api/auth/registration/", body, config)
     .then((res) => {
-      dispatch({ type: action.REGISTER_SUCCESS });
-      dispatch({ type: action.CLEAR_ALERTS });
-      dispatch({ type: action.CLEAR_ERRORS });
+      dispatch({type: action.REGISTER_SUCCESS});
+      dispatch({type: action.CLEAR_ALERTS});
+      dispatch({type: action.CLEAR_ERRORS});
       dispatch(createSnackAlert(res.data, res.status));
       history.push("/login");
     })
     .catch((err) => {
-      dispatch({ type: action.REGISTER_FAIL });
+      dispatch({type: action.REGISTER_FAIL});
       if (err.response.data["non_field_errors"]) {
         dispatch(createSnackAlert(err.response.data, err.response.status));
       } else {
@@ -93,20 +87,20 @@ export const register = (newUser, history) => (dispatch) => {
 
 // CONFIRM EMAIL
 export const confirmEmail = (key, history) => (dispatch) => {
-  dispatch({ type: action.AUTH_REQUEST_SENT });
-  const body = JSON.stringify({ key: key });
+  dispatch({type: action.AUTH_REQUEST_SENT});
+  const body = JSON.stringify({key: key});
 
   axios
     .post("/api/auth/account-confirm-email/", body, config)
     .then(() => {
-      dispatch({ type: action.EMAIL_VERIFIED });
+      dispatch({type: action.EMAIL_VERIFIED});
       dispatch(createSnackAlert("Email verified successfully", 200));
-      dispatch({ type: action.CLEAR_ALERTS });
+      dispatch({type: action.CLEAR_ALERTS});
       history.push("/login");
     })
     .catch((err) => {
       batch(() => {
-        dispatch({ type: action.EMAIL_VERIFICATION_FAILED });
+        dispatch({type: action.EMAIL_VERIFICATION_FAILED});
         dispatch(
           createSnackAlert(
             "Verification failed. Either link is corrupt or expired",
@@ -117,22 +111,22 @@ export const confirmEmail = (key, history) => (dispatch) => {
     });
 };
 export const resendConfirmEmail = (email, history) => (dispatch) => {
-  dispatch({ type: action.AUTH_REQUEST_SENT });
-  const body = JSON.stringify({ email });
+  dispatch({type: action.AUTH_REQUEST_SENT});
+  const body = JSON.stringify({email});
 
   axios
     .post("/api/auth/resend-account-confirmation-email/", body, config)
     .then((res) => {
       batch(() => {
-        dispatch({ type: action.RESET_LINK_SENT });
-        dispatch({ type: action.CLEAR_ALERTS });
+        dispatch({type: action.RESET_LINK_SENT});
+        dispatch({type: action.CLEAR_ALERTS});
       });
       dispatch(createSnackAlert(res.data, res.status));
       history.push("/login");
     })
     .catch((err) => {
       batch(() => {
-        dispatch({ type: action.EMAIL_VERIFICATION_FAILED });
+        dispatch({type: action.EMAIL_VERIFICATION_FAILED});
         dispatch(createSnackAlert(err.response.data, err.response.status));
       });
     });
@@ -144,14 +138,14 @@ export const logout = () => (dispatch, getState) => {
     type: action.AUTH_REQUEST_SENT,
   });
   axios
-    .post("/api/auth/logout/", null, tokenConfig(getState))
+    .post("/api/auth/logout/", null, tokenConfig(getState().auth.token))
     .then((res) => {
       dispatch({
         type: action.LOGOUT_SUCCESS,
       });
       dispatch(createSnackAlert(res.data, res.status));
-      dispatch({ type: action.CLEAR_ALERTS });
-      dispatch({ type: action.CLEAR_ERRORS });
+      dispatch({type: action.CLEAR_ALERTS});
+      dispatch({type: action.CLEAR_ERRORS});
     })
     .catch((err) => {
       dispatch(createSnackAlert(err.response.data, err.response.status));
@@ -163,7 +157,7 @@ export const forgotPassword = (email) => (dispatch) => {
   dispatch({
     type: action.AUTH_REQUEST_SENT,
   });
-  const body = JSON.stringify({ email: email });
+  const body = JSON.stringify({email: email});
   axios
     .post("/api/auth/password/reset/", body, config)
     .then((res) => {
@@ -171,11 +165,11 @@ export const forgotPassword = (email) => (dispatch) => {
         type: action.RESET_LINK_SENT,
       });
       dispatch(createSnackAlert(res.data, res.status));
-      dispatch({ type: action.CLEAR_ALERTS });
-      dispatch({ type: action.CLEAR_ERRORS });
+      dispatch({type: action.CLEAR_ALERTS});
+      dispatch({type: action.CLEAR_ERRORS});
     })
     .catch((err) => {
-      dispatch({ type: action.RESET_LINK_SENT_FAILED });
+      dispatch({type: action.RESET_LINK_SENT_FAILED});
       dispatch(createSnackAlert(err.response.data, err.response.status));
     });
 };
@@ -194,7 +188,7 @@ export const passwordReset = (credentials, history) => (dispatch) => {
         type: action.PASSWORD_RESET_SUCCESS,
       });
       dispatch(createSnackAlert(res.data, res.status));
-      dispatch({ type: action.CLEAR_ALERTS });
+      dispatch({type: action.CLEAR_ALERTS});
       history.push("/login");
     })
     .catch((err) => {
@@ -206,23 +200,20 @@ export const passwordReset = (credentials, history) => (dispatch) => {
 };
 
 // PASSWORD RESET
-export const passwordChange = (credentials, history) => (
-  dispatch,
-  getState
-) => {
+export const passwordChange = (credentials, history) => (dispatch, getState) => {
   dispatch({
     type: action.AUTH_REQUEST_SENT,
   });
   // Request Body
   const body = JSON.stringify(credentials);
   axios
-    .post("/api/auth/password/change/", body, tokenConfig(getState))
+    .post("/api/auth/password/change/", body, tokenConfig(getState().auth.token))
     .then((res) => {
       dispatch({
         type: action.PASSWORD_CHANGED,
       });
       dispatch(createSnackAlert(res.data, res.status));
-      dispatch({ type: action.CLEAR_ALERTS });
+      dispatch({type: action.CLEAR_ALERTS});
       history.push("/");
     })
     .catch((err) => {
@@ -234,22 +225,3 @@ export const passwordChange = (credentials, history) => (
 };
 
 // Setup config with token - helper function
-export const tokenConfig = (getState) => {
-  // Get token from state
-  const token = getState().auth.token;
-
-  // Headers
-  const config = {
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-  };
-
-  // If token, add to headers config
-  if (token) {
-    config.headers["Authorization"] = `Token ${token}`;
-  }
-
-  return config;
-};
