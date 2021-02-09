@@ -24,8 +24,8 @@ module.exports = {
     "react/no-danger": "error",
     "react-hooks/rules-of-hooks": "error",
     "react-hooks/exhaustive-deps": "warn",
-    "import/named": 2,
-    "import/no-unresolved": [2],
+    "import/named": 1,
+    "import/no-unresolved": [1],
   },
   settings: {
     "import/resolver": "webpack",
