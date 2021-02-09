@@ -6,20 +6,33 @@ import Container from "@material-ui/core/Container";
 import Typography from "@material-ui/core/Typography";
 import LoginUsername from "./LoginUsername";
 import LoginEmail from "./LoginEmail";
-import {useComponentStyles} from "../../styles/componentStyles";
 import {connect} from "react-redux";
 import CardContent from "@material-ui/core/CardContent";
 import Card from "@material-ui/core/Card";
 import {Redirect} from 'react-router-dom'
-import useCommonStyles from "../../styles/commonStyles";
+import makeStyles from "@material-ui/core/styles/makeStyles";
+
+const useStyles = makeStyles((theme) => ({
+  paper: {
+    paddingTop: theme.spacing(8),
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    textItems: 'center',
+    paddingBottom: theme.spacing(10)
+  },
+  centered: {
+    display: "block",
+    textAlign: "center"
+  },
+}))
 
 
 const Login = ({auth}) => {
     const isAuthenticated = auth.isAuthenticated;
     const isLoading = auth.isLoading;
     const isSubmitting = auth.isSubmitting;
-    const classes = useComponentStyles();
-    const cls = useCommonStyles()
+    const classes = useStyles();
     const [selectedTab, setSelectedTab] = useState(0);
 
     const handleChange = (event, newValue) => {
@@ -41,7 +54,7 @@ const Login = ({auth}) => {
                 <CssBaseline/>
                 <Card>
                     <CardContent>
-                        <Typography className={cls.centered} component="h1" variant="h5">
+                        <Typography className={classes.centered} component="h1" variant="h5">
                             Log in
                         </Typography>
                         <Tabs centered value={selectedTab} onChange={handleChange} aria-label="log in tabs">

@@ -1,42 +1,71 @@
-import React, { useEffect, useState } from "react";
-import { Link, Redirect } from "react-router-dom";
-import { connect } from "react-redux";
-import { register } from "../../actions/auth";
+import React, {useEffect} from "react";
+import {Link, Redirect} from "react-router-dom";
+import {useDispatch, useSelector} from "react-redux";
 import TextField from "@material-ui/core/TextField";
 import Grid from "@material-ui/core/Grid";
 import Container from "@material-ui/core/Container";
 import CssBaseline from "@material-ui/core/CssBaseline";
 import Typography from "@material-ui/core/Typography";
-import createSnackAlert from "../../actions/snackAlerts";
-import { useComponentStyles } from "../styles/componentStyles";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
-import { FormSubmitButton } from "../reuse/ReButtons";
-import { validatePasswords } from "../../validators/validators";
-import useCommonStyles from "../styles/commonStyles";
+import {FormSubmitButton} from "../reuse/ReButtons";
+import {validatePasswords} from "../../validators/validators";
+import makeStyles from "@material-ui/core/styles/makeStyles";
+import {useImmer} from "use-immer";
+import createSnackAlert from "../../actions/snackAlerts"
+import {register} from "../../actions/auth";
 
-const Register = ({ errors, auth, register, createSnackAlert, history }) => {
-  const isAuthenticated = auth.isAuthenticated;
-  const isLoading = auth.isLoading;
-  const isSubmitting = auth.isSubmitting;
-  const classes = useComponentStyles();
-  const cls = useCommonStyles();
+const useStyles = makeStyles((theme) => ({
+  paper: {
+    paddingTop: theme.spacing(8),
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    textItems: 'center',
+    paddingBottom: theme.spacing(10)
+  },
+  form: {
+    width: '100%', // Fix IE11 issue.
+    marginTop: theme.spacing(1)
+  },
+  centered: {
+    display: "block",
+    textAlign: "center"
+  },
+  link: {
+    marginTop: theme.spacing(2),
+    fontSize: "small",
+    fontWeight: 600,
+    display: "inline-block",
+    color: theme.palette.secondary.main,
+    textDecoration: "none"
+  }
+}))
+
+const Register = ({history}) => {
+  const isAuthenticated = useSelector(state => state.auth.isAuthenticated)
+  const isLoading = useSelector(state => state.auth.isLoading)
+  const isSubmitting = useSelector(state => state.auth.isSubmitting)
+  const errors = useSelector(state => state.errors.errors)
+  const dispatch = useDispatch()
+  const classes = useStyles();
+
   const initState = {
     first_name: "",
     last_name: "",
     username: "",
     email: "",
     password1: "",
-    password2: "",
+    password2: ""
   };
-  const [state, setState] = useState(initState);
-  const [errs, setErrs] = useState({
+  const [state, setState] = useImmer(initState);
+  const [errs, setErrs] = useImmer({
     first_name: "",
     last_name: "",
     username: "",
     email: "",
     password1: "",
-    password2: "",
+    password2: ""
   });
 
   const handleSubmit = (e) => {
@@ -47,16 +76,16 @@ const Register = ({ errors, auth, register, createSnackAlert, history }) => {
       username,
       email,
       password1,
-      password2,
+      password2
     } = state;
     if (
       !(first_name && last_name && username && email && password1 && password2)
     ) {
-      return createSnackAlert("all fields are required", 400);
+      return dispatch(createSnackAlert("all fields are required", 400));
     }
-    const { valid, message } = validatePasswords(password1, password2);
+    const {valid, message} = validatePasswords(password1, password2);
     if (!valid) {
-      createSnackAlert(message, 400);
+      dispatch(createSnackAlert(message, 400));
     } else {
       const newUser = {
         first_name,
@@ -64,51 +93,48 @@ const Register = ({ errors, auth, register, createSnackAlert, history }) => {
         username,
         email,
         password1,
-        password2,
+        password2
       };
-      register(newUser, history);
+      dispatch(register(newUser, history));
     }
   };
 
   const handleChange = (e) => {
-    setState((prevState) => ({
-      ...prevState,
-      [e.target.name]: e.target.value,
-    }));
+    setState((draft) => {
+      draft[e.target.name] = e.target.value
+    });
     if (errors.length) {
-      setErrs((prevState) => ({
-        ...prevState,
-        [e.target.name]: "",
-      }));
+      setErrs((draft) => {
+        draft[e.target.name] = ""
+      });
     }
   };
 
   useEffect(() => {
     for (const err of errors) {
-      setErrs((prevState) => ({
-        ...prevState,
-        [err.field]: err.error,
-      }));
+      setErrs((draft) => {
+        draft[err.field] = err.error
+      });
     }
-  }, [errors]);
+  }, [errors, setErrs]);
   const {
     first_name,
     last_name,
     username,
     email,
     password1,
-    password2,
+    password2
   } = state;
 
   if (isAuthenticated) {
-    return <Redirect to="/" />;
+    return <Redirect to="/"/>;
   } else {
     return (
       <Container className={classes.paper} component="main" maxWidth="xs">
-        <CssBaseline />
+        <CssBaseline/>
         <Card>
           <CardContent>
-            <Typography className={cls.centered} component="h1" variant="h5">
+            <Typography className={classes.centered} component="h1" variant="h5">
               New Account
             </Typography>
             <form className={classes.form} onSubmit={handleSubmit}>
@@ -228,12 +254,4 @@ const Register = ({ errors, auth, register, createSnackAlert, history }) => {
     );
   }
 };
-
-const mapStateToProps = (state) => ({
-  auth: state.auth,
-  errors: state.errors.errors,
-});
-
-export default connect(mapStateToProps, { register, createSnackAlert })(
-  Register
-);
+export default Register
