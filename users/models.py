@@ -13,6 +13,8 @@ class User(AbstractUser):
     id = HashidAutoField(primary_key=True, min_length=15, alphabet='0123456789abcdefghijklmnopqrstuvwxyz',
                          salt=settings.HASHID_USER_SALT)
 
+    avatar = models.FileField(null=True, blank=True, upload_to='avatars/')
+
     def __str__(self):
         """:returns username of the user when ever the user model is called or used"""
         return self.username
@@ -22,7 +24,7 @@ class Team(models.Model):
     id = HashidAutoField(primary_key=True, min_length=20, salt=settings.HASHID_USER_SALT)
     team_name = models.CharField(max_length=100)
     creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="team_leader")
-    members = models.ManyToManyField(User, related_name="team_members")
+    members = models.ManyToManyField(User, related_name="team_members", blank=True)
     created_on = models.DateTimeField(auto_now_add=True, auto_now=False)
     updated_on = models.DateTimeField(auto_now_add=False, auto_now=True)
 
