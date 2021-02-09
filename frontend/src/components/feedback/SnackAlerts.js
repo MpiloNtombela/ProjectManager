@@ -1,17 +1,21 @@
 import PropTypes from "prop-types";
-import React, { useState, useEffect } from "react";
-import { connect } from "react-redux";
+import React, {useEffect, useState} from "react";
+import {useDispatch, useSelector} from "react-redux";
 import Snackbar from "@material-ui/core/Snackbar";
 import Alert from "@material-ui/core/Alert";
+import {CLEAR_ALERTS} from "../../actions/types";
 
-const SnackAlerts = ({ alerts }) => {
+const SnackAlerts = () => {
   const [open, setOpen] = useState(false);
   const [msg, setMsg] = useState("");
   const [type, setType] = useState("");
+  const dispatch = useDispatch ()
+  const alerts = useSelector(state => state.alerts)
 
   const handleClose = () => {
     setOpen(false);
     setMsg("");
+    dispatch({type: CLEAR_ALERTS})
   };
   useEffect(() => {
     if (alerts.statusCode) {
@@ -23,7 +27,7 @@ const SnackAlerts = ({ alerts }) => {
 
   return (
     <Snackbar
-      anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       open={open}
       autoHideDuration={7000}
       onClose={handleClose}>
@@ -40,14 +44,10 @@ const SnackAlerts = ({ alerts }) => {
 
 SnackAlerts.propTypes = {
   alerts: PropTypes.shape({
-    alertMsg: PropTypes.string,
+    alertMsg: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
     alertType: PropTypes.string,
-    statusCode: PropTypes.any,
+    statusCode: PropTypes.number,
   }),
 };
 
-const mapStateToProps = (state) => ({
-  alerts: state.alerts,
-});
-
-export default connect(mapStateToProps)(SnackAlerts);
+export default SnackAlerts;
