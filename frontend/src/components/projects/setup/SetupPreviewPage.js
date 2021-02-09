@@ -7,7 +7,7 @@ import Typography from "@material-ui/core/Typography";
 import Zoom from "@material-ui/core/Zoom";
 import StepperForms from "./StepperForms";
 import Box from "@material-ui/core/Box";
-import BoardCard from "../board/BoardCard";
+import BoardCard from "../boards/Boards";
 
 const SetupPreviewPage = () => {
   const tomrr = new Date().toISOString();
