@@ -1,8 +1,7 @@
 import PropTypes from "prop-types";
-import React, {useState} from 'react';
+import React from 'react';
 import TextField from "@material-ui/core/TextField";
 import {connect} from "react-redux";
-import {useComponentStyles} from "../styles/componentStyles";
 import createSnackAlert from "../../actions/snackAlerts";
 import {passwordReset} from "../../actions/auth";
 import {validatePasswords} from "../../validators/validators";
@@ -13,24 +12,43 @@ import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
 import {useHistory} from 'react-router-dom'
 import {FormSubmitButton} from "../reuse/ReButtons";
-import useCommonStyles from "../styles/commonStyles";
+import makeStyles from "@material-ui/core/styles/makeStyles";
+import {useImmer} from "use-immer";
+
+const useStyles = makeStyles((theme) => ({
+  paper: {
+    paddingTop: theme.spacing(8),
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    textItems: 'center',
+    paddingBottom: theme.spacing(10)
+  },
+  form: {
+    width: '100%', // Fix IE11 issue.
+    marginTop: theme.spacing(1),
+  },
+  centered: {
+    display: "block",
+    textAlign: "center"
+  },
+}))
 
 const PasswordReset = ({auth, createSnackAlert, passwordReset, match}) => {
     const isLoading = auth.isLoading;
     const isSubmitting = auth.isSubmitting;
-    const classes = useComponentStyles();
-    const cls = useCommonStyles()
+    const classes = useStyles();
     const {uid, token} = match.params;
     const history = useHistory()
 
-    const [passwords, setPasswords] = useState({
+    const [passwords, setPasswords] = useImmer({
         new_password1: "",
         new_password2: ""
     })
     const handleChange = e => {
-        setPasswords(prevState => ({
-            ...prevState, [e.target.name]: e.target.value
-        }))
+        setPasswords((draft) => {
+            draft[e.target.name] =  e.target.value
+        })
     }
 
     const handleSubmit = e => {
@@ -59,7 +77,7 @@ const PasswordReset = ({auth, createSnackAlert, passwordReset, match}) => {
             <CssBaseline/>
             <Card>
                 <CardContent>
-                    <Typography className={cls.centered} component="h1" variant="h5">
+                    <Typography className={classes.centered} component="h1" variant="h5">
                         Reset Password
                     </Typography>
                     <form className={classes.form} onSubmit={handleSubmit}>
