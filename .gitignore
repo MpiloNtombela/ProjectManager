@@ -65,7 +65,7 @@ db.sqlite3
 db.sqlite3-journal
 emails/
 staticfiles/
-
+media/
 # Flask stuff:
 instance/
 .webassets-cache
