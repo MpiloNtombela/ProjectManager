@@ -5,13 +5,23 @@ import CardContent from "@material-ui/core/CardContent";
 import Typography from "@material-ui/core/Typography";
 import Container from "@material-ui/core/Container";
 import Skeleton from "@material-ui/core/Skeleton";
-import { useComponentStyles } from "../styles/componentStyles";
 import Grid from "@material-ui/core/Grid";
+import makeStyles from "@material-ui/core/styles/makeStyles";
 
-export function FormSkeleton() {
+const useStyles = makeStyles((theme) => ({
+  paper: {
+    paddingTop: theme.spacing(8),
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    textItems: 'center',
+    paddingBottom: theme.spacing(10)
+  },
+}))
+const FormSkeleton = () => {
   const skeletonNum = ["h3", "h3", "h3", "h3"];
 
-  const classes = useComponentStyles();
+  const classes = useStyles();
   return (
     <Container className={classes.paper} component="main" maxWidth="xs">
       <CssBaseline />
@@ -39,6 +49,6 @@ export function FormSkeleton() {
       </Card>
     </Container>
   );
-}
+};
 
 export default FormSkeleton;
