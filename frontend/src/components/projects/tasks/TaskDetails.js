@@ -188,7 +188,7 @@ const TaskDetails = ({openTask, setOpenTask}) => {
                             disableElevation
                             fullWidth
                             color='secondary'>
-                      assign someone</Button>
+                      assign</Button>
                   </Box>
                   <Box sx={{my: 1}}>
                     <Button size="small"

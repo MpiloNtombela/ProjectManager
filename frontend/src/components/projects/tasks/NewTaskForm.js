@@ -12,14 +12,13 @@ const useStyles = makeStyles({
     marginTop: '1rem'
   }
 })
-const NewTaskForm = ({setIsNewTask, addNewTask}) => {
+const NewTaskForm = ({setIsNewTask, handleAddNewTask}) => {
   const classes = useStyles();
   const [taskName, setTaskName] = useState('')
 
   const handleSubmit = e => {
     e.preventDefault()
-    addNewTask()
-    setIsNewTask(false)
+    handleAddNewTask(taskName)
   }
   const handleCancel = e => {
     e.preventDefault()
@@ -50,8 +49,7 @@ const NewTaskForm = ({setIsNewTask, addNewTask}) => {
 
 NewTaskForm.propTypes = {
   setIsNewTask: PropTypes.func.isRequired,
-  addNewTask: PropTypes.func.isRequired,
-  boardIdx: PropTypes.any
+  handleAddNewTask: PropTypes.func.isRequired
 };
 
 export default memo(NewTaskForm);
