@@ -15,6 +15,7 @@ django-sortedm2m = "*"
 python-decouple = "*"
 
 [dev-packages]
+django-debug-toolbar = "*"
 
 [requires]
 python_version = "3.9"
