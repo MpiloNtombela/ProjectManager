@@ -3,6 +3,7 @@
 export const GET_USER_PROJECTS = 'GET_USER_PROJECTS'
 export const GET_PROJECT = 'GET_PROJECT'
 export const GET_BOARDS = 'GET_BOARDS'
+export const ADD_TASK = 'ADD_TASK';
 export const CREATE_BOARD = 'CREATE_BOARD';
 export const GET_TASK = 'GET_TASK'
 
@@ -11,6 +12,7 @@ export const PROJECTS_LOADED = 'PROJECTS_LOADED'
 export const PROJECT_LOADED = 'PROJECT_LOADED'
 export const BOARDS_LOADED = 'BOARDS_LOADED'
 export const TASK_LOADED = 'TASK_LOADED'
+export let TASK_ADDED = 'TASK_ADDED'
 export const BOARD_CREATED = 'BOARD_CREATED';
 export const BOARD_DELETED = 'BOARD_DELETED';
 

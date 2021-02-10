@@ -13,8 +13,8 @@ const initialState = {
     tasks: null,
     task: null,
     isTaskLoading: false,
-    isCreating: false
-  },
+    isAdding: false
+  }
 };
 
 export default function (state = initialState, {type, payload}) {
@@ -24,14 +24,17 @@ export default function (state = initialState, {type, payload}) {
       case action.GET_PROJECT:
         draft.isLoading = true
         break
+      case action.GET_TASK:
+        draft.tasksState.isTaskLoading = true
+        break
+      case action.ADD_TASK:
+        draft.tasksState.isAdding = true
+        break
       case action.GET_BOARDS:
         draft.boardsState.isBoardsLoading = true
         break
       case action.CREATE_BOARD:
         draft.boardsState.isCreating = true
-        break
-      case action.GET_TASK:
-        draft.tasksState.isTaskLoading = true
         break
 
       // request success
@@ -43,13 +46,17 @@ export default function (state = initialState, {type, payload}) {
         draft.project = payload
         draft.isLoading = false
         break
-      case action.BOARDS_LOADED:
-        draft.boardsState.boards = payload
-        draft.boardsState.isBoardsLoading = false
-        break
       case action.TASK_LOADED:
         draft.tasksState.task = payload
         draft.tasksState.isTaskLoading = false
+        break
+      case action.TASK_ADDED:
+        draft.boardsState.boards[payload.index]["board_tasks"].push(payload.data)
+        draft.tasksState.isAdding = false
+        break
+      case action.BOARDS_LOADED:
+        draft.boardsState.boards = payload
+        draft.boardsState.isBoardsLoading = false
         break
       case action.BOARD_CREATED:
         draft.boardsState.boards.push(payload)
@@ -70,7 +77,7 @@ export default function (state = initialState, {type, payload}) {
         break
       case action.TASK_REQUEST_FAILED:
         draft.tasksState.isTaskLoading = false
-        draft.tasksState.isCreating = false
+        draft.tasksState.isAdding = false
         break
       // clear
       case action.CLEAR_PROJECT_STATE:
