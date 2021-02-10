@@ -33,8 +33,8 @@ class ProjectUserSerializer(serializers.ModelSerializer):
 
 class TaskSerializer(serializers.ModelSerializer):
     id = HashidSerializerCharField(source_field='projects.Task.id', read_only=True)
-    creator = ProjectUserSerializer()
-    assigned = ProjectUserSerializer(many=True)
+    creator = ProjectUserSerializer(required=False)
+    assigned = ProjectUserSerializer(many=True, required=False)
     can_edit = serializers.SerializerMethodField()
 
     class Meta:
