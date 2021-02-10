@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {memo, useState} from 'react';
 import PropTypes from 'prop-types';
 import CardHeader from "@material-ui/core/CardHeader";
 import Typography from "@material-ui/core/Typography";
@@ -10,9 +10,10 @@ import CardContent from "@material-ui/core/CardContent";
 import TaskCard from "../tasks/TaskCard";
 import Card from "@material-ui/core/Card";
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import {deleteBoard} from "../../../actions/projects";
+import {addTask, deleteBoard} from "../../../actions/projects";
 import {useDispatch} from "react-redux";
 import ConfirmDialog from "../../reuse/ReDialogs";
+import createSnackAlert from "../../../actions/snackAlerts";
 
 const useStyles = makeStyles((theme) => ({
   cardPadding: {
@@ -53,6 +54,16 @@ const Board = ({board, idx}) => {
     dispatch(deleteBoard(board.id, idx))
   }
 
+  const handleAddNewTask = (taskName) => {
+    setAnchorEl(null);
+     const name = taskName.trim()
+    if (name) {
+      dispatch(addTask(name, board.id, idx))
+    } else {
+      dispatch(createSnackAlert('task name is required', 400))
+    }
+  }
+
   const handleDeleteWarning = () => {
     setAnchorEl(null);
     setOpen(true)
@@ -69,10 +80,10 @@ const Board = ({board, idx}) => {
         <CardHeader classes={{root: classes.cardPadding}}
                     title={<Typography className={classes.title} variant='title'>{board.name}</Typography>}
                     action={
-                      <IconButton size="small" aria-label="board controls">
+                      <IconButton size="small" aria-label="board controls"
+                                  onClick={handleClick}>
                         <MoreVert/>
-                      </IconButton>}
-                    onClick={handleClick}/>
+                      </IconButton>}/>
         <Menu id="navbar-menu"
               anchorEl={anchorEl}
               keepMounted
@@ -92,7 +103,7 @@ const Board = ({board, idx}) => {
                     onClick={handleDeleteWarning}>Delete</MenuItem>
         </Menu>
         <CardContent classes={{root: classes.cardPadding}}>
-          {board['board_tasks'] && <TaskCard tasks={board['board_tasks']}/>}
+          {board['board_tasks'] && <TaskCard tasks={board['board_tasks']} handleAddNewTask={handleAddNewTask}/>}
         </CardContent>
       </Card>
       <ConfirmDialog
@@ -114,4 +125,4 @@ Board.propTypes = {
   idx: PropTypes.number.isRequired
 };
 
-export default Board;
+export default memo(Board);

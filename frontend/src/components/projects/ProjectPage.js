@@ -12,6 +12,7 @@ import ProductPageBoardsSkeleton from "../skeleton/projects/ProductPageBoardsSke
 import {getProject} from "../../actions/projects";
 import Boards from "./boards/Boards";
 import whyDidYouRender from "@welldone-software/why-did-you-render";
+import Card from "@material-ui/core/Card";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -68,7 +69,7 @@ whyDidYouRender(React, {
   diffNameColor: 'dodgerblue'
 })
 
-// Typography.whyDidYouRender = true
+Card.whyDidYouRender = true
 
 const ProjectPage = () => {
   const classes = useStyles()
@@ -79,7 +80,7 @@ const ProjectPage = () => {
 
   useEffect(() => {
     dispatch(getProject(id))
-  }, [dispatch, id])
+  }, [])
 
   return (
     <>{projectState.isLoading ? <ProjectPageSkeleton/>

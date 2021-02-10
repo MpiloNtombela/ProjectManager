@@ -1,100 +1,65 @@
-import React, {memo, useState} from 'react';
+import React, {memo, useEffect, useState} from 'react';
 import PropTypes from 'prop-types';
 import CardHeader from "@material-ui/core/CardHeader";
-import Typography from "@material-ui/core/Typography";
 import Card from "@material-ui/core/Card";
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import CardActionArea from "@material-ui/core/CardActionArea";
-import Grid from "@material-ui/core/Grid";
-import {Comment, InsertDriveFile, People, PlaylistAdd} from "@material-ui/icons";
-import TaskDetails from "./TaskDetails";
+import {PlaylistAdd} from "@material-ui/icons";
 import Button from "@material-ui/core/Button";
 import NewTaskForm from "./NewTaskForm";
-import {getTask} from "../../../actions/projects";
-import {useDispatch} from "react-redux";
+import {useSelector} from "react-redux";
+import Skeleton from "@material-ui/core/Skeleton";
+import Task from "./Task";
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    boxShadow: "0 0 5px rgba(0, 0, 0, .2)",
-    borderRadius: theme.shape.borderRadius,
-    margin: theme.spacing(1, 0)
-  },
+const useStyles = makeStyles({
   cardPadding: {
     padding: '.55rem'
-  },
-  svgRoot: {
-    width: '1rem',
-    height: '1rem'
   }
-}))
+})
 
-const TaskCard = ({tasks}) => {
+const TaskCard = ({tasks, handleAddNewTask}) => {
   const classes = useStyles()
-  const [openTask, setOpenTask] = useState(false)
   const [isNewTask, setIsNewTask] = useState(false)
-  const dispatch = useDispatch()
+  const isAdding = useSelector(state => state.projectState.tasksState.isAdding)
+  const [taskAdding, setTaskAdding] = useState(false)
 
-  const handleCreateNewTask = () => {
+  useEffect(() => {
+    setTaskAdding(isAdding)
+  }, [isAdding])
+
+  const handleAddNewTaskClick = () => {
     setIsNewTask(true)
-  }
-  const handleTaskCardClick = (id) => {
-    dispatch(getTask(id))
-    setOpenTask(true)
-  };
-
-  const addNewTask = (e) => {
-    e.preventDefault()
   };
 
   return (
     <>
       {tasks.map(task => (
-        <div key={task.id}>
-          <Card className={classes.root}
-                onClick={() => {
-                  handleTaskCardClick(task.id)
-                }}>
-            <CardActionArea style={{display: 'block'}} component='div'>
-              <CardHeader
-                classes={{root: classes.cardPadding}}
-                title={<Typography variant={"subtitle2"}>{task.name}</Typography>}
-                subheader={<Typography color="textSecondary" component={'span'}
-                                       variant={"caption"}> - {task['creator'].username}</Typography>}/>
-              <Grid container justifyContent={"flex-end"} alignItems="center" spacing={2} style={{width: '100%'}}>
-
-                <Grid item>
-                  <Typography color="textSecondary" variant={"caption"}>
-                    <Comment color='inherit' classes={{root: classes.svgRoot}}/> 0
-                  </Typography>
-                </Grid>
-                <Grid item>
-                  <Typography color="textSecondary" variant={"caption"}>
-                    <InsertDriveFile color='inherit' classes={{root: classes.svgRoot}}/> 0
-                  </Typography></Grid>
-                <Grid item>
-                  <Typography color="textSecondary" variant={"caption"}>
-                    <People color='inherit' classes={{root: classes.svgRoot}}/> {task.assigned.length}
-                  </Typography></Grid>
-                {/*<Grid item></Grid>*/}
-              </Grid>
-            </CardActionArea>
-          </Card>
-          <TaskDetails id={task.id} setOpenTask={setOpenTask} openTask={openTask}/>
-        </div>
+        <Task key={task.id} task={task}/>
       ))}
+      {taskAdding && isNewTask &&
+      <Card>
+        <CardHeader
+          className={classes.cardPadding}
+          title={<Skeleton variant='text' height={20}/>}
+          subheader={<Skeleton animation="wave" variant='text' width='45%' height={10}/>}
+        />
+      </Card>}
       {isNewTask ?
         <NewTaskForm
-          addNewTask={addNewTask}
+          handleAddNewTask={handleAddNewTask}
           setIsNewTask={setIsNewTask}/>
-        : <Button fullWidth color='secondary'
-                  startIcon={<PlaylistAdd/>}
-                  onClick={handleCreateNewTask}>add new task</Button>}
+        : <Button
+          fullWidth color='secondary'
+          startIcon={<PlaylistAdd/>}
+          onClick={handleAddNewTaskClick}
+          disabled={taskAdding}>add new task</Button>
+      }
     </>
   )
 }
 
 TaskCard.propTypes = {
-  tasks: PropTypes.array.isRequired
+  tasks: PropTypes.array.isRequired,
+  handleAddNewTask: PropTypes.func.isRequired
 }
 
 export default memo(TaskCard);
