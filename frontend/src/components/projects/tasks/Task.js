@@ -9,7 +9,7 @@ import Card from "@material-ui/core/Card";
 import {deleteTask, getTask} from "../../../actions/projects";
 import {useDispatch} from "react-redux";
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import TaskDetails from "./TaskDetails";
+import TaskView from "./TaskView";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -68,7 +68,7 @@ const Task = ({task, taskIndex, boardIndex}) => {
           </Grid>
         </CardActionArea>
       </Card>
-      <TaskDetails id={task.id} setOpenTask={setOpenTask} openTask={openTask} handleTaskDelete={handleTaskDelete}/>
+      <TaskView id={task.id} setOpenTask={setOpenTask} openTask={openTask} handleTaskDelete={handleTaskDelete}/>
     </>
   );
 };
