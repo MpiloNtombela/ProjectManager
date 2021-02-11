@@ -1,4 +1,4 @@
-import React, {memo, useEffect, useState} from 'react';
+import React, {memo, useState} from 'react';
 import PropTypes from 'prop-types';
 import CardHeader from "@material-ui/core/CardHeader";
 import Card from "@material-ui/core/Card";
@@ -9,49 +9,57 @@ import NewTaskForm from "./NewTaskForm";
 import {useSelector} from "react-redux";
 import Skeleton from "@material-ui/core/Skeleton";
 import Task from "./Task";
+import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 
 const useStyles = makeStyles({
-  cardPadding: {
-    padding: '.55rem'
+  cardSkeletonPadding: {
+    padding: '.75rem .55rem'
   }
 })
 
-const TaskCard = ({tasks, handleAddNewTask}) => {
+const TaskCard = ({tasks, handleAddNewTask, boardIndex}) => {
   const classes = useStyles()
   const [isNewTask, setIsNewTask] = useState(false)
   const isAdding = useSelector(state => state.projectState.tasksState.isAdding)
-  const [taskAdding, setTaskAdding] = useState(false)
+  // const [taskAdding, setTaskAdding] = useState(false)
 
-  useEffect(() => {
-    setTaskAdding(isAdding)
-  }, [isAdding])
+  // useEffect(() => {
+  //   setTaskAdding(isAdding)
+  // }, [isAdding])
 
+  const handleClickAway = () => {
+    setIsNewTask(false)
+  }
   const handleAddNewTaskClick = () => {
     setIsNewTask(true)
   };
 
   return (
     <>
-      {tasks.map(task => (
-        <Task key={task.id} task={task}/>
+      {tasks.map((task, idx) => (
+        <Task key={task.id} task={task} taskIndex={idx} boardIndex={boardIndex}/>
       ))}
-      {taskAdding && isNewTask &&
+      {isAdding && isNewTask &&
       <Card>
         <CardHeader
-          className={classes.cardPadding}
+          className={classes.cardSkeletonPadding}
           title={<Skeleton variant='text' height={20}/>}
           subheader={<Skeleton animation="wave" variant='text' width='45%' height={10}/>}
         />
       </Card>}
       {isNewTask ?
-        <NewTaskForm
-          handleAddNewTask={handleAddNewTask}
-          setIsNewTask={setIsNewTask}/>
+        <ClickAwayListener onClickAway={handleClickAway}>
+          <div>
+            <NewTaskForm
+              handleAddNewTask={handleAddNewTask}
+              setIsNewTask={setIsNewTask}/>
+          </div>
+        </ClickAwayListener>
         : <Button
           fullWidth color='secondary'
           startIcon={<PlaylistAdd/>}
           onClick={handleAddNewTaskClick}
-          disabled={taskAdding}>add new task</Button>
+          disabled={isAdding}>add new task</Button>
       }
     </>
   )
@@ -59,7 +67,8 @@ const TaskCard = ({tasks, handleAddNewTask}) => {
 
 TaskCard.propTypes = {
   tasks: PropTypes.array.isRequired,
-  handleAddNewTask: PropTypes.func.isRequired
+  handleAddNewTask: PropTypes.func.isRequired,
+  boardIndex: PropTypes.number
 }
 
 export default memo(TaskCard);
