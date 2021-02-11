@@ -1,7 +1,7 @@
 from hashid_field.rest import HashidSerializerCharField
 from rest_framework import serializers
 
-from projects.models import Task, Board, TaskComment, TaskFeed, MiniTask
+from projects.models import Task, Board, TaskComment, TaskFeed, MiniTask, Project
 from users.models import User
 
 
@@ -48,11 +48,15 @@ class TaskSerializer(serializers.ModelSerializer):
 
 class BoardSerializer(serializers.ModelSerializer):
     id = HashidSerializerCharField(source_field='projects.Board.id', read_only=True)
-    board_tasks = TaskSerializer(many=True, required=False)
+    board_tasks = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Board
         fields = ['id', 'name', 'created_on', 'board_tasks']
+
+    def get_board_tasks(self, obj):
+        objs = obj.board_tasks.select_related('creator').prefetch_related('assigned')
+        return TaskSerializer(objs, many=True, context={'request': self.context['request']}).data
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -65,9 +69,8 @@ class ProjectSerializer(serializers.ModelSerializer):
     # creator = serializers.SlugRelatedField(queryset=User.objects.all(), slug_field='username')
 
     class Meta:
-        model = Task
+        model = Project
         fields = ['id', 'name', 'creator', 'is_part']
-        depth = 1
 
     def get_is_part(self, obj):
         user = self.context['request'].user
@@ -112,7 +115,8 @@ class TaskDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = ['id', 'name', 'is_creator', 'can_edit', 'created_on', 'description', 'creator', 'assigned',
-                  'mini_tasks', 'task_comments', 'task_feed']
+                  'mini_tasks', 'task_comments', 'task_feed'
+                  ]
 
     def get_can_edit(self, obj) -> bool:
         user = self.context['request'].user
