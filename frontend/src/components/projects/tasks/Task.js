@@ -6,11 +6,10 @@ import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import {Comment, InsertDriveFile, People} from "@material-ui/icons";
 import Card from "@material-ui/core/Card";
-import {getTask} from "../../../actions/projects";
+import {deleteTask, getTask} from "../../../actions/projects";
 import {useDispatch} from "react-redux";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import TaskDetails from "./TaskDetails";
-import whyDidYouRender from "@welldone-software/why-did-you-render";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -29,20 +28,21 @@ const useStyles = makeStyles((theme) => ({
 
 }))
 
-const Task = ({task}) => {
+const Task = ({task, taskIndex, boardIndex}) => {
   const classes = useStyles()
   const dispatch = useDispatch()
   const [openTask, setOpenTask] = useState(false)
-  const handleTaskCardClick = (id) => {
-    dispatch(getTask(id))
+  const handleTaskCardClick = () => {
+    dispatch(getTask(task.id))
     setOpenTask(true)
   };
+  const handleTaskDelete = () =>{
+    dispatch(deleteTask(task.id, boardIndex, taskIndex))
+  }
   return (
     <>
       <Card className={classes.root}
-            onClick={() => {
-              handleTaskCardClick(task.id)
-            }}>
+            onClick={handleTaskCardClick}>
         <CardActionArea style={{display: 'block'}} component='div'>
           <CardHeader
             classes={{root: classes.cardPadding}}
@@ -68,13 +68,15 @@ const Task = ({task}) => {
           </Grid>
         </CardActionArea>
       </Card>
-      <TaskDetails id={task.id} setOpenTask={setOpenTask} openTask={openTask}/>
+      <TaskDetails id={task.id} setOpenTask={setOpenTask} openTask={openTask} handleTaskDelete={handleTaskDelete}/>
     </>
   );
 };
 
 Task.propTypes = {
-  task: PropTypes.object.isRequired
+  task: PropTypes.object.isRequired,
+  taskIndex: PropTypes.number,
+  boardIndex: PropTypes.number,
 };
 
 export default memo(Task);

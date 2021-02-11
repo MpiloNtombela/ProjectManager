@@ -67,7 +67,7 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const TaskDetails = ({openTask, setOpenTask}) => {
+const TaskDetails = ({openTask, setOpenTask, handleTaskDelete}) => {
   const matches = useMediaQuery(theme => theme.breakpoints.down('sm'));
   const classes = useStyles()
   const task = useSelector(state => state.projectState.tasksState.task)
@@ -162,28 +162,31 @@ const TaskDetails = ({openTask, setOpenTask}) => {
                             placeholder="write comment"
                           />
                         </div>
-                        <div  className={classes.sendBtn}>
+                        <div className={classes.sendBtn}>
                           <IconButton size={'small'}><Send/></IconButton>
                         </div>
                       </form>
                     </Box>
                     {task['task_comments'].length ?
                       <List className={classes.root}>
-                        {task['task_comments'].map(comment => (
-                          <Box key={comment.id} sx={{my: 2}}>
-                            <ListItem variant='outlined' alignItems="flex-start" component={Card}>
-                              <ListItemAvatar>
-                                <Avatar alt={comment.commenter.username} src={comment.commenter.avatar}/>
-                              </ListItemAvatar>
-                              <ListItemText
-                                primary={
-                                  <Typography color='textPrimary' style={{fontSize: '.87rem', fontWeight: '800'}}>
-                                    {comment.commenter.username}
-                                  </Typography>}
-                                secondary={comment.comment}
-                              />
-                            </ListItem>
-                          </Box>))}
+                        {task['task_comments'].map(comment => {
+                          const {commenter} = comment;
+                          return (
+                            <Box key={comment.id} sx={{my: 2}}>
+                              <ListItem variant='outlined' alignItems="flex-start" component={Card}>
+                                <ListItemAvatar>
+                                  <Avatar alt={commenter.username} src={commenter.avatar}/>
+                                </ListItemAvatar>
+                                <ListItemText
+                                  primary={
+                                    <Typography color='textPrimary' style={{fontSize: '.87rem', fontWeight: '800'}}>
+                                      {commenter.username}
+                                    </Typography>}
+                                  secondary={comment.comment}
+                                />
+                              </ListItem>
+                            </Box>);
+                        })}
                       </List> :
                       <Typography color={'textSecondary'} variant={'h5'} component={'h2'}>
                         No comments yet for this task
@@ -257,7 +260,8 @@ const TaskDetails = ({openTask, setOpenTask}) => {
               <Divider/>
               <Box sx={{my: 2}} className={classes.actionButton}>
                 <Button color='primary' disableElevation variant='text' onClick={handleClose}>close</Button>
-                <Button className='deleteButton' disableElevation variant='text'>Delete Task</Button>
+                <Button onClick={handleTaskDelete} className='deleteButton' disableElevation variant='text'>Delete
+                  Task</Button>
               </Box>
             </DialogContent>
           </> : <Typography>not found</Typography>}
@@ -267,7 +271,8 @@ const TaskDetails = ({openTask, setOpenTask}) => {
 
 TaskDetails.propTypes = {
   openTask: PropTypes.bool.isRequired,
-  setOpenTask: PropTypes.func.isRequired
+  setOpenTask: PropTypes.func.isRequired,
+  handleTaskDelete: PropTypes.func
 };
 
 export default TaskDetails;
