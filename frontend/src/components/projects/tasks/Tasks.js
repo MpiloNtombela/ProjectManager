@@ -17,7 +17,7 @@ const useStyles = makeStyles({
   }
 })
 
-const TaskCard = ({tasks, handleAddNewTask, boardIndex}) => {
+const Tasks = ({tasks, handleAddNewTask, boardIndex}) => {
   const classes = useStyles()
   const [isNewTask, setIsNewTask] = useState(false)
   const isAdding = useSelector(state => state.projectState.tasksState.isAdding)
@@ -65,10 +65,10 @@ const TaskCard = ({tasks, handleAddNewTask, boardIndex}) => {
   )
 }
 
-TaskCard.propTypes = {
+Tasks.propTypes = {
   tasks: PropTypes.array.isRequired,
   handleAddNewTask: PropTypes.func.isRequired,
   boardIndex: PropTypes.number
 }
 
-export default memo(TaskCard);
+export default memo(Tasks);
