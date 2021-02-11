@@ -7,7 +7,7 @@ import {MoreVert} from "@material-ui/icons";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import CardContent from "@material-ui/core/CardContent";
-import TaskCard from "../tasks/TaskCard";
+import TaskCard from "../tasks/Tasks";
 import Card from "@material-ui/core/Card";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import {addTask, deleteBoard} from "../../../actions/projects";
