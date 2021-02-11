@@ -7,7 +7,7 @@ import makeStyles from "@material-ui/core/styles/makeStyles";
 import {useDispatch} from "react-redux";
 import {useParams} from "react-router-dom";
 import createSnackAlert from "../../../actions/snackAlerts";
-import {createBoard} from "../../../actions/projects";
+import {createBoard} from "../../../actions/projects/boards";
 
 const useStyles = makeStyles({
   root: {

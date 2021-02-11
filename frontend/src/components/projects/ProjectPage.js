@@ -9,10 +9,10 @@ import Grid from "@material-ui/core/Grid";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import ProjectPageSkeleton from "../skeleton/projects/ProjectPageSkeleton";
 import ProductPageBoardsSkeleton from "../skeleton/projects/ProductPageBoardsSkeleton";
-import {getProject} from "../../actions/projects";
 import Boards from "./boards/Boards";
 import whyDidYouRender from "@welldone-software/why-did-you-render";
 import Card from "@material-ui/core/Card";
+import {getProject} from "../../actions/projects/projects";
 
 const useStyles = makeStyles(theme => ({
   root: {
