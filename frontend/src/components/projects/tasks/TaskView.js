@@ -67,7 +67,7 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-const TaskDetails = ({openTask, setOpenTask, handleTaskDelete}) => {
+const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
   const matches = useMediaQuery(theme => theme.breakpoints.down('sm'));
   const classes = useStyles()
   const task = useSelector(state => state.projectState.tasksState.task)
@@ -269,10 +269,10 @@ const TaskDetails = ({openTask, setOpenTask, handleTaskDelete}) => {
   );
 };
 
-TaskDetails.propTypes = {
+TaskView.propTypes = {
   openTask: PropTypes.bool.isRequired,
   setOpenTask: PropTypes.func.isRequired,
   handleTaskDelete: PropTypes.func
 };
 
-export default TaskDetails;
+export default TaskView;
