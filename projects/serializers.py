@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from hashid_field.rest import HashidSerializerCharField
 from rest_framework import serializers
 
@@ -48,15 +49,18 @@ class TaskSerializer(serializers.ModelSerializer):
 
 class BoardSerializer(serializers.ModelSerializer):
     id = HashidSerializerCharField(source_field='projects.Board.id', read_only=True)
-    board_tasks = serializers.SerializerMethodField(read_only=True)
+    board_tasks = serializers.SerializerMethodField(read_only=True, required=False)
 
     class Meta:
         model = Board
         fields = ['id', 'name', 'created_on', 'board_tasks']
 
     def get_board_tasks(self, obj):
-        objs = obj.board_tasks.select_related('creator').prefetch_related('assigned')
-        return TaskSerializer(objs, many=True, context={'request': self.context['request']}).data
+        try:
+            objs = obj.board_tasks.select_related('creator').prefetch_related('assigned')
+            return TaskSerializer(objs, many=True, context={'request': self.context['request']}).data
+        except (ObjectDoesNotExist, KeyError):
+            return []
 
 
 class ProjectSerializer(serializers.ModelSerializer):

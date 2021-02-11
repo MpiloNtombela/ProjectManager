@@ -2,6 +2,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import generics, status
 from rest_framework import pagination
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
@@ -94,7 +95,7 @@ class BoardDestroyAPI(generics.DestroyAPIView):
             return Response(status=status.HTTP_404_NOT_FOUND)
         self.perform_destroy(instance=inst)
         data['message'] = _('board deleted successfully')
-        return Response(data=data, status=status.HTTP_204_NO_CONTENT)
+        return Response(data=data, status=status.HTTP_200_OK)
 
 
 class ProjectTaskListCreateAPI(generics.ListCreateAPIView):
@@ -177,8 +178,8 @@ class BoardTaskCreateAPI(generics.ListCreateAPIView):
         return Response(serializer.errors)
 
 
-class TaskDetailsAPI(generics.RetrieveAPIView):
-    """retrieves all the details of the task"""
+class TaskRetrieveDestroyAPI(generics.RetrieveDestroyAPIView):
+    """retrieves all the details of the task or delete it depending on the request"""
     serializer_class = TaskDetailsSerializer
     queryset = Task.objects.all()
     permission_classes = [AllowAny]
@@ -188,6 +189,22 @@ class TaskDetailsAPI(generics.RetrieveAPIView):
             'assigned', 'mini_tasks').get(id=self.kwargs['pk'])
 
     def retrieve(self, request, *args, **kwargs):
-        obj = self.get_object()
-        serializer = TaskDetailsSerializer(obj, context={'request': request})
+        data = {}
+        try:
+            task = self.get_object()
+        except ObjectDoesNotExist:
+            data['message'] = _("we can't find what you you looking for")
+            return Response(data=data, status=status.HTTP_404_NOT_FOUND)
+        serializer = TaskDetailsSerializer(task, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def destroy(self, request, *args, **kwargs):
+        data = {}
+        try:
+            task = self.get_object()
+        except ObjectDoesNotExist:
+            data['message'] = _("task may already have been deleted")
+            return Response(data=data, status=status.HTTP_404_NOT_FOUND)
+        self.perform_destroy(instance=task)
+        data['message'] = _('task deleted successfully')
+        return Response(data=data, status=status.HTTP_200_OK)
