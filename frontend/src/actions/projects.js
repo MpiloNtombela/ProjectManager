@@ -101,6 +101,34 @@ export const addTask = (name, id, idx) => (dispatch, getState) => {
   })
 }
 
+/**
+ * @description action creator for deleting task
+ * @param {string} id of the task to be deleted
+ * @param {number} boardIndex index of the board the task is in at
+ * @param {number} taskIndex index of the task in the board
+* */
+export const deleteTask = (id, boardIndex, taskIndex) => (dispatch, getState) => {
+  axios.delete(`/api/projects/req/task/${id}/`, tokenConfig(getState().auth.token))
+    .then(res => {
+      dispatch({
+        type: action.TASK_DELETED,
+        payload: {
+          boardIndex,
+          taskIndex
+        }
+      })
+      console.log(res)
+      dispatch(createSnackAlert(res.data.message, res.status))
+    }).catch(err => {
+    if (err.response) {
+      dispatch(createSnackAlert(err.response.data, err.response.status))
+    } else {
+      dispatch(createSnackAlert(err.message, 400))
+    }
+    dispatch({type: action.BOARDS_REQUEST_FAILED})
+  })
+}
+
 export const createBoard = (name, id) => (dispatch, getState) => {
   dispatch({type: action.CREATE_BOARD})
   const body = JSON.stringify({name, project: id})
@@ -132,7 +160,7 @@ export const deleteBoard = (id, index) => (dispatch, getState) => {
         type: action.BOARD_DELETED,
         payload: index
       })
-      dispatch(createSnackAlert("board deleted successfully", res.status))
+      dispatch(createSnackAlert(res.data.message, res.status))
     }).catch(err => {
     if (err.response) {
       dispatch(createSnackAlert(err.response.data, err.response.status))
