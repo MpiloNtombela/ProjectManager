@@ -1,7 +1,8 @@
 from django.urls import path
 
-from projects.api import (ProjectRetrieveAPI, ProjectBoardsListCreateAPI, TaskRetrieveDestroyAPI, BoardDestroyAPI,
-                          ProjectTaskListCreateAPI, BoardTaskCreateAPI)
+from projects.apis.boards import ProjectBoardsListCreateAPI, BoardDestroyAPI
+from projects.apis.projects import ProjectRetrieveAPI
+from projects.apis.tasks import ProjectTaskListCreateAPI, BoardTaskCreateAPI, TaskRetrieveDestroyAPI
 
 urlpatterns = [
     path('req/project/<str:pk>/', ProjectRetrieveAPI.as_view(), name='project-retrieve'),

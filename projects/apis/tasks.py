@@ -1,110 +1,29 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
-from rest_framework import generics, status
-from rest_framework import pagination
-from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework import status, generics
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from projects.models import Project, Task, Board
-from projects.permissions import IsPartOfProject
-from projects.serializers import ProjectSerializer, TaskSerializer, BoardSerializer, TaskDetailsSerializer
-
-
-class CustomCursorPag(pagination.PageNumberPagination):
-    page_size = 5
-    page_size_query_param = 'page_size'
-    max_page_size = 10
-
-    def get_paginated_response(self, data):
-        return Response({
-            'links'  : {
-                'next'    : self.get_next_link(),
-                'previous': self.get_previous_link()
-            },
-            'count'  : self.page.paginator.count,
-            'results': data
-        })
-
-
-class ProjectRetrieveAPI(generics.RetrieveAPIView):
-    serializer_class = ProjectSerializer
-    queryset = Project.objects.all()
-    permission_classes = [AllowAny]
-
-    def get_object(self):
-        return Project.objects.select_related('creator').get(id=self.kwargs['pk'])
-
-    def retrieve(self, request, *args, **kwargs):
-        obj = self.get_object()
-        serializer = ProjectSerializer(obj, context={'request': request})
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-class ProjectBoardsListCreateAPI(generics.ListCreateAPIView):
-    serializer_class = BoardSerializer
-    queryset = Board.objects.select_related('project', 'creator')
-    permission_classes = [AllowAny]
-
-    # permission_classes = [IsAuthenticated, IsPartOfProject]
-
-    def list(self, request, *args, **kwargs):
-        data = {}
-        try:
-            project = Project.objects.get(id=self.kwargs['pk'])
-        except ObjectDoesNotExist:
-            data['message'] = _("we can't find what you're looking for")
-            return Response(data=data, status=status.HTTP_404_NOT_FOUND)
-
-        qs = Board.objects.select_related('project').prefetch_related('board_tasks').filter(project=project)
-        serializer = BoardSerializer(instance=qs, many=True, context={'request': request})
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
-
-    def create(self, request, *args, **kwargs):
-        """
-        creates a new instance of the board model
-        :param request:
-        :param args:
-        :param kwargs:
-        :return api response:
-        """
-        data = {}
-        try:
-            project = Project.objects.get(id=self.kwargs['pk'])
-        except ObjectDoesNotExist:
-            data['message'] = _("sorry, we encountered an error saving the board")
-            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-        serializer = BoardSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            serializer.save(creator=request.user, project=project)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors)
-
-
-class BoardDestroyAPI(generics.DestroyAPIView):
-    serializer_class = BoardSerializer
-    queryset = Board.objects.select_related('project').all()
-    permission_classes = [IsAuthenticated]
-
-    def destroy(self, request, *args, **kwargs):
-        data = {}
-        try:
-            inst = self.get_object()
-        except ObjectDoesNotExist:
-            data['message'] = _("board may already have been deleted")
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        self.perform_destroy(instance=inst)
-        data['message'] = _('board deleted successfully')
-        return Response(data=data, status=status.HTTP_200_OK)
+from projects.models import Task, Board, Project
+from projects.serializers import TaskDetailsSerializer, TaskSerializer
 
 
 class ProjectTaskListCreateAPI(generics.ListCreateAPIView):
+    """
+    apis to get or create new tasks given project id
+    """
     serializer_class = TaskSerializer
     queryset = Task.objects.all()
     permission_classes = [AllowAny]
-    pagination_class = CustomCursorPag
 
     def list(self, request, *args, **kwargs):
+        """
+        list all the tasks for the project given the project id `(from url kwargs)`
+        :param request: request object
+        :param args: args
+        :param kwargs: <pk> project id
+        :return: list/array of tasks
+        """
         data = {}
         try:
             project = Project.objects.get(id=self.kwargs['pk'])
@@ -118,12 +37,12 @@ class ProjectTaskListCreateAPI(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         """
-        creates a new instance of the task model using project F-key and add it to the first board of the project
-         if exist or return error
-        :param request:
-        :param args:
-        :param kwargs:
-        :return api response:
+        creates a new task for the project and add it to the first board of the project.
+        **the project must at least have one board**
+        :param request: request object
+        :param args: args
+        :param kwargs: <pk> project id
+        :return: newly created task if no error
         """
         data = {}
         try:
@@ -142,10 +61,20 @@ class ProjectTaskListCreateAPI(generics.ListCreateAPIView):
 
 
 class BoardTaskCreateAPI(generics.ListCreateAPIView):
+    """
+    apis to get or create new task(s) given board id
+    """
     serializer_class = TaskSerializer
     queryset = Task.objects.select_related('creator').prefetch_related('assigned')
 
     def list(self, request, *args, **kwargs):
+        """
+        lists all the task for that particular board in the project
+        :param request: request object
+        :param args: args
+        :param kwargs: <pk> board id
+        :return: a list/array of tasks
+        """
         data = {}
         try:
             board = Board.objects.get(id=self.kwargs['pk'])
@@ -159,11 +88,11 @@ class BoardTaskCreateAPI(generics.ListCreateAPIView):
 
     def create(self, request, *args, **kwargs):
         """
-        creates a new instance of the task model using board F-key relationship
-        :param request:
-        :param args:
-        :param kwargs:
-        :return api response:
+        creates a new task for the board
+        :param request: request object
+        :param args: args
+        :param kwargs: <pk> board id
+        :return: newly created task if no error
         """
         data = {}
         try:
@@ -179,7 +108,9 @@ class BoardTaskCreateAPI(generics.ListCreateAPIView):
 
 
 class TaskRetrieveDestroyAPI(generics.RetrieveDestroyAPIView):
-    """retrieves all the details of the task or delete it depending on the request"""
+    """
+    apis to retrieve or destroy/delete tasks
+    """
     serializer_class = TaskDetailsSerializer
     queryset = Task.objects.all()
     permission_classes = [AllowAny]
@@ -189,6 +120,13 @@ class TaskRetrieveDestroyAPI(generics.RetrieveDestroyAPIView):
             'assigned', 'mini_tasks').get(id=self.kwargs['pk'])
 
     def retrieve(self, request, *args, **kwargs):
+        """
+        retrieves all the tasks details
+        :param request: request object
+        :param args: args
+        :param kwargs: <pk> task id
+        :return: task object
+        """
         data = {}
         try:
             task = self.get_object()
@@ -199,6 +137,13 @@ class TaskRetrieveDestroyAPI(generics.RetrieveDestroyAPIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def destroy(self, request, *args, **kwargs):
+        """
+        destroys or delete a task given the id
+        :param request: request object
+        :param args: args
+        :param kwargs: <pk> task id
+        :return: success message if n error
+        """
         data = {}
         try:
             task = self.get_object()
