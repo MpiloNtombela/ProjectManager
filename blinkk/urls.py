@@ -14,15 +14,15 @@ urlpatterns = [
 
     # endpoint to send key using post request
     path('api/auth/account-confirm-email/', VerifyEmailView.as_view(), name='account_email_verification_sent'),
-    re_path(r'^api/auth/registration/account-confirm-email/(?P<key>[-:\w]+)/$', index,
+    re_path(r'^apis/auth/registration/account-confirm-email/(?P<key>[-:\w]+)/$', index,
             name='account_confirm_email'),
-    path('api/auth/resend-account-confirmation-email/', ResendEmailConfirmationAPI.as_view(),
+    path('apis/auth/resend-account-confirmation-email/', ResendEmailConfirmationAPI.as_view(),
          name='resend-account-confirmation-email'),
 
     path('api/auth/registration/', include('dj_rest_auth.registration.urls')),
     path('api/auth/', include('dj_rest_auth.urls')),
     path('api-auth/drf/', include('rest_framework.urls')),
-    # path('api/u/', include('users.urls')),
+    # path('apis/u/', include('users.urls')),
     path('api/projects/', include('projects.urls')),
     path('__debug__/', include(debug_toolbar.urls))
 ]
