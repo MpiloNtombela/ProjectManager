@@ -1,6 +1,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import generics, status
+from rest_framework import pagination
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
@@ -9,10 +10,29 @@ from projects.permissions import IsPartOfProject
 from projects.serializers import ProjectSerializer, TaskSerializer, BoardSerializer, TaskDetailsSerializer
 
 
+class CustomCursorPag(pagination.PageNumberPagination):
+    page_size = 5
+    page_size_query_param = 'page_size'
+    max_page_size = 10
+
+    def get_paginated_response(self, data):
+        return Response({
+            'links'  : {
+                'next'    : self.get_next_link(),
+                'previous': self.get_previous_link()
+            },
+            'count'  : self.page.paginator.count,
+            'results': data
+        })
+
+
 class ProjectRetrieveAPI(generics.RetrieveAPIView):
     serializer_class = ProjectSerializer
     queryset = Project.objects.all()
     permission_classes = [AllowAny]
+
+    def get_object(self):
+        return Project.objects.select_related('creator').get(id=self.kwargs['pk'])
 
     def retrieve(self, request, *args, **kwargs):
         obj = self.get_object()
@@ -22,9 +42,10 @@ class ProjectRetrieveAPI(generics.RetrieveAPIView):
 
 class ProjectBoardsListCreateAPI(generics.ListCreateAPIView):
     serializer_class = BoardSerializer
-    queryset = Board.objects.select_related('project').all()
+    queryset = Board.objects.select_related('project', 'creator')
+    permission_classes = [AllowAny]
 
-    permission_classes = [IsAuthenticated, IsPartOfProject]
+    # permission_classes = [IsAuthenticated, IsPartOfProject]
 
     def list(self, request, *args, **kwargs):
         data = {}
@@ -34,7 +55,7 @@ class ProjectBoardsListCreateAPI(generics.ListCreateAPIView):
             data['message'] = _("we can't find what you're looking for")
             return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
-        qs = Board.objects.select_related('project').filter(project=project)
+        qs = Board.objects.select_related('project').prefetch_related('board_tasks').filter(project=project)
         serializer = BoardSerializer(instance=qs, many=True, context={'request': request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
@@ -79,7 +100,8 @@ class BoardDestroyAPI(generics.DestroyAPIView):
 class ProjectTaskListCreateAPI(generics.ListCreateAPIView):
     serializer_class = TaskSerializer
     queryset = Task.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+    pagination_class = CustomCursorPag
 
     def list(self, request, *args, **kwargs):
         data = {}
@@ -89,7 +111,7 @@ class ProjectTaskListCreateAPI(generics.ListCreateAPIView):
             data['message'] = _("we can't find what you're looking for")
             return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
-        qs = Task.objects.select_related('project', 'board').filter(project=project)
+        qs = Task.objects.select_related('creator').prefetch_related('assigned').filter(project=project)
         serializer = TaskSerializer(instance=qs, many=True, context={'request': request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
@@ -118,7 +140,22 @@ class ProjectTaskListCreateAPI(generics.ListCreateAPIView):
         return Response(serializer.errors)
 
 
-class BoardTaskCreateAPI(generics.CreateAPIView):
+class BoardTaskCreateAPI(generics.ListCreateAPIView):
+    serializer_class = TaskSerializer
+    queryset = Task.objects.select_related('creator').prefetch_related('assigned')
+
+    def list(self, request, *args, **kwargs):
+        data = {}
+        try:
+            board = Board.objects.get(id=self.kwargs['pk'])
+        except ObjectDoesNotExist:
+            data['message'] = _("we can't find what you're looking for")
+            return Response(data=data, status=status.HTTP_404_NOT_FOUND)
+
+        qs = Task.objects.select_related('creator').prefetch_related('assigned').filter(board=board)
+        serializer = TaskSerializer(instance=qs, many=True, context={'request': request})
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
     def create(self, request, *args, **kwargs):
         """
         creates a new instance of the task model using board F-key relationship
@@ -145,6 +182,10 @@ class TaskDetailsAPI(generics.RetrieveAPIView):
     serializer_class = TaskDetailsSerializer
     queryset = Task.objects.all()
     permission_classes = [AllowAny]
+
+    def get_object(self):
+        return Task.objects.select_related('creator').prefetch_related(
+            'assigned', 'mini_tasks').get(id=self.kwargs['pk'])
 
     def retrieve(self, request, *args, **kwargs):
         obj = self.get_object()
