@@ -6,10 +6,10 @@ import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import {Comment, InsertDriveFile, People} from "@material-ui/icons";
 import Card from "@material-ui/core/Card";
-import {deleteTask, getTask} from "../../../actions/projects";
 import {useDispatch} from "react-redux";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import TaskView from "./TaskView";
+import {deleteTask, getTask} from "../../../actions/projects/tasks";
 
 
 const useStyles = makeStyles((theme) => ({

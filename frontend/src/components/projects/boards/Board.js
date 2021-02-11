@@ -10,10 +10,11 @@ import CardContent from "@material-ui/core/CardContent";
 import TaskCard from "../tasks/Tasks";
 import Card from "@material-ui/core/Card";
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import {addTask, deleteBoard} from "../../../actions/projects";
 import {useDispatch} from "react-redux";
 import ConfirmDialog from "../../reuse/ReDialogs";
 import createSnackAlert from "../../../actions/snackAlerts";
+import {deleteBoard} from "../../../actions/projects/boards";
+import {addTask} from "../../../actions/projects/tasks";
 
 const useStyles = makeStyles((theme) => ({
   cardPadding: {
