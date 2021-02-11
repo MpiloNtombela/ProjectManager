@@ -10,8 +10,8 @@ const initialState = {
     isCreating: false
   },
   tasksState: {
-    tasks: null,
     task: null,
+    tasks: null,
     isTaskLoading: false,
     isAdding: false
   }
@@ -53,6 +53,10 @@ export default function (state = initialState, {type, payload}) {
       case action.TASK_ADDED:
         draft.boardsState.boards[payload.index]["board_tasks"].push(payload.data)
         draft.tasksState.isAdding = false
+        break
+      case action.TASK_DELETED:
+        draft.boardsState.boards[payload.boardIndex]["board_tasks"].splice(payload.taskIndex, 1)
+        draft.tasksState.task = null
         break
       case action.BOARDS_LOADED:
         draft.boardsState.boards = payload
