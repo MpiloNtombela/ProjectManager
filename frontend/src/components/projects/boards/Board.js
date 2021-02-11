@@ -56,7 +56,7 @@ const Board = ({board, idx}) => {
 
   const handleAddNewTask = (taskName) => {
     setAnchorEl(null);
-     const name = taskName.trim()
+    const name = taskName.trim()
     if (name) {
       dispatch(addTask(name, board.id, idx))
     } else {
@@ -103,7 +103,11 @@ const Board = ({board, idx}) => {
                     onClick={handleDeleteWarning}>Delete</MenuItem>
         </Menu>
         <CardContent classes={{root: classes.cardPadding}}>
-          {board['board_tasks'] && <TaskCard tasks={board['board_tasks']} handleAddNewTask={handleAddNewTask}/>}
+          {board['board_tasks'] &&
+          <TaskCard
+            tasks={board['board_tasks']}
+            handleAddNewTask={handleAddNewTask}
+            boardIndex={idx}/>}
         </CardContent>
       </Card>
       <ConfirmDialog
