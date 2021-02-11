@@ -19,6 +19,7 @@ const NewTaskForm = ({setIsNewTask, handleAddNewTask}) => {
   const handleSubmit = e => {
     e.preventDefault()
     handleAddNewTask(taskName)
+    setTaskName('')
   }
   const handleCancel = e => {
     e.preventDefault()
