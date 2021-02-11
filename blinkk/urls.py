@@ -1,3 +1,4 @@
+import debug_toolbar
 from dj_rest_auth.registration.views import VerifyEmailView
 from django.conf import settings
 from django.conf.urls.static import static
@@ -23,6 +24,7 @@ urlpatterns = [
     path('api-auth/drf/', include('rest_framework.urls')),
     # path('api/u/', include('users.urls')),
     path('api/projects/', include('projects.urls')),
+    path('__debug__/', include(debug_toolbar.urls))
 ]
 
 if settings.DEBUG is True:
