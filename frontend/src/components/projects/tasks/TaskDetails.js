@@ -53,6 +53,17 @@ const useStyles = makeStyles(theme => ({
       color: theme.palette.error.main,
       fontWeight: '600'
     }
+  },
+  sendBtn: {
+    width: '5%',
+    marginTop: '-.50rem',
+    display: 'flex',
+    alignItems: 'flex-end'
+  },
+  closeBtn: {
+    position: "absolute",
+    top: '1rem',
+    right: '1rem'
   }
 }))
 
@@ -81,8 +92,10 @@ const TaskDetails = ({openTask, setOpenTask}) => {
         <TaskDetailsSkeleton classes={classes}/>
         : task ?
           <>
-            <IconButton onClick={handleClose}
-                        style={{position: "absolute", top: '1.25rem', right: '1rem'}}><Close/></IconButton>
+            <IconButton
+              onClick={handleClose}
+              size={'small'}
+              className={classes.closeBtn}><Close/></IconButton>
             <DialogTitle classes={{root: classes.dialogContentRoot}} id="task-details">{task.name}</DialogTitle>
             <DialogContent classes={{root: classes.dialogContentRoot}}>
               <Grid container spacing={2}>
@@ -113,7 +126,7 @@ const TaskDetails = ({openTask, setOpenTask}) => {
                                         value={7}/>*/}
                         </Box>
                         {task['mini_tasks'].map(mini => (
-                          <Box key={mini.id} sx={{my: 2}}>
+                          <div key={mini.id}>
                             <FormControlLabel
                               style={{marginLeft: 0}}
                               control={
@@ -125,7 +138,7 @@ const TaskDetails = ({openTask, setOpenTask}) => {
                               }
                               label={<Typography variant='body2' component='span'>{mini.name}</Typography>}
                             />
-                          </Box>
+                          </div>
                         ))}
                       </div>
                       : <Typography
@@ -149,8 +162,8 @@ const TaskDetails = ({openTask, setOpenTask}) => {
                             placeholder="write comment"
                           />
                         </div>
-                        <div style={{width: '5%', marginTop: '-.50rem', display: 'flex', alignItems: 'flex-end'}}>
-                          <IconButton><Send/></IconButton>
+                        <div  className={classes.sendBtn}>
+                          <IconButton size={'small'}><Send/></IconButton>
                         </div>
                       </form>
                     </Box>
@@ -182,21 +195,23 @@ const TaskDetails = ({openTask, setOpenTask}) => {
 
                   <Typography variant='h6' component='h2'>Control Panel</Typography>
                   <Box sx={{my: 1}}>
-                    <Button size="small"
-                            startIcon={<PersonAdd/>}
-                            variant='contained'
-                            disableElevation
-                            fullWidth
-                            color='secondary'>
-                      assign</Button>
+                    <Button
+                      size="small"
+                      startIcon={<PersonAdd/>}
+                      variant='contained'
+                      disableElevation
+                      fullWidth
+                      color='secondary'>
+                      new assign</Button>
                   </Box>
                   <Box sx={{my: 1}}>
-                    <Button size="small"
-                            startIcon={<PlaylistAddCheck/>}
-                            variant='contained'
-                            disableElevation
-                            fullWidth
-                            color='secondary'>
+                    <Button
+                      size="small"
+                      startIcon={<PlaylistAddCheck/>}
+                      variant='contained'
+                      disableElevation
+                      fullWidth
+                      color='secondary'>
                       add mini task
                     </Button>
                   </Box>
