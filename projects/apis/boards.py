@@ -28,12 +28,11 @@ class ProjectBoardsListCreateAPI(generics.ListCreateAPIView):
         """
         data = {}
         try:
-            project = Project.objects.get(id=self.kwargs['pk'])
+            qs = Board.objects.select_related('project').filter(project_id=self.kwargs['pk'])
         except ObjectDoesNotExist:
             data['message'] = _("we can't find what you're looking for")
             return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
-        qs = Board.objects.select_related('project').prefetch_related('board_tasks').filter(project=project)
         serializer = BoardSerializer(instance=qs, many=True, context={'request': request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 

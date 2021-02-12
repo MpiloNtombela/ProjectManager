@@ -35,21 +35,24 @@ class ProjectUserSerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     id = HashidSerializerCharField(source_field='projects.Task.id', read_only=True)
     creator = ProjectUserSerializer(required=False)
-    assigned = ProjectUserSerializer(many=True, required=False)
+    assigned = ProjectUserSerializer(required=False, many=True)
     can_edit = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
-        fields = ['id', 'name', 'creator', 'assigned', 'can_edit']
+        fields = ['id', 'name', 'can_edit', 'creator', 'assigned']
 
     def get_can_edit(self, obj) -> bool:
         user = self.context['request'].user
         return user in obj.assigned.all() or obj.creator == user
 
+    def get_num_assigned(self, obj):
+        return obj.assigned.all().count()
+
 
 class BoardSerializer(serializers.ModelSerializer):
     id = HashidSerializerCharField(source_field='projects.Board.id', read_only=True)
-    board_tasks = serializers.SerializerMethodField(read_only=True, required=False)
+    board_tasks = serializers.SerializerMethodField()
 
     class Meta:
         model = Board
