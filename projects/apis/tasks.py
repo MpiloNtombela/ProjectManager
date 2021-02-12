@@ -26,12 +26,13 @@ class ProjectTaskListCreateAPI(generics.ListCreateAPIView):
         """
         data = {}
         try:
-            project = Project.objects.get(id=self.kwargs['pk'])
+            qs = Task.objects.select_related('creator').prefetch_related('assigned').filter(
+                project_id=self.kwargs['pk'])
         except ObjectDoesNotExist:
             data['message'] = _("we can't find what you're looking for")
             return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
-        qs = Task.objects.select_related('creator').prefetch_related('assigned').filter(project=project)
+        # qs = Task.objects.select_related('creator').prefetch_related('assigned').filter(project=project)
         serializer = TaskSerializer(instance=qs, many=True, context={'request': request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
