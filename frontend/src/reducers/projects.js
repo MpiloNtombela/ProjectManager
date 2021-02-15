@@ -61,6 +61,7 @@ export default function (state = initialState, {type, payload}) {
       case action.TASK_DELETED:
         draft.boardsState.boards[payload.boardIndex]["board_tasks"].splice(payload.taskIndex, 1)
         draft.tasksState.task = null
+        draft.tasksState.isRequesting = false
         break
       case action.BOARDS_LOADED:
         draft.boardsState.boards = payload
@@ -75,6 +76,11 @@ export default function (state = initialState, {type, payload}) {
         break
       case action.COMMENT_ADDED:
         draft.tasksState.task['task_comments'].unshift(payload)
+        draft.tasksState.isRequesting = false
+        break
+      case action.COMMENT_DELETED:
+        draft.tasksState.task['task_comments'].splice(
+          draft.tasksState.task['task_comments'].findIndex(c => c.id === payload), 1)
         draft.tasksState.isRequesting = false
         break
 
