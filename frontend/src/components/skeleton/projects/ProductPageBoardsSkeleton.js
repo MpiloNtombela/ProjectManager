@@ -8,7 +8,7 @@ import CardActionArea from "@material-ui/core/CardActionArea";
 import Typography from "@material-ui/core/Typography";
 
 
-const skeletonNum = [1, 2, 3]
+const skeletonNum = [1, 2, 3, 4]
 const ProductPageBoardsSkeleton = () => {
   return (
     <>
@@ -19,7 +19,7 @@ const ProductPageBoardsSkeleton = () => {
             <CardContent>
               {skeletonNum.map(x => (
                 <div key={x} style={{margin: '.5rem 0px'}}>
-                  {bx !== 2 ?
+                  {bx === 2 || bx === 4 ? <div key={x}/> :
                     <Card>
                       <CardActionArea style={{display: 'block'}} component='div'>
                         <CardHeader
@@ -27,7 +27,7 @@ const ProductPageBoardsSkeleton = () => {
                           subheader={<Skeleton animation="wave" variant='text' width='45%' height={10}/>}
                         />
                       </CardActionArea>
-                    </Card> : <div key={2}/>}
+                    </Card>}
                 </div>
               ))}
             </CardContent>
