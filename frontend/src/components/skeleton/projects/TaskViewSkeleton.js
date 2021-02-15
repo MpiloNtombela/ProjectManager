@@ -31,7 +31,7 @@ const useStyles = makeStyles({
 
 
 const skeletonNum = [1, 2, 3, 4]
-const TaskDetailsSkeleton = (/*{classes}*/) => {
+const TaskViewSkeleton = (/*{classes}*/) => {
   const classes = useStyles()
   return (
     <>
@@ -131,9 +131,9 @@ const TaskDetailsSkeleton = (/*{classes}*/) => {
   );
 };
 
-TaskDetailsSkeleton.propTypes = {
+TaskViewSkeleton.propTypes = {
   classes: PropTypes.object
 };
 
 
-export default memo(TaskDetailsSkeleton);
+export default memo(TaskViewSkeleton);
