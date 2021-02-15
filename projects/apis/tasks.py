@@ -142,7 +142,7 @@ class TaskRetrieveDestroyAPI(generics.RetrieveDestroyAPIView):
         :param request: request object
         :param args: args
         :param kwargs: <pk> task id
-        :return: success message if n error
+        :return: success message if no error
         """
         data = {}
         try:
@@ -196,3 +196,33 @@ class TaskCommentListCreateAPI(generics.ListCreateAPIView):
             serializer.save(commenter=request.user, task=task)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors)
+
+
+class TaskCommentDestroyAPI(generics.DestroyAPIView):
+    serializer_class = TaskCommentSerializer
+    queryset = TaskComment.objects.select_related('commenter')
+
+    def get_object(self):
+        return TaskComment.objects.select_related('commenter').get(id=self.kwargs['pk'])
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        destroys or delete a comment given the id
+        :param request: request object
+        :param args: args
+        :param kwargs: <pk> comment id
+        :return: success message if no error
+        """
+        data = {}
+        try:
+            comment = self.get_object()
+        except ObjectDoesNotExist:
+            data['message'] = _("comment may already have been deleted")
+            return Response(data=data, status=status.HTTP_404_NOT_FOUND)
+        if not comment.can_be_deleted_by(request.user):
+            data['message'] = _("permission denied to delete comment")
+            return Response(data=data, status=status.HTTP_403_FORBIDDEN)
+
+        self.perform_destroy(instance=comment)
+        data['message'] = _('comment deleted successfully')
+        return Response(data=data, status=status.HTTP_200_OK)
