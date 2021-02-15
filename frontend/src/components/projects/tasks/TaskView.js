@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Dialog from "@material-ui/core/Dialog";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
-import TaskDetailsSkeleton from "../../skeleton/projects/TaskDetailsSkeleton";
+import TaskDetailsSkeleton from "../../skeleton/projects/TaskViewSkeleton";
 import IconButton from "@material-ui/core/IconButton";
 import Close from "@material-ui/icons/Close";
 import DialogTitle from "@material-ui/core/DialogTitle";
@@ -16,18 +16,18 @@ import Box from "@material-ui/core/Box";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import Divider from "@material-ui/core/Divider";
-import TextField from "@material-ui/core/TextField";
-import Send from "@material-ui/icons/Send";
 import List from "@material-ui/core/List";
-import ListItem from "@material-ui/core/ListItem";
-import Card from "@material-ui/core/Card";
-import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import ListItemText from "@material-ui/core/ListItemText";
 import Button from "@material-ui/core/Button";
 import DateRange from "@material-ui/icons/DateRange";
 import PersonAdd from "@material-ui/icons/PersonAdd";
 import PlaylistAddCheck from "@material-ui/icons/PlaylistAddCheck";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
+import TaskComments from "./TaskComments";
+import TaskCommentForm from "./TaskCommentForm";
+import {addComment} from "../../../actions/projects/tasks";
+import createSnackAlert from "../../../actions/snackAlerts";
+import LinearProgress from "@material-ui/core/LinearProgress";
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -54,12 +54,6 @@ const useStyles = makeStyles(theme => ({
       fontWeight: '600'
     }
   },
-  sendBtn: {
-    width: '5%',
-    marginTop: '-.50rem',
-    display: 'flex',
-    alignItems: 'flex-end'
-  },
   closeBtn: {
     position: "absolute",
     top: '1rem',
@@ -72,6 +66,8 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
   const classes = useStyles()
   const task = useSelector(state => state.projectState.tasksState.task)
   const isLoading = useSelector(state => state.projectState.tasksState.isTaskLoading)
+  const isRequesting = useSelector(state => state.projectState.tasksState.isRequesting)
+  const dispatch = useDispatch()
 
   const handleClose = () => {
     setOpenTask(false)
@@ -81,26 +77,36 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
     e.preventDefault()
   }
 
+  const handleAddComment = (commentBody) => {
+    const comment = commentBody.trim()
+    if (comment) {
+      dispatch(addComment(comment, task.id))
+    } else {
+      dispatch(createSnackAlert('write some comment first', 400))
+    }
+  }
+
   return (
     <Dialog fullWidth fullScreen={matches} open={openTask}
-      /*TransitionComponent={Zoom} */
             scroll='body'
             classes={{paper: classes.paper}}
             aria-labelledby="tasks-details"
             onClose={handleOnClose}>
-      {isLoading ?
-        <TaskDetailsSkeleton classes={classes}/>
+      {isLoading ? <TaskDetailsSkeleton/>
         : task ?
-          <>
+          <>{isRequesting && <LinearProgress variant={'indeterminate'}/>}
             <IconButton
               onClick={handleClose}
               size={'small'}
-              className={classes.closeBtn}><Close/></IconButton>
+              className={classes.closeBtn}
+              disabled={isRequesting}>
+              <Close/>
+            </IconButton>
             <DialogTitle classes={{root: classes.dialogContentRoot}} id="task-details">{task.name}</DialogTitle>
             <DialogContent classes={{root: classes.dialogContentRoot}}>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={8} md={9}>
-                  <Typography variant={"h6"} component={'h5'}>Assigned To</Typography>
+                <Grid item xs={12} sm={8}>
+                  <Typography variant={"h6"} component={'h5'}>Assigned</Typography>
                   {task["assigned"].length ?
                     <div className={classes.flexAvatar}>
                       {task['assigned'].map(user => (
@@ -112,7 +118,7 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
                           alt={user.username}/>
                       ))}
                     </div>
-                    : <Typography color={"textSecondary"} variant={'h6'}>
+                    : <Typography color={"textSecondary"} variant={'subtitle1'}>
                       No one has been assigned to this task
                     </Typography>
                   }
@@ -131,8 +137,6 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
                               style={{marginLeft: 0}}
                               control={
                                 <Checkbox
-                                  // icon={<PanoramaFishEye/>}
-                                  // checkedIcon={<CheckCircleOutlined/>}
                                   checked={mini.complete}
                                 />
                               }
@@ -142,60 +146,24 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
                         ))}
                       </div>
                       : <Typography
-                        color={'textSecondary'}
-                        variant={"h6"}>No Mini Tasks created yet</Typography>
+                        color={'textSecondary'} variant={'subtitle1'}>No Mini Tasks created yet</Typography>
                     }
                   </Box>
                   <Divider/>
                   <Box sx={{my: 1}}>
                     <Typography variant='h6' component="h5">Comments</Typography>
                     <Box sx={{my: 2}}>
-                      <form style={{display: 'flex'}} onSubmit={e => e.preventDefault()}>
-                        <div style={{width: '95%'}}>
-                          <TextField
-                            variant='standard'
-                            color='primary'
-                            maxRows={4}
-                            multiline
-                            fullWidth
-                            aria-valuemax={249}
-                            placeholder="write comment"
-                          />
-                        </div>
-                        <div className={classes.sendBtn}>
-                          <IconButton size={'small'}><Send/></IconButton>
-                        </div>
-                      </form>
+                      <TaskCommentForm handleAddComment={handleAddComment}/>
                     </Box>
                     {task['task_comments'].length ?
-                      <List className={classes.root}>
-                        {task['task_comments'].map(comment => {
-                          const {commenter} = comment;
-                          return (
-                            <Box key={comment.id} sx={{my: 2}}>
-                              <ListItem variant='outlined' alignItems="flex-start" component={Card}>
-                                <ListItemAvatar>
-                                  <Avatar alt={commenter.username} src={commenter.avatar}/>
-                                </ListItemAvatar>
-                                <ListItemText
-                                  primary={
-                                    <Typography color='textPrimary' style={{fontSize: '.87rem', fontWeight: '800'}}>
-                                      {commenter.username}
-                                    </Typography>}
-                                  secondary={comment.comment}
-                                />
-                              </ListItem>
-                            </Box>);
-                        })}
-                      </List> :
-                      <Typography color={'textSecondary'} variant={'h5'} component={'h2'}>
-                        No comments yet for this task
+                      <TaskComments comments={task['task_comments']}/>
+                      : <Typography color={'textSecondary'} variant={'subtitle1'} component={'h2'}>
+                        Ooh so empty, there is literally nothing here...
                       </Typography>
                     }
                   </Box>
                 </Grid>
-                <Grid item xs={12} sm={4} md={3}>
-
+                <Grid item xs={12} sm={4}>
                   <Typography variant='h6' component='h2'>Control Panel</Typography>
                   <Box sx={{my: 1}}>
                     <Button
@@ -241,10 +209,10 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
                                 {feed.user.username}
                               </Typography>}
                             secondary={
-                              <Typography component='p' color="textSecondary" style={{fontSize: '.75rem'}}>
+                              <Typography component='p' color="textSecondary" variant={'caption'}>
                                 {feed["feed"]}
                                 <Typography component='span' style={{fontSize: '.55rem', display: 'block'}}>
-                                  - 17/10/2000
+                                  {feed.timestamp}
                                 </Typography>
                               </Typography>}
                           />
@@ -259,9 +227,18 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
               </Grid>
               <Divider/>
               <Box sx={{my: 2}} className={classes.actionButton}>
-                <Button color='primary' disableElevation variant='text' onClick={handleClose}>close</Button>
-                <Button onClick={handleTaskDelete} className='deleteButton' disableElevation variant='text'>Delete
-                  Task</Button>
+                <Button color='primary'
+                        disableElevation
+                        variant='text'
+                        onClick={handleClose}
+                        disabled={isRequesting}>close
+                </Button>
+                <Button onClick={handleTaskDelete}
+                        className='deleteButton'
+                        disableElevation
+                        variant='text'
+                        disabled={isRequesting}>Delete Task
+                </Button>
               </Box>
             </DialogContent>
           </> : <Typography>not found</Typography>}
