@@ -4,8 +4,8 @@ from rest_framework import status, generics
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from projects.models import Task, Board, Project
-from projects.serializers import TaskDetailsSerializer, TaskSerializer
+from projects.models import Task, Board, Project, TaskComment
+from projects.serializers import TaskDetailsSerializer, TaskSerializer, TaskCommentSerializer
 
 
 class ProjectTaskListCreateAPI(generics.ListCreateAPIView):
@@ -117,8 +117,7 @@ class TaskRetrieveDestroyAPI(generics.RetrieveDestroyAPIView):
     permission_classes = [AllowAny]
 
     def get_object(self):
-        return Task.objects.select_related('creator').prefetch_related(
-            'assigned', 'mini_tasks').get(id=self.kwargs['pk'])
+        return Task.objects.select_related('creator').get(id=self.kwargs['pk'])
 
     def retrieve(self, request, *args, **kwargs):
         """
@@ -154,3 +153,46 @@ class TaskRetrieveDestroyAPI(generics.RetrieveDestroyAPIView):
         self.perform_destroy(instance=task)
         data['message'] = _('task deleted successfully')
         return Response(data=data, status=status.HTTP_200_OK)
+
+
+class TaskCommentListCreateAPI(generics.ListCreateAPIView):
+    serializer_class = TaskCommentSerializer
+    queryset = TaskComment.objects.select_related('commenter')
+
+    def list(self, request, *args, **kwargs):
+        """
+        lists all the comments for that particular tasks
+        :param request: request object
+        :param args: args
+        :param kwargs: <pk> task id
+        :return: a list/array of comments
+        """
+        data = {}
+        try:
+            qs = TaskComment.objects.select_related('commenter').filter(task_id=self.kwargs['pk'])
+        except ObjectDoesNotExist:
+            data['message'] = _("we can't find what you're looking for")
+            return Response(data=data, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = TaskCommentSerializer(instance=qs, many=True, context={'request': request})
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        """
+        creates a new task comment
+        :param request: request object
+        :param args: args
+        :param kwargs: <pk> task id
+        :return: newly created comment
+        """
+        data = {}
+        try:
+            task = Task.objects.get(id=self.kwargs['pk'])
+        except ObjectDoesNotExist:
+            data['message'] = _("sorry, we encountered an error, task may have been deleted")
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+        serializer = TaskCommentSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid(raise_exception=True):
+            serializer.save(commenter=request.user, task=task)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors)

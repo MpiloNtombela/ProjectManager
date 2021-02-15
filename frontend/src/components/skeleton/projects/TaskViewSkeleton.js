@@ -12,14 +12,30 @@ import Card from "@material-ui/core/Card";
 import ListItemText from "@material-ui/core/ListItemText";
 import Skeleton from "@material-ui/core/Skeleton";
 import PropTypes from "prop-types";
+import makeStyles from "@material-ui/core/styles/makeStyles";
+
+const useStyles = makeStyles({
+  flexAvatar: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    '& > *': {
+      margin: '.25rem'
+    }
+  },
+  closeBtn: {
+    position: "absolute",
+    top: '1rem',
+    right: '1rem'
+  }
+})
 
 
 const skeletonNum = [1, 2, 3, 4]
-const TaskDetailsSkeleton = ({classes}) => {
+const TaskDetailsSkeleton = (/*{classes}*/) => {
+  const classes = useStyles()
   return (
     <>
-      <Skeleton animation="wave" variant="circular" width={30} height={30}
-                style={{position: "absolute", top: '1.25rem', right: '1.25rem'}}/>
+      <Skeleton animation="wave" variant="circular" width={30} height={30} className={classes.closeBtn}/>
       {/*title*/}
       <DialogTitle id="task-details">
         <Skeleton animation="wave" variant='text' width='45%' height='20'/></DialogTitle>
@@ -27,7 +43,7 @@ const TaskDetailsSkeleton = ({classes}) => {
         <Grid container spacing={2}>
           <Grid item xs={12} sm={8} md={9}>
             <Typography variant='subtitle1'><Skeleton animation="wave" variant="text" width='50%'/></Typography>
-            {/*members*/}
+            {/*assigned*/}
             <div className={classes.flexAvatar}>
               {skeletonNum.map(x => <Skeleton animation="wave" variant='circular' key={x}><Avatar/></Skeleton>)}
             </div>
@@ -46,14 +62,14 @@ const TaskDetailsSkeleton = ({classes}) => {
             <Box sx={{my: 1}}>
               <Typography variant='h5'><Skeleton animation="wave" variant='text' width="60%"/></Typography>
               <Box sx={{my: 2}}>
-                <form style={{display: 'flex'}} onSubmit={e => e.preventDefault()}>
+                <div style={{display: 'flex'}}>
                   <div style={{width: '90%'}}>
                     <Skeleton animation="wave" variant='text'/>
                   </div>
                   <div style={{width: '10%'}}>
                     <Skeleton animation="wave" variant='circular' width={35} height={35}/>
                   </div>
-                </form>
+                </div>
               </Box>
               <List className={classes.root}>
                 {/*comments*/}
@@ -116,7 +132,7 @@ const TaskDetailsSkeleton = ({classes}) => {
 };
 
 TaskDetailsSkeleton.propTypes = {
-  classes:  PropTypes.object
+  classes: PropTypes.object
 };
 
 
