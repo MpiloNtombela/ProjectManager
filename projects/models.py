@@ -132,6 +132,9 @@ class TaskComment(models.Model):
     def __str__(self):
         return self.commenter
 
+    def can_be_deleted_by(self, user):
+        return user == self.commenter or user == self.task.project.creator
+
 
 class TaskFeed(models.Model):
     """
