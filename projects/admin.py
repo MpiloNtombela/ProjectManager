@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from projects.models import Project, Board, Task, TaskFeed, MiniTask  # ProjectTask, ProjectBoard
+from projects.models import Project, Board, Task, TaskFeed, MiniTask, TaskComment  # ProjectTask, ProjectBoard
 
 
 class BoardInline(admin.StackedInline):
@@ -45,6 +45,10 @@ class MiniTasksInline(admin.StackedInline):
     model = MiniTask
 
 
+class TaskCommentsInline(admin.StackedInline):
+    model = TaskComment
+
+
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
     """
@@ -54,7 +58,7 @@ class TaskAdmin(admin.ModelAdmin):
     list_display_links = ['name']
     list_filter = ['created_on', 'deadline']
     search_fields = ['id', 'creator__username', 'name', 'board__name', 'project__name']
-    inlines = [MiniTasksInline, TaskFeedInline]
+    inlines = [MiniTasksInline, TaskCommentsInline, TaskFeedInline]
 
 
 @admin.register(MiniTask)
