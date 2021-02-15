@@ -62,6 +62,7 @@ export const addTask = (name, id, idx) => (dispatch, getState) => {
  * @param {number} taskIndex index of the task in the board
 * */
 export const deleteTask = (id, boardIndex, taskIndex) => (dispatch, getState) => {
+  dispatch({type: action.TASK_VIEW_REQUESTING})
   axios.delete(`/api/projects/req/task/${id}/`, tokenConfig(getState().auth.token))
     .then(res => {
       dispatch({
@@ -104,5 +105,24 @@ export const addComment = (comment, id) => (dispatch, getState) => {
       dispatch(createSnackAlert(err.message, 400))
     }
     dispatch({type: action.TASK_REQUEST_FAILED})
+  })
+}
+
+export const deleteComment = (id) => (dispatch, getState) => {
+  dispatch({type: action.TASK_VIEW_REQUESTING})
+  axios.delete(`/api/projects/req/comment/${id}/`, tokenConfig(getState().auth.token))
+    .then(res => {
+      dispatch({
+        type: action.COMMENT_DELETED,
+        payload: id
+      })
+      dispatch(createSnackAlert(res.data.message, res.status))
+    }).catch((err) => {
+    if (err.response) {
+      dispatch(createSnackAlert(err.response.data, err.response.status))
+    } else {
+      dispatch(createSnackAlert(err.message, 400))
+    }
+    dispatch({type: action.COMMENT_REQUEST_FAILED})
   })
 }

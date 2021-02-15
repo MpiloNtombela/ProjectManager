@@ -17,6 +17,7 @@ export const BOARD_CREATED = 'BOARD_CREATED';
 export const TASK_DELETED = 'TASK_DELETED';
 export const BOARD_DELETED = 'BOARD_DELETED';
 export const COMMENT_ADDED = 'COMMENT_ADDED';
+export const COMMENT_DELETED = 'COMMENT_DELETED';
 
 // request failed
 export const PROJECTS_REQUEST_FAILED = 'PROJECTS_REQUEST_FAILED'
