@@ -9,6 +9,11 @@ import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
 import List from "@material-ui/core/List";
 import whyDidYouRender from "@welldone-software/why-did-you-render";
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
+import IconButton from "@material-ui/core/IconButton";
+import {Delete} from "@material-ui/icons";
+import {useDispatch} from "react-redux";
+import {deleteComment} from "../../../actions/projects/tasks";
 
 
 whyDidYouRender(React, {
@@ -20,6 +25,7 @@ whyDidYouRender(React, {
 List.whyDidYouRender = true
 
 const TaskComments = ({comments}) => {
+  const dispatch = useDispatch()
   return (
     <List>
       {comments.map(comment => (
@@ -36,6 +42,17 @@ const TaskComments = ({comments}) => {
                 </Typography>}
               secondary={<Typography color={'textPrimary'} variant={'body2'}>{comment.comment}</Typography>}
             />
+            <ListItemSecondaryAction>
+              <IconButton
+                onClick={() => {
+                  dispatch(deleteComment(comment.id))
+                }}
+                size={'small'}
+                edge="end"
+                aria-label="delete comment">
+                <Delete/>
+              </IconButton>
+            </ListItemSecondaryAction>
           </ListItem>
         </Box>
       ))}
