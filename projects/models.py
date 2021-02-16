@@ -50,31 +50,38 @@ class Project(BaseFields):
         for team in self.teams.all():
             return user in team.members.all()
 
-    def team_is_valid(self, team) -> bool:
+    def team_is_valid(self, team: Team) -> bool:
         """checks if the team that is about to be added to project was created by project creator
-        :param team
-        :return bool"""
+        :type team: object
+        :param team: team being checked
+        :return: bool
+        """
         return team.creator == self.creator
 
-    def add_team(self, team):
+    def add_team(self, team: Team):
         """
         adds team to project teams
-        :param team
+        :type team: object
+        :param team: team to add
         """
         if self.creator == team.creator:
-            if team not in self.teams.all():
-                self.teams.add(team)
+            self.teams.add(team)
 
-    def remove_team(self, team):
+    def remove_team(self, team: Team):
         """
         removes a team to project teams
-        :param team
+        :type team: object
+        :param team: team to remove
         """
         if self.creator == team.creator:
             if team in self.teams.all():
                 self.teams.remove(team)
 
     def deadline_is_valid(self) -> bool:
+        """
+        checks if the deadline is not a past datetime
+        :return: bool
+        """
         return self.deadline > datetime.now()
 
 
@@ -87,7 +94,7 @@ class ProjectFeed(models.Model):
     feed = models.CharField(max_length=500)
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.project.name
 
 
@@ -106,16 +113,29 @@ class Task(BaseFields):
     id = HashidAutoField(primary_key=True, salt=settings.HASHID_TASK_SALT, min_length=11)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='project_tasks')
     board = models.ForeignKey(Board, on_delete=models.CASCADE, related_name='board_tasks')
-    assigned = models.ManyToManyField(User, blank=True, related_name='task_assigned_to')
+    members = models.ManyToManyField(User, blank=True, related_name='task_members')
     deadline = models.DateTimeField(blank=True, null=True)
 
     def deadline_is_valid(self) -> bool:
-        return self.deadline < self.project.deadline
+        """
+        checks if the task deadline is not greater than project deadline and is not past datetime
+        :return: bool
+        """
+        return datetime.now() < self.deadline < self.project.deadline
+
+    def user_part_of_task(self, user: User):
+        """
+        checks if given user is part of the task
+        :type user: object
+        :param user: that wanna check
+        :return: bool
+        """
+        return user == self.creator or user in self.members
 
 
-class MiniTask(BaseFields):
+class Subtask(BaseFields):
     id = HashidAutoField(primary_key=True, salt=settings.HASHID_TASK_SALT, min_length=7)
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='mini_tasks')
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name='subtasks')
     complete = models.BooleanField(default=False)
 
 
