@@ -68,6 +68,7 @@ const Navbar = () => {
   const [anchorEl, setAnchorEl] = useState(null);
   const auth = useSelector(state => state.auth)
   const dispatch = useDispatch()
+
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -77,6 +78,7 @@ const Navbar = () => {
   };
 
   const handleLogout = () => {
+    setAnchorEl(null);
     dispatch(logout())
   }
 

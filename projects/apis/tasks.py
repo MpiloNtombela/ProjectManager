@@ -4,8 +4,8 @@ from rest_framework import status, generics
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from projects.models import Task, Board, Project
-from projects.serializers import TaskDetailsSerializer, TaskSerializer
+from projects.models import Task, Board, Project, TaskComment
+from projects.serializers import TaskDetailsSerializer, TaskSerializer, TaskCommentSerializer
 
 
 class ProjectTaskListCreateAPI(generics.ListCreateAPIView):
@@ -143,7 +143,7 @@ class TaskRetrieveDestroyAPI(generics.RetrieveDestroyAPIView):
         :param request: request object
         :param args: args
         :param kwargs: <pk> task id
-        :return: success message if n error
+        :return: success message if no error
         """
         data = {}
         try:
@@ -153,4 +153,77 @@ class TaskRetrieveDestroyAPI(generics.RetrieveDestroyAPIView):
             return Response(data=data, status=status.HTTP_404_NOT_FOUND)
         self.perform_destroy(instance=task)
         data['message'] = _('task deleted successfully')
+        return Response(data=data, status=status.HTTP_200_OK)
+
+
+class TaskCommentListCreateAPI(generics.ListCreateAPIView):
+    serializer_class = TaskCommentSerializer
+    queryset = TaskComment.objects.select_related('commenter')
+
+    def list(self, request, *args, **kwargs):
+        """
+        lists all the comments for that particular tasks
+        :param request: request object
+        :param args: args
+        :param kwargs: <pk> task id
+        :return: a list/array of comments
+        """
+        data = {}
+        try:
+            qs = TaskComment.objects.select_related('commenter').filter(task_id=self.kwargs['pk'])
+        except ObjectDoesNotExist:
+            data['message'] = _("we can't find what you're looking for")
+            return Response(data=data, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = TaskCommentSerializer(instance=qs, many=True, context={'request': request})
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        """
+        creates a new task comment
+        :param request: request object
+        :param args: args
+        :param kwargs: <pk> task id
+        :return: newly created comment
+        """
+        data = {}
+        try:
+            task = Task.objects.get(id=self.kwargs['pk'])
+        except ObjectDoesNotExist:
+            data['message'] = _("sorry, we encountered an error, task may have been deleted")
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+        serializer = TaskCommentSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid(raise_exception=True):
+            serializer.save(commenter=request.user, task=task)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors)
+
+
+class TaskCommentDestroyAPI(generics.DestroyAPIView):
+    serializer_class = TaskCommentSerializer
+    queryset = TaskComment.objects.select_related('commenter')
+
+    def get_object(self):
+        return TaskComment.objects.select_related('commenter').get(id=self.kwargs['pk'])
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        destroys or delete a comment given the id
+        :param request: request object
+        :param args: args
+        :param kwargs: <pk> comment id
+        :return: success message if no error
+        """
+        data = {}
+        try:
+            comment = self.get_object()
+        except ObjectDoesNotExist:
+            data['message'] = _("comment may already have been deleted")
+            return Response(data=data, status=status.HTTP_404_NOT_FOUND)
+        if not comment.can_be_deleted_by(request.user):
+            data['message'] = _("permission denied to delete comment")
+            return Response(data=data, status=status.HTTP_403_FORBIDDEN)
+
+        self.perform_destroy(instance=comment)
+        data['message'] = _('comment deleted successfully')
         return Response(data=data, status=status.HTTP_200_OK)

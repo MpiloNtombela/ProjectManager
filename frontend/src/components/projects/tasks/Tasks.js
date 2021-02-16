@@ -28,7 +28,7 @@ const Tasks = ({tasks, handleAddNewTask, boardIndex}) => {
   // }, [isAdding])
 
   const handleClickAway = () => {
-    setIsNewTask(false)
+    setIsNewTask(isAdding)
   }
   const handleAddNewTaskClick = () => {
     setIsNewTask(true)

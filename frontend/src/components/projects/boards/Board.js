@@ -7,7 +7,7 @@ import {MoreVert} from "@material-ui/icons";
 import Menu from "@material-ui/core/Menu";
 import MenuItem from "@material-ui/core/MenuItem";
 import CardContent from "@material-ui/core/CardContent";
-import TaskCard from "../tasks/Tasks";
+import Tasks from "../tasks/Tasks";
 import Card from "@material-ui/core/Card";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import {useDispatch} from "react-redux";
@@ -77,11 +77,12 @@ const Board = ({board, idx}) => {
 
   return (
     <>
-      <Card>
+      <Card variant={'outlined'}>
         <CardHeader classes={{root: classes.cardPadding}}
                     title={<Typography className={classes.title} variant='title'>{board.name}</Typography>}
                     action={
-                      <IconButton size="small" aria-label="board controls"
+                      <IconButton size="small"
+                                  aria-label="board controls"
                                   onClick={handleClick}>
                         <MoreVert/>
                       </IconButton>}/>
@@ -105,7 +106,7 @@ const Board = ({board, idx}) => {
         </Menu>
         <CardContent classes={{root: classes.cardPadding}}>
           {board['board_tasks'] &&
-          <TaskCard
+          <Tasks
             tasks={board['board_tasks']}
             handleAddNewTask={handleAddNewTask}
             boardIndex={idx}/>}

@@ -1,4 +1,4 @@
-import React, {memo} from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import Box from "@material-ui/core/Box";
 import Button from "@material-ui/core/Button";
@@ -19,21 +19,21 @@ const useStyles = makeStyles(theme => ({
       width: '2rem'
     }
   },
-  ButtonContainer: {
-    '& .cancelButton': {
-      background: theme.palette.error.main,
-      margin: '.25rem',
-      color: 'inherit'
-    },
-    '& .saveButton': {
-      background: theme.palette.primary.main,
-      margin: '.25rem',
-      color: 'inherit'
-    }
+  cancelButton: {
+    background: 'transparent',
+    border: `2px solid ${theme.palette.error.main}`,
+    margin: '.25rem',
+    color: theme.palette.error.main
+  },
+  saveButton: {
+    background: theme.palette.background.paper,
+    border: `2px solid ${theme.palette.primary.main}`,
+    margin: '.25rem',
+    color: theme.palette.primary.main
   }
 }))
 // eslint-disable-next-line react/display-name
-const FormSubmitButton = memo(({children, disabled, size}) => (
+const FormSubmitButton = React.memo(({children, disabled, size}) => (
   <Box sx={{my: 2}}>
     <Button
       disableElevation
@@ -48,24 +48,26 @@ const FormSubmitButton = memo(({children, disabled, size}) => (
   </Box>
 ));
 
-const SaveCancelButtons = ({containerClass, saveButtonType, cancelButtonType, onClickSave, onClickCancel}) => {
+const SaveCancelButtons = ({containerClass, saveButtonType, cancelButtonType, onClickSave, onClickCancel, disabled}) => {
   const classes = useStyles()
   return (
-    <Box sx={{mt: 1}} className={`${containerClass ? containerClass : classes.flexButtons} ${classes.ButtonContainer}`}>
+    <Box sx={{mt: 1}} className={`${containerClass ? containerClass : classes.flexButtons}`}>
       <Avatar
         component={ButtonBase}
         type={cancelButtonType}
         onClick={onClickCancel}
-        className={'cancelButton'}
-        aria-label='cancel button'>
+        className={classes.cancelButton}
+        aria-label='cancel button'
+        disabled={disabled}>
         <Close/>
       </Avatar>
       <Avatar
         component={ButtonBase}
         type={saveButtonType}
         onClick={onClickSave}
-        className={'saveButton'}
-        aria-label="save button">
+        className={classes.saveButton}
+        aria-label="save button"
+        disabled={disabled}>
         <Done/>
       </Avatar>
     </Box>
@@ -74,15 +76,16 @@ const SaveCancelButtons = ({containerClass, saveButtonType, cancelButtonType, on
 FormSubmitButton.propTypes = {
   children: PropTypes.any,
   disabled: PropTypes.bool,
-  size: PropTypes.string,
+  size: PropTypes.string
 };
 SaveCancelButtons.propTypes = {
   containerClass: PropTypes.any,
   saveButtonType: PropTypes.string,
   cancelButtonType: PropTypes.string,
   onClickSave: PropTypes.func,
-  onClickCancel: PropTypes.func
+  onClickCancel: PropTypes.func,
+  disabled: PropTypes.bool
 };
 
-export default memo(SaveCancelButtons)
+export default React.memo(SaveCancelButtons)
 export {FormSubmitButton}
