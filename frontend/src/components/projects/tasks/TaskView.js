@@ -100,10 +100,10 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
             <DialogContent classes={{root: classes.dialogContentRoot}}>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={8} md={9}>
-                  <Typography variant={"h6"} component={'h5'}>Assigned To</Typography>
-                  {task["assigned"].length ?
+                  <Typography variant={"h6"} component={'h5'}>Task Members</Typography>
+                  {task["members"].length ?
                     <div className={classes.flexAvatar}>
-                      {task['assigned'].map(user => (
+                      {task['members'].map(user => (
                         <Avatar
                           key={user.id}
                           src={user.avatar}
@@ -113,37 +113,37 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
                       ))}
                     </div>
                     : <Typography color={"textSecondary"} variant={'h6'}>
-                      No one has been assigned to this task
+                      No one has been members to this task
                     </Typography>
                   }
                   <Box sx={{my: 3}}>
-                    <Typography variant={'h6'} component={'h5'}>Mini tasks</Typography>
-                    {task['mini_tasks'].length ?
+                    <Typography variant={'h6'} component={'h5'}>subtask tasks</Typography>
+                    {task['subtasks'].length ?
                       <div>
                         <Box sx={{my: 2}}>
                           {/*<LinearProgress style={{height: '.50rem', borderRadius: '9999rem'}} color="secondary"
                                         variant="determinate"
                                         value={7}/>*/}
                         </Box>
-                        {task['mini_tasks'].map(mini => (
-                          <div key={mini.id}>
+                        {task['subtasks'].map(subtask => (
+                          <div key={subtask.id}>
                             <FormControlLabel
                               style={{marginLeft: 0}}
                               control={
                                 <Checkbox
                                   // icon={<PanoramaFishEye/>}
                                   // checkedIcon={<CheckCircleOutlined/>}
-                                  checked={mini.complete}
+                                  checked={subtask.complete}
                                 />
                               }
-                              label={<Typography variant='body2' component='span'>{mini.name}</Typography>}
+                              label={<Typography variant='body2' component='span'>{subtask.name}</Typography>}
                             />
                           </div>
                         ))}
                       </div>
                       : <Typography
                         color={'textSecondary'}
-                        variant={"h6"}>No Mini Tasks created yet</Typography>
+                        variant={"h6"}>No subtask Tasks created yet</Typography>
                     }
                   </Box>
                   <Divider/>
@@ -215,7 +215,7 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
                       disableElevation
                       fullWidth
                       color='secondary'>
-                      add mini task
+                      add subtask task
                     </Button>
                   </Box>
                   <Box key={1} sx={{my: 1}}>
