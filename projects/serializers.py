@@ -38,9 +38,13 @@ class TaskSerializer(serializers.ModelSerializer):
     task_members = ProjectUserSerializer(required=False, many=True)
     can_edit = serializers.SerializerMethodField()
 
+    # comment_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Task
         fields = ['id', 'name', 'can_edit', 'creator', 'task_members']
+
+    # def get_comment_count(self, obj) -> int:
 
     def get_can_edit(self, obj) -> bool:
         """
@@ -92,7 +96,8 @@ class ProjectSerializer(serializers.ModelSerializer):
 
 class TaskCommentSerializer(serializers.ModelSerializer):
     id = HashidSerializerCharField(source_field='projects.TaskComment.id', read_only=True)
-    commenter = ProjectUserSerializer()
+    commenter = ProjectUserSerializer(required=False)
+    timestamp = serializers.DateTimeField(format='%d %b %y | %H:%M', required=False)
 
     class Meta:
         model = TaskComment
@@ -101,10 +106,11 @@ class TaskCommentSerializer(serializers.ModelSerializer):
 
 class TaskFeedSerializer(serializers.ModelSerializer):
     user = ProjectUserSerializer()
+    timestamp = serializers.DateTimeField(format='%d %b %y | %H:%M', required=False)
 
     class Meta:
         model = TaskFeed
-        fields = ['id', 'feed', 'user']
+        fields = ['id', 'feed', 'user', 'timestamp']
 
 
 class MiniTaskSerializer(serializers.ModelSerializer):

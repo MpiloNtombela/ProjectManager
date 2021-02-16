@@ -13,7 +13,8 @@ const initialState = {
     task: null,
     tasks: null,
     isTaskLoading: false,
-    isAdding: false
+    isAdding: false,
+    isRequesting: false
   }
 };
 
@@ -36,6 +37,9 @@ export default function (state = initialState, {type, payload}) {
       case action.CREATE_BOARD:
         draft.boardsState.isCreating = true
         break
+      case action.TASK_VIEW_REQUESTING:
+        draft.tasksState.isRequesting = true
+        break
 
       // request success
       case action.PROJECTS_LOADED:
@@ -57,6 +61,7 @@ export default function (state = initialState, {type, payload}) {
       case action.TASK_DELETED:
         draft.boardsState.boards[payload.boardIndex]["board_tasks"].splice(payload.taskIndex, 1)
         draft.tasksState.task = null
+        draft.tasksState.isRequesting = false
         break
       case action.BOARDS_LOADED:
         draft.boardsState.boards = payload
@@ -69,6 +74,15 @@ export default function (state = initialState, {type, payload}) {
       case action.BOARD_DELETED:
         draft.boardsState.boards.splice(payload, 1)
         break
+      case action.COMMENT_ADDED:
+        draft.tasksState.task['task_comments'].unshift(payload)
+        draft.tasksState.isRequesting = false
+        break
+      case action.COMMENT_DELETED:
+        draft.tasksState.task['task_comments'].splice(
+          draft.tasksState.task['task_comments'].findIndex(c => c.id === payload), 1)
+        draft.tasksState.isRequesting = false
+        break
 
       // request failed
       case action.PROJECTS_REQUEST_FAILED:
@@ -80,9 +94,12 @@ export default function (state = initialState, {type, payload}) {
         draft.boardsState.isCreating = false
         break
       case action.TASK_REQUEST_FAILED:
+      case action.COMMENT_REQUEST_FAILED:
         draft.tasksState.isTaskLoading = false
         draft.tasksState.isAdding = false
+        draft.tasksState.isRequesting = false
         break
+
       // clear
       case action.CLEAR_PROJECT_STATE:
         return initialState
