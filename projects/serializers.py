@@ -2,7 +2,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from hashid_field.rest import HashidSerializerCharField
 from rest_framework import serializers
 
-from projects.models import Task, Board, TaskComment, TaskFeed, MiniTask, Project
+from projects.models import Task, Board, TaskComment, TaskFeed, Subtask, Project
 from users.models import User
 
 
@@ -35,19 +35,25 @@ class ProjectUserSerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     id = HashidSerializerCharField(source_field='projects.Task.id', read_only=True)
     creator = ProjectUserSerializer(required=False)
-    assigned = ProjectUserSerializer(required=False, many=True)
+    task_members = ProjectUserSerializer(required=False, many=True)
     can_edit = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
-        fields = ['id', 'name', 'can_edit', 'creator', 'assigned']
+        fields = ['id', 'name', 'can_edit', 'creator', 'task_members']
 
     def get_can_edit(self, obj) -> bool:
+        """
+        checks if user has perm to edit
+        :param obj:
+        :return:
+        """
         user = self.context['request'].user
-        return user in obj.assigned.all() or obj.creator == user
+        return obj.user_part_of_task(user)
 
+    @staticmethod
     def get_num_assigned(self, obj):
-        return obj.assigned.all().count()
+        return obj.members.all().count()
 
 
 class BoardSerializer(serializers.ModelSerializer):
@@ -60,7 +66,7 @@ class BoardSerializer(serializers.ModelSerializer):
 
     def get_board_tasks(self, obj):
         try:
-            objs = obj.board_tasks.select_related('creator').prefetch_related('assigned')
+            objs = obj.board_tasks.select_related('creator').prefetch_related('members')
             return TaskSerializer(objs, many=True, context={'request': self.context['request']}).data
         except (ObjectDoesNotExist, KeyError):
             return []
@@ -102,32 +108,32 @@ class TaskFeedSerializer(serializers.ModelSerializer):
 
 
 class MiniTaskSerializer(serializers.ModelSerializer):
-    id = HashidSerializerCharField(source_field='projects.MiniTask.id', read_only=True)
+    id = HashidSerializerCharField(source_field='projects.Subtask.id', read_only=True)
 
     class Meta:
-        model = MiniTask
+        model = Subtask
         fields = ['id', 'name', 'complete', 'created_on', 'updated_on']
 
 
 class TaskDetailsSerializer(serializers.ModelSerializer):
     id = HashidSerializerCharField(source_field='projects.Task.id', read_only=True)
     creator = ProjectUserSerializer()
-    assigned = ProjectUserSerializer(many=True)
+    members = ProjectUserSerializer(many=True)
     is_creator = serializers.SerializerMethodField()
     can_edit = serializers.SerializerMethodField()
-    mini_tasks = MiniTaskSerializer(many=True)
+    subtasks = MiniTaskSerializer(many=True)
     task_comments = TaskCommentSerializer(many=True)
     task_feed = TaskFeedSerializer(many=True)
 
     class Meta:
         model = Task
-        fields = ['id', 'name', 'is_creator', 'can_edit', 'created_on', 'description', 'creator', 'assigned',
-                  'mini_tasks', 'task_comments', 'task_feed'
+        fields = ['id', 'name', 'is_creator', 'can_edit', 'created_on', 'description', 'creator', 'members',
+                  'subtasks', 'task_comments', 'task_feed'
                   ]
 
     def get_can_edit(self, obj) -> bool:
         user = self.context['request'].user
-        return user in obj.assigned.all() or obj.creator == user
+        return user in obj.members.all() or obj.creator == user
 
     def get_is_creator(self, obj) -> bool:
         user = self.context['request'].user

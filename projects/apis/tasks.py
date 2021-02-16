@@ -26,13 +26,13 @@ class ProjectTaskListCreateAPI(generics.ListCreateAPIView):
         """
         data = {}
         try:
-            qs = Task.objects.select_related('creator').prefetch_related('assigned').filter(
+            qs = Task.objects.select_related('creator').prefetch_related('members').filter(
                 project_id=self.kwargs['pk'])
         except ObjectDoesNotExist:
             data['message'] = _("we can't find what you're looking for")
             return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
-        # qs = Task.objects.select_related('creator').prefetch_related('assigned').filter(project=project)
+        # qs = Task.objects.select_related('creator').prefetch_related('members').filter(project=project)
         serializer = TaskSerializer(instance=qs, many=True, context={'request': request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
@@ -66,7 +66,7 @@ class BoardTaskCreateAPI(generics.ListCreateAPIView):
     apis to get or create new task(s) given board id
     """
     serializer_class = TaskSerializer
-    queryset = Task.objects.select_related('creator').prefetch_related('assigned')
+    queryset = Task.objects.select_related('creator').prefetch_related('members')
 
     def list(self, request, *args, **kwargs):
         """
@@ -83,7 +83,7 @@ class BoardTaskCreateAPI(generics.ListCreateAPIView):
             data['message'] = _("we can't find what you're looking for")
             return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
-        qs = Task.objects.select_related('creator').prefetch_related('assigned').filter(board=board)
+        qs = Task.objects.select_related('creator').prefetch_related('members').filter(board=board)
         serializer = TaskSerializer(instance=qs, many=True, context={'request': request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
@@ -118,7 +118,7 @@ class TaskRetrieveDestroyAPI(generics.RetrieveDestroyAPIView):
 
     def get_object(self):
         return Task.objects.select_related('creator').prefetch_related(
-            'assigned', 'mini_tasks').get(id=self.kwargs['pk'])
+            'members', 'subtasks').get(id=self.kwargs['pk'])
 
     def retrieve(self, request, *args, **kwargs):
         """
