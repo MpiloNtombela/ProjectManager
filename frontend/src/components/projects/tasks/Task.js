@@ -62,7 +62,7 @@ const Task = ({task, taskIndex, boardIndex}) => {
               </Typography></Grid>
             <Grid item>
               <Typography color="textSecondary" variant={"caption"}>
-                <People color='inherit' classes={{root: classes.svgRoot}}/> {task.assigned.length}
+                <People color='inherit' classes={{root: classes.svgRoot}}/> {task.members.length}
               </Typography></Grid>
             {/*<Grid item></Grid>*/}
           </Grid>
