@@ -1,7 +1,7 @@
 import Paper from "@material-ui/core/Paper";
 import Container from "@material-ui/core/Container";
 import React, {Suspense} from "react";
-import ProjectPage from "./ProjectPage";
+import ProjectView from "./ProjectView";
 import ProjectPageSkeleton from "../skeleton/projects/ProjectPageSkeleton";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 
@@ -34,7 +34,7 @@ const ProjectTemplate = () => {
     <Paper square elevation={0} className={classes.root}>
       <Container maxWidth='xl' className={classes.container}>
         <Suspense fallback={<ProjectPageSkeleton/>}>
-          <ProjectPage/>
+          <ProjectView/>
         </Suspense>
       </Container>
     </Paper>

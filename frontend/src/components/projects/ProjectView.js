@@ -71,7 +71,7 @@ whyDidYouRender(React, {
 
 Card.whyDidYouRender = true
 
-const ProjectPage = () => {
+const ProjectView = () => {
   const classes = useStyles()
   const projectState = useSelector(state => state.projectState)
   const dispatch = useDispatch()
@@ -83,35 +83,36 @@ const ProjectPage = () => {
   }, [])
 
   return (
-    <>{projectState.isLoading ? <ProjectPageSkeleton/>
-      : <>
-        {projectState.project ?
-          <>
-            <Container className={`${classes.hideScroll} ${classes.projectContainer}`} maxWidth="xl">
-              <div className={classes.projectBar}>
-                <Typography color="textSecondary" component="h1" variant="h5">
-                  {projectState.project.name}
-                </Typography>
-              </div>
-              <Box sx={{py: 3}}>
-                <Grid container className={classes.projectBoardsGrid} spacing={1}>
-                  {projectState.boardsState.isBoardsLoading ? <ProductPageBoardsSkeleton/>
-                    : projectState.boardsState.boards ? <Boards/>
-                      : <Typography variant={'h1'} color={"error"}>Failed to load boards</Typography>
-                  }
-                </Grid>
-              </Box>
-            </Container>
-          </>
-          : <Typography variant='h1' component='h1' color='error'>Failed to load project</Typography>}
-      </>
-    }
+    <>
+      {projectState.isLoading ? <ProjectPageSkeleton/>
+        : <>
+          {projectState.project ?
+            <>
+              <Container className={`${classes.hideScroll} ${classes.projectContainer}`} maxWidth="xl">
+                <div className={classes.projectBar}>
+                  <Typography color="textSecondary" component="h1" variant="h5">
+                    {projectState.project.name}
+                  </Typography>
+                </div>
+                <Box sx={{py: 3}}>
+                  <Grid container className={classes.projectBoardsGrid} spacing={1}>
+                    {projectState.boardsState.isBoardsLoading ? <ProductPageBoardsSkeleton/>
+                      : projectState.boardsState.boards ? <Boards/>
+                        : <Typography variant={'h1'} color={"error"}>Failed to load boards</Typography>
+                    }
+                  </Grid>
+                </Box>
+              </Container>
+            </>
+            : <Typography variant='h1' component='h1' color='error'>Failed to load project</Typography>}
+        </>
+      }
     </>
   );
 }
 
-ProjectPage.propTypes = {
+ProjectView.propTypes = {
   token: PropTypes.string
 };
 
-export default ProjectPage;
+export default ProjectView;
