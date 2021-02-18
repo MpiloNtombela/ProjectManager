@@ -126,11 +126,11 @@ class Task(BaseFields):
     def user_part_of_task(self, user: User):
         """
         checks if given user is part of the task
-        :type user: object
-        :param user: that wanna check
+        :type user: User
+        :param user:
         :return: bool
         """
-        return user == self.creator or user in self.members
+        return user == self.creator or user.task_members.filter(id=user.id).exists()
 
 
 class Subtask(BaseFields):
