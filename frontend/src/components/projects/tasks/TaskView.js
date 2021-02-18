@@ -105,7 +105,7 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
             <DialogTitle classes={{root: classes.dialogContentRoot}} id="task-details">{task.name}</DialogTitle>
             <DialogContent classes={{root: classes.dialogContentRoot}}>
               <Grid container spacing={2}>
-                <Grid item xs={12} sm={8} md={9}>
+                <Grid item xs={12} sm={8}>
                   <Typography variant={"h6"} component={'h5'}>Task Members</Typography>
                   {task["members"].length ?
                     <div className={classes.flexAvatar}>
@@ -149,7 +149,7 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
                       </div>
                       : <Typography
                         color={'textSecondary'}
-                        variant={"h6"}>No subtask Tasks created yet</Typography>
+                        variant={"subtitle1"}>No subtasks created yet</Typography>
                     }
                   </Box>
                   <Divider/>
@@ -172,28 +172,28 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
                     <Button
                       size="small"
                       startIcon={<PersonAdd/>}
-                      variant='contained'
+                      variant='outlined'
                       disableElevation
                       fullWidth
                       color='secondary'>
-                      new assign</Button>
+                      add member</Button>
                   </Box>
                   <Box sx={{my: 1}}>
                     <Button
                       size="small"
                       startIcon={<PlaylistAddCheck/>}
-                      variant='contained'
+                      variant='outlined'
                       disableElevation
                       fullWidth
                       color='secondary'>
-                      add subtask task
+                      add subtask
                     </Button>
                   </Box>
                   <Box key={1} sx={{my: 1}}>
                     <Button
                       size="small"
                       startIcon={<DateRange/>}
-                      variant='contained'
+                      variant='outlined'
                       disableElevation
                       fullWidth
                       color='secondary'>

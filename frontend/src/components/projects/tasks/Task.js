@@ -28,6 +28,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const Task = ({task, taskIndex, boardIndex}) => {
+  console.log(task)
   const classes = useStyles()
   const dispatch = useDispatch()
   const [openTask, setOpenTask] = useState(false)
@@ -39,6 +40,7 @@ const Task = ({task, taskIndex, boardIndex}) => {
     dispatch(deleteTask(task.id, boardIndex, taskIndex))
   }
   return (
+
     <>
       <Card className={classes.root}
             onClick={handleTaskCardClick}>
