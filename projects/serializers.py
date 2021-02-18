@@ -35,14 +35,14 @@ class ProjectUserSerializer(serializers.ModelSerializer):
 class TaskSerializer(serializers.ModelSerializer):
     id = HashidSerializerCharField(source_field='projects.Task.id', read_only=True)
     creator = ProjectUserSerializer(required=False)
-    task_members = ProjectUserSerializer(required=False, many=True)
+    members = ProjectUserSerializer(required=False, many=True)
     can_edit = serializers.SerializerMethodField()
 
     # comment_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
-        fields = ['id', 'name', 'can_edit', 'creator', 'task_members']
+        fields = ['id', 'name', 'can_edit', 'creator', 'members']
 
     # def get_comment_count(self, obj) -> int:
 
