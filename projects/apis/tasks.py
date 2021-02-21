@@ -5,7 +5,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from projects.models import Task, Board, Project, TaskComment
-from projects.serializers import TaskDetailsSerializer, TaskSerializer, TaskCommentSerializer
+from projects.serializers import TaskDetailsSerializer, TaskSerializer, TaskCommentSerializer, ProjectUserSerializer
+from users.models import User
 
 
 class ProjectTaskListCreateAPI(generics.ListCreateAPIView):
@@ -227,3 +228,42 @@ class TaskCommentDestroyAPI(generics.DestroyAPIView):
         self.perform_destroy(instance=comment)
         data['message'] = _('comment deleted successfully')
         return Response(data=data, status=status.HTTP_200_OK)
+
+
+class AddRemoveTaskMemberAPI(generics.UpdateAPIView):
+    # queryset = Task.objects.select_related('creator').prefetch_related('members')
+    serializer_class = TaskSerializer
+
+    def get_queryset(self):
+        return Task.objects.select_related('creator').prefetch_related('members').get(id=self.kwargs['pk']).members
+
+    def get_object(self):
+        return Task.objects.select_related('creator').prefetch_related('members').get(id=self.kwargs['pk'])
+
+    def update(self, request, *args, **kwargs):
+        data = {}
+        try:
+            task = self.get_object()
+        except ObjectDoesNotExist:
+            data['message'] = _("Oops... something went wrong")
+            return Response(data=data, status=status.HTTP_404_NOT_FOUND)
+        try:
+            user = User.objects.get(id=request.data['id'])
+        except ObjectDoesNotExist:
+            data['message'] = _("user not found")
+            return Response(data=data, status=status.HTTP_404_NOT_FOUND)
+
+        if request.data['type'].lower() == 'remove':
+            task.remove_user(user)
+            data['message'] = f'{user.username} removed from task members'
+            data['response'] = ProjectUserSerializer(user).data
+            return Response(data=data, status=status.HTTP_200_OK)
+        else:
+            if task.user_is_valid(user):
+                task.add_user(user)
+                data['message'] = f'{user.username} added to task members'
+                data['response'] = ProjectUserSerializer(user).data
+                return Response(data=data, status=status.HTTP_200_OK)
+            else:
+                data['message'] = _('only project members can be added to task members')
+                return Response(data=data, status=status.HTTP_400_BAD_REQUEST)

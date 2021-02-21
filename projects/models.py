@@ -18,7 +18,7 @@ class BaseFields(models.Model):
     -created_on (timestamp)
     -updated_on
     """
-    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="%(class)s_creator")
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="created_%(class)ss")
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=1000, blank=True)
     created_on = models.DateTimeField(auto_now_add=True, auto_now=False)
@@ -38,44 +38,58 @@ class Project(BaseFields):
     id = HashidAutoField(primary_key=True, salt=settings.HASHID_PROJECT_SALT, min_length=11)
     teams = models.ManyToManyField(Team, related_name='project_teams', blank=True)
     deadline = models.DateTimeField(blank=True, null=True)
+    members = models.ManyToManyField(User, related_name='joined_projects', blank=True)
 
-    def has_this_user(self, user: object) -> bool:
+    def has_user(self, user: User) -> bool:
         """
-        checks if user has permission to view project
-        :param user:
-        :return bool:
+        checks if user part of the project
+        :param user: User
+        :return: bool
         """
         if user == self.creator:
             return True
-        for team in self.teams.all():
-            return user in team.members.all()
+        if user.joined_projects.filter(id=self.id).exists():
+            return True
+        return False
+        # for team in self.teams.all():
+        #     return team.has_user(user)
+
+    def add_user(self, user: User):
+        """
+        adds user project members
+        :param user: User
+        """
+        self.members.add(user)
+
+    def remove_user(self, user: User):
+        """
+        removes user project members
+        :param user: User
+        """
+        self.members.remove(user)
 
     def team_is_valid(self, team: Team) -> bool:
-        """checks if the team that is about to be added to project was created by project creator
-        :type team: object
-        :param team: team being checked
+        """checks if the team creator is the project creator
+        :param team: Team object
         :return: bool
         """
-        return team.creator == self.creator
+        return self.creator == team.creator
 
     def add_team(self, team: Team):
         """
         adds team to project teams
-        :type team: object
-        :param team: team to add
+        :param team: Team to be add
         """
-        if self.creator == team.creator:
+        if self.team_is_valid(team):
             self.teams.add(team)
 
     def remove_team(self, team: Team):
         """
         removes a team to project teams
-        :type team: object
         :param team: team to remove
         """
-        if self.creator == team.creator:
-            if team in self.teams.all():
-                self.teams.remove(team)
+        if team.project_teams.filter(id=self.id).exists():
+            self.teams.remove(team)
 
     def deadline_is_valid(self) -> bool:
         """
@@ -113,7 +127,7 @@ class Task(BaseFields):
     id = HashidAutoField(primary_key=True, salt=settings.HASHID_TASK_SALT, min_length=11)
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='project_tasks')
     board = models.ForeignKey(Board, on_delete=models.CASCADE, related_name='board_tasks')
-    members = models.ManyToManyField(User, blank=True, related_name='task_members')
+    members = models.ManyToManyField(User, blank=True, related_name='joined_tasks')
     deadline = models.DateTimeField(blank=True, null=True)
 
     def deadline_is_valid(self) -> bool:
@@ -123,14 +137,38 @@ class Task(BaseFields):
         """
         return datetime.now() < self.deadline < self.project.deadline
 
+    def user_is_valid(self, user: User) -> bool:
+        """
+        checks if user can be added to task members
+        :param user: User object
+        :return: bool
+        """
+        if user == self.creator:
+            return True
+        return self.project.has_user(user)
+
+    def add_user(self, user: User):
+        """
+        adds user to tasks members
+        :param user: User
+        """
+        self.members.add(user)
+
+    def remove_user(self, user: User):
+        """
+        removes user tasks members
+        :param user: User
+        """
+        if self.user_part_of_task(user):
+            self.members.remove(user)
+
     def user_part_of_task(self, user: User):
         """
         checks if given user is part of the task
-        :type user: User
-        :param user:
+        :param user: User
         :return: bool
         """
-        return user == self.creator or user.task_members.filter(id=user.id).exists()
+        return user == self.creator or user.joined_tasks.filter(id=self.id).exists()
 
 
 class Subtask(BaseFields):
@@ -150,7 +188,7 @@ class TaskComment(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
 
     def __str__(self):
-        return self.commenter
+        return self.task.name
 
     def can_be_deleted_by(self, user):
         return user == self.commenter or user == self.task.project.creator

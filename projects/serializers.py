@@ -79,19 +79,20 @@ class BoardSerializer(serializers.ModelSerializer):
 class ProjectSerializer(serializers.ModelSerializer):
     id = HashidSerializerCharField(source_field='projects.Project.id', read_only=True)
     creator = ProjectUserSerializer()
-    is_part = serializers.SerializerMethodField()
-
-    # project_boards = BoardSerializer(many=True)
-
-    # creator = serializers.SlugRelatedField(queryset=User.objects.all(), slug_field='username')
+    members = ProjectUserSerializer(many=True)
 
     class Meta:
         model = Project
-        fields = ['id', 'name', 'creator', 'is_part']
+        fields = ['id', 'name', 'creator', 'members']
 
-    def get_is_part(self, obj):
-        user = self.context['request'].user
-        return user == obj.creator or user in [team.members.all() for team in obj.teams.all()][0]
+
+class ProjectMembersSerializer(serializers.ModelSerializer):
+    id = HashidSerializerCharField(source_field='projects.Project.id', read_only=True)
+    members = ProjectUserSerializer(many=True)
+
+    class Meta:
+        model = Project
+        fields = ['id', 'members']
 
 
 class TaskCommentSerializer(serializers.ModelSerializer):
@@ -134,13 +135,12 @@ class TaskDetailsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = ['id', 'name', 'is_creator', 'can_edit', 'created_on', 'description', 'creator', 'members',
-                  'subtasks', 'task_comments', 'task_feed'
-                  ]
+                  'subtasks', 'task_comments', 'task_feed']
 
     def get_can_edit(self, obj) -> bool:
         user = self.context['request'].user
-        return user in obj.members.all() or obj.creator == user
+        return obj.user_part_of_task(user)
 
     def get_is_creator(self, obj) -> bool:
         user = self.context['request'].user
-        return obj.creator == user
+        return user == obj.creator
