@@ -11,14 +11,14 @@ import Tasks from "../tasks/Tasks";
 import Card from "@material-ui/core/Card";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import {useDispatch} from "react-redux";
-import ConfirmDialog from "../../reuse/ReDialogs";
+import ActionDialog from "../../reuse/ReDialogs";
 import createSnackAlert from "../../../actions/snackAlerts";
 import {deleteBoard} from "../../../actions/projects/boards";
 import {addTask} from "../../../actions/projects/tasks";
 
 const useStyles = makeStyles((theme) => ({
   cardPadding: {
-    padding: '.55rem'
+    padding: '.55rem .45rem 0 .45rem'
   },
 
   title: {
@@ -77,15 +77,16 @@ const Board = ({board, idx}) => {
 
   return (
     <>
-      <Card variant={'outlined'}>
-        <CardHeader classes={{root: classes.cardPadding}}
-                    title={<Typography className={classes.title} variant='title'>{board.name}</Typography>}
-                    action={
-                      <IconButton size="small"
-                                  aria-label="board controls"
-                                  onClick={handleClick}>
-                        <MoreVert/>
-                      </IconButton>}/>
+      <Card>
+        <CardHeader
+          classes={{root: classes.cardPadding}}
+          title={<Typography className={classes.title} variant='title'>{board.name}</Typography>}
+          action={
+            <IconButton size="small"
+                        aria-label="board controls"
+                        onClick={handleClick}>
+              <MoreVert/>
+            </IconButton>}/>
         <Menu id="navbar-menu"
               anchorEl={anchorEl}
               keepMounted
@@ -102,7 +103,7 @@ const Board = ({board, idx}) => {
                 horizontal: 'right'
               }} classes={{paper: classes.menu}}>
           <MenuItem className={classes.menuText} color={'error'}
-                    onClick={handleDeleteWarning}>Delete</MenuItem>
+                    onClick={handleDeleteWarning}>Remove</MenuItem>
         </Menu>
         <CardContent classes={{root: classes.cardPadding}}>
           {board['board_tasks'] &&
@@ -112,15 +113,16 @@ const Board = ({board, idx}) => {
             boardIndex={idx}/>}
         </CardContent>
       </Card>
-      <ConfirmDialog
-        message={
+      <ActionDialog
+        content={
           <Typography
             variant={'subtitle1'}
             component={'header'}>
-            Delete <strong>{board.name}</strong> <p>* note all tasks in this board will also deleted *</p>
+            Remove <strong>{board.name}</strong> and all its tasks
           </Typography>}
         onCancelClick={handleCancel}
-        onConfirmClick={handleDelete}
+        onActionClick={handleDelete}
+        actionText={'yes remove'}
         open={open}/>
     </>
   );
