@@ -7,21 +7,26 @@ import makeStyles from "@material-ui/core/styles/makeStyles";
 import {useSelector} from "react-redux";
 
 const useStyles = makeStyles({
+  form: {
+    position: "relative",
+  },
+  textField: {
+     paddingRight: '2rem'
+  },
   sendBtn: {
-    width: '5%',
     marginTop: '-.50rem',
     display: 'flex',
-    alignItems: 'flex-end'
+    alignItems: 'flex-end',
+    position: "absolute",
+    right: 0,
+    bottom: 0
   },
-  form: {
-    display: 'flex'
-  }
 })
 
 const TaskCommentForm = ({handleAddComment}) => {
   const classes = useStyles()
   const [comment, setComment] = useState('')
-  const isCommenting = useSelector(state => state.projectState.tasksState.isRequesting)
+  const isCommenting = useSelector(state => state.tasksState.isRequesting)
   const handleChange = (e) => {
     setComment(e.target.value)
   }
@@ -33,21 +38,20 @@ const TaskCommentForm = ({handleAddComment}) => {
   return (
     <>
       <form className={classes.form} onSubmit={handleSubmit}>
-        <div style={{width: '95%'}}>
-          <TextField
-            disabled={isCommenting}
-            variant='standard'
-            color='primary'
-            maxRows={4}
-            multiline
-            fullWidth
-            aria-valuemax={249}
-            placeholder="write comment"
-            onChange={handleChange}
-            value={comment}
-            required
-          />
-        </div>
+        <TextField
+          disabled={isCommenting}
+          variant='standard'
+          color='primary'
+          maxRows={4}
+          multiline
+          fullWidth
+          aria-valuemax={249}
+          placeholder="add a comment"
+          onChange={handleChange}
+          value={comment}
+          required
+          className={classes.textField}
+        />
         <div className={classes.sendBtn}>
           <IconButton disabled={isCommenting} type={'submit'} size={'small'}><Send/></IconButton>
         </div>

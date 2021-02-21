@@ -14,9 +14,9 @@ import {deleteTask, getTask} from "../../../actions/projects/tasks";
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    boxShadow: "0 0 5px rgba(0, 0, 0, .2)",
+    boxShadow: "0 0 .25rem rgba(0, 0, 0, .25)",
     borderRadius: theme.shape.borderRadius,
-    margin: theme.spacing(1, 0)
+    margin: theme.spacing(.75, 0)
   },
   cardPadding: {
     padding: '.55rem'
@@ -28,7 +28,6 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const Task = ({task, taskIndex, boardIndex}) => {
-  console.log(task)
   const classes = useStyles()
   const dispatch = useDispatch()
   const [openTask, setOpenTask] = useState(false)
@@ -40,16 +39,13 @@ const Task = ({task, taskIndex, boardIndex}) => {
     dispatch(deleteTask(task.id, boardIndex, taskIndex))
   }
   return (
-
     <>
       <Card className={classes.root}
             onClick={handleTaskCardClick}>
         <CardActionArea style={{display: 'block'}} component='div'>
           <CardHeader
             classes={{root: classes.cardPadding}}
-            title={<Typography variant={"subtitle2"}>{task.name}</Typography>}
-            subheader={<Typography color="textSecondary" component={'span'}
-                                   variant={"caption"}> - {task['creator'].username}</Typography>}/>
+            title={<Typography variant={"subtitle2"}>{task.name}</Typography>}/>
           <Grid container justifyContent={"flex-end"} alignItems="center" spacing={2} style={{width: '100%'}}>
 
             <Grid item>
