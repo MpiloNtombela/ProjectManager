@@ -1,18 +1,13 @@
-import React, {useEffect} from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import {useParams} from 'react-router-dom'
-import {useDispatch, useSelector} from "react-redux";
+import {useSelector} from "react-redux";
 import Container from "@material-ui/core/Container";
 import Box from "@material-ui/core/Box";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import ProjectPageSkeleton from "../skeleton/projects/ProjectPageSkeleton";
-import ProductPageBoardsSkeleton from "../skeleton/projects/ProductPageBoardsSkeleton";
+import ProjectPageSkeleton from "../skeletons/projects/ProjectPageSkeleton";
 import Boards from "./boards/Boards";
-import whyDidYouRender from "@welldone-software/why-did-you-render";
-import Card from "@material-ui/core/Card";
-import {getProject} from "../../actions/projects/projects";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -63,25 +58,18 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-whyDidYouRender(React, {
-  onlyLogs: true,
-  titleColor: 'green',
-  diffNameColor: 'dodgerblue'
-})
-
-Card.whyDidYouRender = true
+// whyDidYouRender(React, {
+//   onlyLogs: true,
+//   titleColor: 'green',
+//   diffNameColor: 'dodgerblue'
+// })
+//
+// Card.whyDidYouRender = true
 
 const ProjectView = () => {
   const classes = useStyles()
-  const projectState = useSelector(state => state.projectState)
-  const dispatch = useDispatch()
-
-  const {id} = useParams()
-
-  useEffect(() => {
-    dispatch(getProject(id))
-  }, [])
-
+  const projectState = useSelector(state => state.projectsState)
+  const boardsState = useSelector(state => state.boardsState)
   return (
     <>
       {projectState.isLoading ? <ProjectPageSkeleton/>
@@ -96,9 +84,8 @@ const ProjectView = () => {
                 </div>
                 <Box sx={{py: 3}}>
                   <Grid container className={classes.projectBoardsGrid} spacing={1}>
-                    {projectState.boardsState.isBoardsLoading ? <ProductPageBoardsSkeleton/>
-                      : projectState.boardsState.boards ? <Boards/>
-                        : <Typography variant={'h1'} color={"error"}>Failed to load boards</Typography>
+                    {boardsState.boards ? <Boards/>
+                      : <Typography variant={'h1'} color={"error"}>Failed to load boards</Typography>
                     }
                   </Grid>
                 </Box>
