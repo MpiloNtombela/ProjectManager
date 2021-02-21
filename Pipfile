@@ -13,9 +13,9 @@ django-autoslug = "*"
 django-filter = "*"
 django-sortedm2m = "*"
 python-decouple = "*"
+django-debug-toolbar = "*"
 
 [dev-packages]
-django-debug-toolbar = "*"
 
 [requires]
 python_version = "3.9"
