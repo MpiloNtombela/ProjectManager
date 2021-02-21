@@ -23,8 +23,8 @@ class User(AbstractUser):
 class Team(models.Model):
     id = HashidAutoField(primary_key=True, min_length=20, salt=settings.HASHID_USER_SALT)
     team_name = models.CharField(max_length=100)
-    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="team_leader")
-    members = models.ManyToManyField(User, related_name="team_members", blank=True)
+    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name="created_teams")
+    members = models.ManyToManyField(User, related_name="joined_teams", blank=True)
     created_on = models.DateTimeField(auto_now_add=True, auto_now=False)
     updated_on = models.DateTimeField(auto_now_add=False, auto_now=True)
 
@@ -37,22 +37,30 @@ class Team(models.Model):
             models.UniqueConstraint(fields=['creator', 'team_name'], name="unique_team_name")
         ]
 
-    def add_member(self, member: object):
-        """add new member to the team
-        :param member"""
-        self.members.add(member)
+    def add_user(self, user: User):
+        """
+        add new user to the team
+        :param user: User
+        """
+        self.members.add(user)
 
-    def remove_member(self, member: object):
-        """remove member from the team
-        :param member"""
-        self.members.remove(member)
+    def remove_user(self, user: User):
+        """
+        remove user from the team
+        :param user: User
+        """
+        self.members.remove(user)
 
-    def has_this_member(self, member: object) -> bool:
-        """checks if to_user not already part of a team"""
-        return True if member in self.members.all() else False
+    def has_user(self, user: User) -> bool:
+        """
+        checks a user in the team members list
+        :param user: User
+        :return: bool
+        """
+        return user.joined_teams.filter(id=self.id).exists()
 
     def __str__(self):
-        """:returns team name"""
+        """:returns: team name"""
         return self.team_name
 
 
@@ -66,24 +74,32 @@ class Profile(models.Model):
     teams = models.ManyToManyField(Team, blank=True, related_name="user_teams")
     blocked_users = models.ManyToManyField(User, blank=True, related_name='blocked_users')
 
-    def add_team(self, team: object):
-        """add team to user profile
-        :param team"""
+    def add_team(self, team: Team):
+        """
+        add team to user profile
+        :param team: Team
+        """
         self.teams.add(team)
 
-    def remove_team(self, team: object):
-        """removes team from profile
-        :param team"""
+    def remove_team(self, team: Team):
+        """
+        removes team from profile
+        :param team: Team
+        """
         self.teams.remove(team)
 
-    def add_blocked_users(self, user: object):
-        """add user to blocked list
-        :param user"""
+    def block_user(self, user: User):
+        """
+        add user to blocked list
+        :param user: User
+        """
         self.blocked_users.add(user)
 
-    def unblock(self, user: object):
-        """removes user from blocked list
-        :param user"""
+    def unblock_user(self, user: User):
+        """
+        removes user from blocked list
+        :param user: User
+        """
         self.blocked_users.remove(user)
 
     def __str__(self):
