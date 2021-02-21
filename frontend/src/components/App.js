@@ -8,7 +8,7 @@ import SnackAlerts from "./feedback/SnackAlerts";
 import ThemeProvider from "@material-ui/core/styles/ThemeProvider";
 import PrivateRoute from "./common/PrivateRoute";
 import Navbar from "./layout/Navbar";
-import FormSkeleton from "./skeleton/FormSkeleton";
+import FormSkeleton from "./skeletons/FormSkeleton";
 import theme from "./styles/theme";
 import ProjectTemplate from "./projects/ProjectTemplate";
 import StyledEngineProvider from '@material-ui/core/StyledEngineProvider'
