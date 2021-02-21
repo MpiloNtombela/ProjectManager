@@ -26,7 +26,7 @@ const useStyles = makeStyles(theme => ({
     color: theme.palette.error.main
   },
   saveButton: {
-    background: theme.palette.background.paper,
+    background: 'transparent',
     border: `2px solid ${theme.palette.primary.main}`,
     margin: '.25rem',
     color: theme.palette.primary.main

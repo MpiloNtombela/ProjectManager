@@ -7,40 +7,41 @@ import DialogActions from "@material-ui/core/DialogActions";
 import Button from "@material-ui/core/Button";
 import DialogContentText from "@material-ui/core/DialogContentText";
 
-const ConfirmDialog = ({open, title, message, onConfirmClick, onCancelClick}) => {
+const ActionDialog = ({open, title, content, onActionClick, onCancelClick, actionText}) => {
   return (
     <Dialog
       open={open}
       onClose={onCancelClick}
       maxWidth="sm"
-      fullWidth
-      aria-label={message}>
+      fullWidth>
       {title && <DialogTitle id="forgot-password-form">
         {title}
       </DialogTitle>}
       <DialogContent>
         <DialogContentText component={'div'}>
-          {message}
+          {content}
         </DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button color={'secondary'} onClick={onCancelClick}>
           {"Cancel"}
         </Button>
-        <Button color={'primary'} onClick={onConfirmClick}>
-          {"Confirm"}
+        <Button color={'secondary'} onClick={onActionClick}>
+          {actionText ? actionText : "ok"}
         </Button>
       </DialogActions>
     </Dialog>
   );
 };
 
-ConfirmDialog.propTypes = {
+ActionDialog.propTypes = {
   open: PropTypes.bool.isRequired,
   title: PropTypes.node,
-  message: PropTypes.node.isRequired,
-  onConfirmClick: PropTypes.func.isRequired,
-  onCancelClick: PropTypes.func.isRequired
+  content: PropTypes.node.isRequired,
+  actionText: PropTypes.string,
+  onActionClick: PropTypes.func.isRequired,
+  onCancelClick: PropTypes.func.isRequired,
+
 };
 
-export default ConfirmDialog;
+export default ActionDialog;
