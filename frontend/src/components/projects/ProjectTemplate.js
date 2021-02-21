@@ -1,9 +1,14 @@
 import Paper from "@material-ui/core/Paper";
 import Container from "@material-ui/core/Container";
-import React, {Suspense} from "react";
-import ProjectView from "./ProjectView";
-import ProjectPageSkeleton from "../skeleton/projects/ProjectPageSkeleton";
+import React, {Suspense, useEffect} from "react";
+import ProjectPageSkeleton from "../skeletons/projects/ProjectPageSkeleton";
 import makeStyles from "@material-ui/core/styles/makeStyles";
+import {useDispatch} from "react-redux";
+import {useParams} from "react-router-dom";
+import {getProject} from "../../actions/projects/projects";
+
+
+const ProjectView = React.lazy(()=> import('./ProjectView'))
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -30,6 +35,14 @@ const useStyles = makeStyles(theme => ({
 
 const ProjectTemplate = () => {
   const classes = useStyles()
+  const dispatch = useDispatch()
+
+  const {id} = useParams()
+
+  useEffect(() => {
+    dispatch(getProject(id))
+  }, [])
+
   return (
     <Paper square elevation={0} className={classes.root}>
       <Container maxWidth='xl' className={classes.container}>
