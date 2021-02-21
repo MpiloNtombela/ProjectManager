@@ -38,8 +38,8 @@ const useStyles = makeStyles(() => ({
 const Boards = () => {
   const classes = useStyles();
   const [newBoard, setNewBoard] = useState(false);
-  const boards = useSelector(state => state.projectState.boardsState.boards)
-  const isCreating = useSelector(state => state.projectState.boardsState.isCreating)
+  const boards = useSelector(state => state.boardsState.boards)
+  const isCreating = useSelector(state => state.boardsState.isCreating)
 
   const handleClickCreateNewBoard = () => {
     setNewBoard(true);

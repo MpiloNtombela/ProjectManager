@@ -11,7 +11,7 @@ import {createBoard} from "../../../actions/projects/boards";
 
 const useStyles = makeStyles({
   root: {
-    padding: '.50rem'
+    padding: '.50rem',
   },
   form: {
     marginTop: '1rem'
