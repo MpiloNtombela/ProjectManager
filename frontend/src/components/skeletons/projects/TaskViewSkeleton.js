@@ -13,6 +13,7 @@ import ListItemText from "@material-ui/core/ListItemText";
 import Skeleton from "@material-ui/core/Skeleton";
 import PropTypes from "prop-types";
 import makeStyles from "@material-ui/core/styles/makeStyles";
+import Button from "@material-ui/core/Button";
 
 const useStyles = makeStyles({
   flexAvatar: {
@@ -43,9 +44,14 @@ const TaskViewSkeleton = (/*{classes}*/) => {
         <Grid container spacing={2}>
           <Grid item xs={12} sm={8} md={9}>
             <Typography variant='subtitle1'><Skeleton animation="wave" variant="text" width='50%'/></Typography>
-            {/*assigned*/}
+            {/*members*/}
             <div className={classes.flexAvatar}>
-              {skeletonNum.map(x => <Skeleton animation="wave" variant='circular' key={x}><Avatar/></Skeleton>)}
+              {skeletonNum.map(x => <Skeleton animation="wave"
+                                              width={75}
+                                              height={30}
+                                              variant={'rectangular'}
+                                              component={Button}
+                                              key={x}/>)}
             </div>
             <Box sx={{my: 3}}>
               <Typography><Skeleton animation="wave" variant='text' width='50%'/></Typography>

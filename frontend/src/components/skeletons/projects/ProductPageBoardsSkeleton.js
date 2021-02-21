@@ -17,7 +17,6 @@ const useStyles = makeStyles({
 
 const skeletonNum = [1, 2, 3, 4]
 const ProductPageBoardsSkeleton = () => {
-  // TODO: add padding to skeleton
   const classes = useStyles()
   return (
     <>
