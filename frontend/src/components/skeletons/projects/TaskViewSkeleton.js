@@ -39,11 +39,18 @@ const TaskViewSkeleton = (/*{classes}*/) => {
       <Skeleton animation="wave" variant="circular" width={30} height={30} className={classes.closeBtn}/>
       {/*title*/}
       <DialogTitle id="task-details">
-        <Skeleton animation="wave" variant='text' width='45%' height='20'/></DialogTitle>
+      </DialogTitle>
       <DialogContent>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={8} md={9}>
-            <Typography variant='subtitle1'><Skeleton animation="wave" variant="text" width='50%'/></Typography>
+            <Skeleton animation="wave" variant='text' width='65%' height='20'/>
+            <Box sx={{my: 1}}>
+              <Skeleton animation="wave" variant='text' width='40%' height='10'/>
+              <Skeleton animation="wave" variant='text' width='100%' height={10}/>
+              <Skeleton animation="wave" variant='text' width='95%' height={10}/>
+              <Skeleton animation="wave" variant='text' width='50%' height={10}/>
+            </Box>
+            <Typography variant='subtitle2'><Skeleton animation="wave" variant="text" width='50%'/></Typography>
             {/*members*/}
             <div className={classes.flexAvatar}>
               {skeletonNum.map(x => <Skeleton animation="wave"
@@ -51,6 +58,7 @@ const TaskViewSkeleton = (/*{classes}*/) => {
                                               height={30}
                                               variant={'rectangular'}
                                               component={Button}
+                                              disabled
                                               key={x}/>)}
             </div>
             <Box sx={{my: 3}}>
@@ -106,7 +114,12 @@ const TaskViewSkeleton = (/*{classes}*/) => {
             <Typography variant='h5'><Skeleton animation="wave" variant='text' width="60%"/></Typography>
             {skeletonNum.map(x =>
               <Box key={x} sx={{my: 1}}>
-                <Skeleton animation="wave" variant='rectangular' width="70%" height={20}/>
+                <Skeleton animation="wave"
+                          width={'100%'}
+                          height={30}
+                          variant={'rectangular'}
+                          component={Button}
+                          disabled/>
               </Box>)}
             <Box sx={{mb: 3}}/>
             {/*task feed*/}
