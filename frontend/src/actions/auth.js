@@ -148,6 +148,7 @@ export const logout = () => (dispatch, getState) => {
       dispatch({type: action.CLEAR_ERRORS});
     })
     .catch((err) => {
+      dispatch({type: action.AUTH_REQUEST_DONE})
       dispatch(createSnackAlert(err.response.data, err.response.status));
     });
 };

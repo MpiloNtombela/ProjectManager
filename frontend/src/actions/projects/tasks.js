@@ -3,6 +3,32 @@ import axios from "axios";
 import {tokenConfig} from "../../components/common/axiosConfig";
 import createSnackAlert from "../snackAlerts";
 
+
+/**
+ * @description creates an new task
+ * @param {string} name name of the task
+ * @param {string} id of the board the task belong to
+ * */
+export const addTask = (name, id) => (dispatch, getState) => {
+  dispatch({type: action.ADD_TASK})
+  const body = JSON.stringify({name})
+  axios.post(`/api/projects/req/board/${id}/tasks/`, body, tokenConfig(getState().auth.token))
+    .then(res => {
+      dispatch({
+        type: action.TASK_ADDED,
+        payload: res.data
+      })
+    }).catch((err) => {
+    if (err.response) {
+      dispatch(createSnackAlert(err.response.data, err.response.status))
+    } else {
+      dispatch(createSnackAlert(err.message, 400))
+    }
+    dispatch({type: action.TASK_REQUEST_FAILED})
+  })
+}
+
+
 /**
  * **gets a single task**
  * @param {string} id of the task
@@ -28,49 +54,45 @@ export const getTask = (id) => (dispatch, getState) => {
 
 
 /**
- * @description creates an new task
- * @param {string} name name of the task
- * @param {string} id of the board for the task
- * @param {number} idx index of the board in the store/state
- * */
-export const addTask = (name, id, idx) => (dispatch, getState) => {
-  dispatch({type: action.ADD_TASK})
-  const body = JSON.stringify({name, project: id})
-  axios.post(`/api/projects/req/board/${id}/tasks/`, body, tokenConfig(getState().auth.token))
-    .then(res => {
+ * **allow editing of task**
+ * @param {string} id an id of the task
+ * @param {object} data a data to be updated
+ */
+export const updateTask = (id, data) => (dispatch, getState) => {
+  dispatch({type: action.TASK_VIEW_REQUESTING});
+  const body = JSON.stringify(data)
+  axios.patch(`/api/projects/req/task/${id}/`, body, tokenConfig(getState().auth.token))
+    .then((res) => {
       dispatch({
-        type: action.TASK_ADDED,
+        type: action.TASK_UPDATED,
         payload: {
-          data: res.data,
-          index: idx
+          id,
+          data: res.data.response
         }
-      })
-    }).catch((err) => {
-    if (err.response) {
-      dispatch(createSnackAlert(err.response.data, err.response.status))
-    } else {
-      dispatch(createSnackAlert(err.message, 400))
-    }
-    dispatch({type: action.TASK_REQUEST_FAILED})
-  })
+      });
+      dispatch(createSnackAlert(res.data.message, res.status))
+    })
+    .catch((err) => {
+      if (err.response) {
+        dispatch(createSnackAlert(err.response.data, err.response.status))
+      } else {
+        dispatch(createSnackAlert(err.message, 400))
+      }
+      dispatch({type: action.TASK_REQUEST_FAILED})
+    });
 }
 
 /**
  * @description action creator for deleting task
  * @param {string} id of the task to be deleted
- * @param {number} boardIndex index of the board the task is in at
- * @param {number} taskIndex index of the task in the board
  * */
-export const deleteTask = (id, boardIndex, taskIndex) => (dispatch, getState) => {
+export const deleteTask = (id) => (dispatch, getState) => {
   dispatch({type: action.TASK_VIEW_REQUESTING})
   axios.delete(`/api/projects/req/task/${id}/`, tokenConfig(getState().auth.token))
     .then(res => {
       dispatch({
         type: action.TASK_DELETED,
-        payload: {
-          boardIndex,
-          taskIndex
-        }
+        payload: id
       })
       dispatch(createSnackAlert(res.data.message, res.status))
     }).catch(err => {
@@ -101,7 +123,8 @@ export const addRemoveMember = (taskId, userId, type) => (dispatch, getState) =>
         type: action.TASK_MEMBER_ALTERED,
         payload: {
           type,
-          data: res.data.response
+          data: res.data.response,
+          id: taskId
         }
       })
       dispatch(createSnackAlert(res.data.message, res.status))
