@@ -76,6 +76,9 @@ REST_FRAMEWORK = {
     )
 }
 
+if DEBUG:
+    REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += 'rest_framework.authentication.SessionAuthentication',
+
 REST_AUTH_SERIALIZERS = {
     'USER_DETAILS_SERIALIZER': 'users.serializers.UserDetailsSerializer',
 }
