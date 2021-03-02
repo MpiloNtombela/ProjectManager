@@ -6,7 +6,6 @@ import useMediaQuery from "@material-ui/core/useMediaQuery";
 import TaskViewSkeleton from "../../skeletons/projects/TaskViewSkeleton";
 import IconButton from "@material-ui/core/IconButton";
 import Close from "@material-ui/icons/Close";
-import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
@@ -31,8 +30,15 @@ import LinearProgress from "@material-ui/core/LinearProgress";
 import PersonAdd from "@material-ui/icons/PersonAdd";
 // import {useImmer} from "use-immer";
 import Chip from "@material-ui/core/Chip";
-import {Add} from "@material-ui/icons";
-import TasksMembers from "./TasksMembers";
+import {Add, ExpandMore} from "@material-ui/icons";
+import TasksMembers from "./TaskMembers";
+import {TaskDescriptionEdit, TaskNameEdit} from "./InlineEditable";
+import AppBar from "@material-ui/core/AppBar";
+import Toolbar from "@material-ui/core/Toolbar";
+import Tooltip from "@material-ui/core/Tooltip";
+import Accordion from "@material-ui/core/Accordion";
+import AccordionSummary from "@material-ui/core/AccordionSummary";
+import AccordionDetails from "@material-ui/core/AccordionDetails";
 
 const useStyles = makeStyles(theme => ({
   paper: {
@@ -40,9 +46,14 @@ const useStyles = makeStyles(theme => ({
   },
 
   dialogContentRoot: {
-    padding: theme.spacing(2)
+    padding: theme.spacing(2, 2, 0, 2)
   },
-
+  appBar: {
+    background: theme.palette.glass.dark
+  },
+  appBarTitle: {
+    flexGrow: 1
+  },
   flexAvatar: {
     display: 'flex',
     flexWrap: 'wrap',
@@ -59,12 +70,32 @@ const useStyles = makeStyles(theme => ({
       fontWeight: '600'
     }
   },
-  closeBtn: {
-    position: "absolute",
-    top: '1rem',
-    right: '.7rem'
+  addMemberIcon: {
+    '& .add-icon': {
+      background: 'transparent',
+      border: `2px solid ${theme.palette.secondary.main}`,
+      color: theme.palette.secondary.main
+    }
+  },
+  description: {
+    padding: '0',
+    margin: '.75rem 0',
+    borderBottom: '.075rem solid rgba(0, 0, 0, .3)',
+  },
+  descriptionSummary: {
+    padding: 0,
+    margin: 0,
+    minHeight: '2rem'
+  },
+  feedList: {
+    margin: 0
+  },
+  subHeader: {
+    fontSize: 'medium'
   }
 }))
+
+// TODO:  commit and add ability to add subtasks
 
 
 const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
@@ -91,7 +122,7 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
     if (comment) {
       dispatch(addComment(comment, task.id))
     } else {
-      dispatch(createSnackAlert('write some comment first', 400))
+      dispatch(createSnackAlert('write a comment first!', 400))
     }
   }
 
@@ -104,29 +135,49 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
       {isTaskLoading ? <TaskViewSkeleton/>
         : task ?
           <>
-            {isRequesting && <LinearProgress variant={'indeterminate'}/>}
-            <IconButton
-              onClick={handleClose}
-              size={'small'}
-              className={classes.closeBtn}
-              disabled={isRequesting}>
-              <Close/>
-            </IconButton>
-            <DialogTitle classes={{root: classes.dialogContentRoot}} id="task-details">{task.name}</DialogTitle>
+            <AppBar position="sticky" elevation={0} color={'primary'} className={smMatches ? '' : classes.appBar}>
+              <Toolbar variant="dense">
+                <Typography variant="h6" className={classes.appBarTitle}>
+                  Task View
+                </Typography>
+                <IconButton
+                  onClick={handleClose}
+                  size={'small'}
+                  disabled={isRequesting}>
+                  <Close/>
+                </IconButton>
+              </Toolbar>
+              {isRequesting && <LinearProgress variant={'indeterminate'} color={'secondary'}/>}
+            </AppBar>
             <DialogContent classes={{root: classes.dialogContentRoot}}>
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={8}>
-                  <Typography variant={"h6"} component={'h5'}>Task Members</Typography>
+                  <TaskNameEdit id={task.id} name={task.name} isRequesting={isRequesting}/>
+                  <Accordion elevation={0} className={classes.description}>
+                    <AccordionSummary
+                      className={classes.descriptionSummary}
+                      classes={{content: classes.descriptionSummary}}
+                      expandIcon={<ExpandMore/>}
+                      aria-controls="task-description"
+                      id="task-description">
+                      <Typography className={classes.subHeader} component={'h5'}>Description</Typography>
+                    </AccordionSummary>
+                    <AccordionDetails color={'textSecondary'}>
+                      <TaskDescriptionEdit id={task.id} description={task.description} isRequesting={isRequesting}/>
+                    </AccordionDetails>
+                  </Accordion>
+                  <Typography className={classes.subHeader} component={'h5'}>Task Members</Typography>
                   <div className={classes.flexAvatar}>
                     <TasksMembers id={task.id} members={task.members} isRequesting={isRequesting}/>
-                    <Chip avatar={<Avatar color={'secondary'}><Add/></Avatar>}
+                    <Chip avatar={<Avatar className={'add-icon'}><Add/></Avatar>}
+                          className={classes.addMemberIcon}
                           label={'add member'}
                           variant={"outlined"}
                           onClick={handleClick}
                           color={'secondary'}/>
                   </div>
                   <Box sx={{my: 3}}>
-                    <Typography variant={'h6'} component={'h5'}>subtask tasks</Typography>
+                    <Typography className={classes.subHeader} component={'h5'}>Subtasks</Typography>
                     {task['subtasks'].length ?
                       <div>
                         <Box sx={{my: 2}}>
@@ -157,7 +208,7 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
                   </Box>
                   <Divider/>
                   <Box sx={{my: 1}}>
-                    <Typography variant='h6' component="h5">Comments</Typography>
+                    <Typography className={classes.subHeader} component="h5">Comments</Typography>
                     <Box sx={{my: 2}}>
                       <TaskCommentForm handleAddComment={handleAddComment}/>
                     </Box>
@@ -170,7 +221,7 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
                   </Box>
                 </Grid>
                 <Grid item xs={12} sm={4}>
-                  <Typography variant='h6' component='h2'>Control Panel</Typography>
+                  <Typography className={classes.subHeader} component='h2'>Control Panel</Typography>
                   <Box sx={{my: 1}}>
                     <Button
                       size="small"
@@ -203,30 +254,30 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
                       add Deadline</Button>
                   </Box>
                   <Box sx={{mb: 3}}/>
-                  <Typography variant='h6' component='h2'>Task Feed</Typography>
+                  <Typography className={classes.subHeader} component='h2'>Task Feed</Typography>
                   <Divider/>
                   {task['task_feed'].length ?
                     <List>
                       {task['task_feed'].map(feed => (
-                        <div key={feed.id}>
-                          <ListItemText
-                            primary={
-                              <Typography color={'textSecondary'} variant={'caption'}>
-                                {feed.user.username}
-                              </Typography>}
-                            secondary={
-                              <Typography component='h6' color="textPrimary" variant={"body2"}>
-                                {feed["feed"]}
-                                <Typography component='p' variant={'caption'} color={'textSecondary'}>
-                                  {feed.timestamp}
-                                </Typography>
-                              </Typography>}
-                          />
-                          <Divider/>
-                        </div>
+                        <Tooltip placement={'top'} key={feed.id} title={feed.timestamp} arrow>
+                          <div>
+                            <ListItemText className={classes.feedList}
+                                          primary={
+                                            <Typography color={'textSecondary'} variant={'caption'}>
+                                              {feed.user.username}
+                                            </Typography>
+                                          }
+                                          secondary={
+                                            <Typography component='h6' color="textPrimary" variant={"body2"}>
+                                              {feed["feed"]}
+                                            </Typography>
+                                          }/>
+                            <Divider/>
+                          </div>
+                        </Tooltip>
                       ))}
                     </List>
-                    : <Typography color={'textSecondary'} component={'h2'} variant={"subtitle1"}>
+                    : <Typography color={'textSecondary'} component={'small'} variant={"caption"}>
                       Changes made to this task will appear here
                     </Typography>}
                 </Grid>

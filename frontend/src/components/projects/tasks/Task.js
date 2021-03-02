@@ -10,6 +10,8 @@ import {useDispatch} from "react-redux";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import TaskView from "./TaskView";
 import {deleteTask, getTask} from "../../../actions/projects/tasks";
+import AvatarGroup from "@material-ui/core/AvatarGroup";
+import Avatar from "@material-ui/core/Avatar";
 
 
 const useStyles = makeStyles((theme) => ({
@@ -21,13 +23,14 @@ const useStyles = makeStyles((theme) => ({
   cardPadding: {
     padding: '.55rem'
   },
-  svgRoot: {
-    width: '1rem',
-    height: '1rem'
+  avatar: {
+    width: '1.25rem',
+    height: '1.25rem',
+    fontSize: 'small',
   }
 }))
 
-const Task = ({task, taskIndex, boardIndex}) => {
+const Task = ({task}) => {
   const classes = useStyles()
   const dispatch = useDispatch()
   const [openTask, setOpenTask] = useState(false)
@@ -35,8 +38,8 @@ const Task = ({task, taskIndex, boardIndex}) => {
     dispatch(getTask(task.id))
     setOpenTask(true)
   };
-  const handleTaskDelete = () =>{
-    dispatch(deleteTask(task.id, boardIndex, taskIndex))
+  const handleTaskDelete = () => {
+    dispatch(deleteTask(task.id))
   }
   return (
     <>
@@ -46,22 +49,12 @@ const Task = ({task, taskIndex, boardIndex}) => {
           <CardHeader
             classes={{root: classes.cardPadding}}
             title={<Typography variant={"subtitle2"}>{task.name}</Typography>}/>
-          <Grid container justifyContent={"flex-end"} alignItems="center" spacing={2} style={{width: '100%'}}>
-
-            <Grid item>
-              <Typography color="textSecondary" variant={"caption"}>
-                <Comment color='inherit' classes={{root: classes.svgRoot}}/> 0
-              </Typography>
-            </Grid>
-            <Grid item>
-              <Typography color="textSecondary" variant={"caption"}>
-                <InsertDriveFile color='inherit' classes={{root: classes.svgRoot}}/> 0
-              </Typography></Grid>
-            <Grid item>
-              <Typography color="textSecondary" variant={"caption"}>
-                <People color='inherit' classes={{root: classes.svgRoot}}/> {task.members.length}
-              </Typography></Grid>
-            {/*<Grid item></Grid>*/}
+          <Grid container justifyContent={"flex-end"} alignItems="center" spacing={1} style={{width: '100%'}}>
+            <AvatarGroup max={3} classes={{avatar: classes.avatar}}>
+              {task['members'].map(member => (
+                <Avatar key={member.id} className={classes.avatar} alt={member.username} src={member.avatar}/>
+              ))}
+            </AvatarGroup>
           </Grid>
         </CardActionArea>
       </Card>
@@ -71,9 +64,7 @@ const Task = ({task, taskIndex, boardIndex}) => {
 };
 
 Task.propTypes = {
-  task: PropTypes.object.isRequired,
-  taskIndex: PropTypes.number,
-  boardIndex: PropTypes.number,
+  task: PropTypes.object.isRequired
 };
 
 export default memo(Task);

@@ -6,7 +6,7 @@ import Avatar from "@material-ui/core/Avatar";
 import {addRemoveMember} from "../../../actions/projects/tasks";
 
 
-const TasksMembers = ({id, members, isRequesting}) => {
+const TaskMembers = ({id, members, isRequesting}) => {
   const dispatch = useDispatch()
   const handleRemoveMember = userId => {
     console.log(userId)
@@ -31,10 +31,10 @@ const TasksMembers = ({id, members, isRequesting}) => {
   );
 };
 
-TasksMembers.propTypes = {
+TaskMembers.propTypes = {
   id: PropTypes.string.isRequired,
   members: PropTypes.array.isRequired,
   isRequesting: PropTypes.bool,
 };
 
-export default memo(TasksMembers);
+export default memo(TaskMembers);

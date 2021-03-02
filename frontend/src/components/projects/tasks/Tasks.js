@@ -8,7 +8,7 @@ import Task from "./Task";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import TaskSkeleton from "../../skeletons/projects/TaskSkeleton";
 
-const Tasks = ({tasks, handleAddNewTask, boardIndex}) => {
+const Tasks = ({tasks, boardId}) => {
   const [isNewTask, setIsNewTask] = useState(false)
   const isAdding = useSelector(state => state.tasksState.isAdding)
 
@@ -21,16 +21,14 @@ const Tasks = ({tasks, handleAddNewTask, boardIndex}) => {
 
   return (
     <>
-      {tasks.map((task, idx) => (
-        <Task key={task.id} task={task} taskIndex={idx} boardIndex={boardIndex}/>
+      {tasks.map((task) => (
+        <Task key={task.id} task={task}/>
       ))}
       {isAdding && isNewTask && <TaskSkeleton num={[1]}/>}
       {isNewTask ?
         <ClickAwayListener onClickAway={handleClickAway}>
           <div>
-            <NewTaskForm
-              handleAddNewTask={handleAddNewTask}
-              setIsNewTask={setIsNewTask}/>
+            <NewTaskForm setIsNewTask={setIsNewTask} boardId={boardId}/>
           </div>
         </ClickAwayListener>
         : <Button
@@ -45,8 +43,7 @@ const Tasks = ({tasks, handleAddNewTask, boardIndex}) => {
 
 Tasks.propTypes = {
   tasks: PropTypes.array.isRequired,
-  handleAddNewTask: PropTypes.func.isRequired,
-  boardIndex: PropTypes.number
+  boardId: PropTypes.string
 }
 
 export default memo(Tasks);

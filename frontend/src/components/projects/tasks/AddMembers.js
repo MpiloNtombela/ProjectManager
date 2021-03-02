@@ -26,7 +26,7 @@ const AddMember = ({anchorEl, setAnchorEl}) => {
   }
 
   const open = Boolean(anchorEl);
-  const id = open ? 'simple-popper' : undefined;
+  const id = open ? 'add-member-form' : undefined;
 
   return (
     <Popper id={id} open={open} anchorEl={anchorEl} className={classes.root}>
