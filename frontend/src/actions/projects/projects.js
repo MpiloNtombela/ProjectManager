@@ -5,7 +5,7 @@ import {batch} from "react-redux";
 import {tokenConfig} from "../../components/common/axiosConfig";
 
 /**
- * **gets a single project and all it boards**
+ * @description **gets a single project and all it boards**
  * @param {string} id of the requested project
  */
 export const getProject = (id) => (dispatch, getState) => {
@@ -15,9 +15,10 @@ export const getProject = (id) => (dispatch, getState) => {
   dispatch({type: action.GET_BOARDS})
   const getProject = () => axios.get(`${ROOT_URL}/`, tokenConfig(token))
   const getBoards = () => axios.get(`${ROOT_URL}/boards/`, tokenConfig(token))
-  axios.all([getProject(), getBoards()])
+  const getTasks = () => axios.get(`${ROOT_URL}/tasks/`, tokenConfig(token))
+  axios.all([getProject(), getBoards(), getTasks()])
     .then(res => {
-      const [project, boards] = res
+      const [project, boards, tasks] = res
       dispatch({
         type: action.PROJECT_LOADED,
         payload: project.data
@@ -26,6 +27,11 @@ export const getProject = (id) => (dispatch, getState) => {
         type: action.BOARDS_LOADED,
         payload: boards.data
       });
+      dispatch({
+        type: action.TASKS_LOADED,
+        payload: tasks.data
+      });
+
     }).catch((err) => {
     if (err.response) {
       dispatch(createSnackAlert(err.response.data, err.response.status))
