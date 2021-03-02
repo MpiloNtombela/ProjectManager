@@ -2,7 +2,7 @@ from django.urls import path
 
 from projects.apis.boards import ProjectBoardsListCreateAPI, BoardDestroyAPI
 from projects.apis.projects import ProjectRetrieveAPI, ProjectMembersListAPI
-from projects.apis.tasks import (ProjectTaskListCreateAPI, BoardTaskCreateAPI, TaskRetrieveDestroyAPI,
+from projects.apis.tasks import (ProjectTaskListCreateAPI, BoardTaskCreateAPI, TaskRetrieveUpdateDestroyAPI,
                                  TaskCommentListCreateAPI, TaskCommentDestroyAPI, AddRemoveTaskMemberAPI)
 
 urlpatterns = [
@@ -11,7 +11,7 @@ urlpatterns = [
     path('req/project/<str:pk>/tasks/', ProjectTaskListCreateAPI.as_view(), name='project-tasks'),
     path('req/board/<str:pk>/', BoardDestroyAPI.as_view(), name='board-destroy'),
     path('req/board/<str:pk>/tasks/', BoardTaskCreateAPI.as_view(), name='board-tasks'),
-    path('req/task/<str:pk>/', TaskRetrieveDestroyAPI.as_view(), name='task-retrieve-destroy'),
+    path('req/task/<str:pk>/', TaskRetrieveUpdateDestroyAPI.as_view(), name='task-retrieve-destroy'),
     path('req/task/<str:pk>/comments/', TaskCommentListCreateAPI.as_view(), name='task-comments'),
     path('req/task/<str:pk>/members/', AddRemoveTaskMemberAPI.as_view(), name='task-members'),
     path('req/comment/<str:pk>/', TaskCommentDestroyAPI.as_view(), name='comment-destroy'),

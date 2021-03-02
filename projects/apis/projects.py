@@ -1,12 +1,9 @@
-from django.core.exceptions import ObjectDoesNotExist
-from django.utils.translation import ugettext_lazy as _
 from rest_framework import generics, status, filters
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from projects.models import Project
-from projects.serializers import ProjectSerializer, ProjectUserSerializer, ProjectMembersSerializer
-from users.models import User
+from projects.serializers import ProjectSerializer, ProjectUserSerializer
 
 
 class ProjectRetrieveAPI(generics.RetrieveAPIView):
@@ -39,6 +36,6 @@ class ProjectMembersListAPI(generics.ListAPIView):
     search_fields = ['username']
 
     def get_queryset(self):
-        return Project.objects.get(id=self.kwargs['pk']).members
+        return Project.objects.select_related('creator').get(id=self.kwargs['pk']).members
 
 
