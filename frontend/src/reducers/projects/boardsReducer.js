@@ -11,37 +11,25 @@ const boardsReducer = (state = initialState, {type, payload}) => produce(state, 
   switch (type) {
     case action.GET_BOARDS:
       draft.isBoardsLoading = true
-      break
+      break;
     case action.CREATE_BOARD:
       draft.isCreating = true
-      break
-
-    // request success
-    case action.TASK_ADDED:
-      draft.boards[payload.index]["board_tasks"].push(payload.data)
-      break
-    case action.TASK_DELETED:
-      draft.boards[payload.boardIndex]["board_tasks"].splice(payload.taskIndex, 1)
-      break
+      break;
     case action.BOARDS_LOADED:
       draft.boards = payload
       draft.isBoardsLoading = false
-      break
+      break;
     case action.BOARD_CREATED:
       draft.boards.push(payload)
       draft.isCreating = false
-      break
+      break;
     case action.BOARD_DELETED:
       draft.boards.splice(payload, 1)
-      break
-
-    // request failed
+      break;
     case action.BOARDS_REQUEST_FAILED:
       draft.isBoardsLoading = false
       draft.isCreating = false
-      break
-
-    // clear
+      break;
     case action.CLEAR_PROJECT_STATE:
     case action.CLEAR_BOARD_STATE:
       return initialState

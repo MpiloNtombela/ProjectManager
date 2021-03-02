@@ -26,20 +26,42 @@ const tasksReducer = (state = initialState, {type, payload}) => produce(state, (
       draft.task = payload
       draft.isTaskLoading = false
       break
+    case action.TASKS_LOADED:
+      draft.tasks = payload
+      break
     case action.TASK_ADDED:
+      draft.tasks.push(payload);
       draft.isAdding = false
       break
-    case action.TASK_DELETED:
-      draft.task = null
+    case action.TASK_UPDATED:
+      if (payload.id) {
+        const _task = draft.tasks.find(task => task.id === payload.id)
+        for (let key of Object.keys(payload.data)) {
+          draft.task[key] = payload.data[key]
+          if (_task[key])
+            _task[key] = payload.data[key]
+        }
+      }
       draft.isRequesting = false
       break
-    case action.TASK_MEMBER_ALTERED:
+    case action.TASK_MEMBER_ALTERED: {
+      const _task = draft.tasks.find(task => task.id === payload.id)
       if (payload.type.toLowerCase() === 'add') {
         draft.task['members'].push(payload.data)
+        _task['members'].push(payload.data)
       } else if (payload.type.toLowerCase() === 'remove') {
         draft.task['members'].splice(
           draft.task['members'].findIndex(member => member.id === payload.data.id), 1)
+        _task['members'].splice(
+          _task['members'].findIndex(member => member.id === payload.data.id), 1)
+
       }
+      draft.isRequesting = false
+      break
+    }
+    case action.TASK_DELETED:
+      draft.task = null
+      draft.tasks.splice(draft.tasks.findIndex(task => task.id === payload), 1)
       draft.isRequesting = false
       break
     case action.COMMENT_ADDED:
