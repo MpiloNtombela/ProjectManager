@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from projects.models import Task, Board, Project, TaskComment
-from projects.serializers import TaskDetailsSerializer, TaskSerializer, TaskCommentSerializer, ProjectUserSerializer
+from projects.serializers import TaskViewSerializer, TaskSerializer, TaskCommentSerializer, ProjectUserSerializer
 from users.models import User
 
 
@@ -27,7 +27,7 @@ class ProjectTaskListCreateAPI(generics.ListCreateAPIView):
         """
         data = {}
         try:
-            qs = Task.objects.select_related('creator').prefetch_related('members').filter(
+            qs = Task.objects.select_related('creator', 'board').prefetch_related('members').filter(
                 project_id=self.kwargs['pk'])
         except ObjectDoesNotExist:
             data['message'] = _("we can't find what you're looking for")
@@ -109,11 +109,11 @@ class BoardTaskCreateAPI(generics.ListCreateAPIView):
         return Response(serializer.errors)
 
 
-class TaskRetrieveDestroyAPI(generics.RetrieveDestroyAPIView):
+class TaskRetrieveUpdateDestroyAPI(generics.RetrieveUpdateDestroyAPIView):
     """
     apis to retrieve or destroy/delete tasks
     """
-    serializer_class = TaskDetailsSerializer
+    serializer_class = TaskViewSerializer
     queryset = Task.objects.all()
     permission_classes = [AllowAny]
 
@@ -135,7 +135,7 @@ class TaskRetrieveDestroyAPI(generics.RetrieveDestroyAPIView):
         except ObjectDoesNotExist:
             data['message'] = _("we can't find what you you looking for")
             return Response(data=data, status=status.HTTP_404_NOT_FOUND)
-        serializer = TaskDetailsSerializer(task, context={'request': request})
+        serializer = TaskViewSerializer(task, context={'request': request})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def destroy(self, request, *args, **kwargs):
@@ -155,6 +155,24 @@ class TaskRetrieveDestroyAPI(generics.RetrieveDestroyAPIView):
         self.perform_destroy(instance=task)
         data['message'] = _('task deleted successfully')
         return Response(data=data, status=status.HTTP_200_OK)
+
+    def patch(self, request, *args, **kwargs):
+        data = {}
+        try:
+            task = self.get_object()
+        except ObjectDoesNotExist:
+            data['message'] = _("Uhh Ohh something went wrong")
+            return Response(data=data, status=status.HTTP_404_NOT_FOUND)
+        _serializer = self.get_serializer_class()
+        serializer = _serializer(task, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            data['message'] = _('task updated successfully')
+            data['response'] = request.data
+            return Response(data, status=status.HTTP_200_OK)
+        data['message'] = _('Oops... bad request!')
+        data['response'] = serializer.errors
+        return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TaskCommentListCreateAPI(generics.ListCreateAPIView):

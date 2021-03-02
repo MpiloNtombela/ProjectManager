@@ -32,17 +32,26 @@ class ProjectUserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'avatar']
 
 
+class BSerializer(serializers.ModelSerializer):
+    id = HashidSerializerCharField(source_field='projects.Board.id', read_only=True)
+
+    class Meta:
+        model = Board
+        fields = ['id', 'name']
+
+
 class TaskSerializer(serializers.ModelSerializer):
     id = HashidSerializerCharField(source_field='projects.Task.id', read_only=True)
     creator = ProjectUserSerializer(required=False)
     members = ProjectUserSerializer(required=False, many=True)
     can_edit = serializers.SerializerMethodField()
+    board = BSerializer(required=False)
 
     # comment_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Task
-        fields = ['id', 'name', 'can_edit', 'creator', 'members']
+        fields = ['id', 'name', 'can_edit', 'board', 'creator', 'members']
 
     # def get_comment_count(self, obj) -> int:
 
@@ -62,18 +71,10 @@ class TaskSerializer(serializers.ModelSerializer):
 
 class BoardSerializer(serializers.ModelSerializer):
     id = HashidSerializerCharField(source_field='projects.Board.id', read_only=True)
-    board_tasks = serializers.SerializerMethodField()
 
     class Meta:
         model = Board
-        fields = ['id', 'name', 'created_on', 'board_tasks']
-
-    def get_board_tasks(self, obj):
-        try:
-            objs = obj.board_tasks.select_related('creator').prefetch_related('members')
-            return TaskSerializer(objs, many=True, context={'request': self.context['request']}).data
-        except (ObjectDoesNotExist, KeyError):
-            return []
+        fields = ['id', 'name', 'created_on']
 
 
 class ProjectSerializer(serializers.ModelSerializer):
@@ -122,15 +123,15 @@ class MiniTaskSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'complete', 'created_on', 'updated_on']
 
 
-class TaskDetailsSerializer(serializers.ModelSerializer):
+class TaskViewSerializer(serializers.ModelSerializer):
     id = HashidSerializerCharField(source_field='projects.Task.id', read_only=True)
-    creator = ProjectUserSerializer()
-    members = ProjectUserSerializer(many=True)
+    creator = ProjectUserSerializer(required=False)
+    members = ProjectUserSerializer(many=True, required=False)
     is_creator = serializers.SerializerMethodField()
     can_edit = serializers.SerializerMethodField()
-    subtasks = MiniTaskSerializer(many=True)
-    task_comments = TaskCommentSerializer(many=True)
-    task_feed = TaskFeedSerializer(many=True)
+    subtasks = MiniTaskSerializer(many=True, required=False)
+    task_comments = TaskCommentSerializer(many=True, required=False)
+    task_feed = TaskFeedSerializer(many=True, required=True)
 
     class Meta:
         model = Task
