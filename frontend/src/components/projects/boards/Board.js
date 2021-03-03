@@ -10,11 +10,11 @@ import CardContent from "@material-ui/core/CardContent";
 import Tasks from "../tasks/Tasks";
 import Card from "@material-ui/core/Card";
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import ActionDialog from "../../reuse/ReDialogs";
-import createSnackAlert from "../../../actions/snackAlerts";
 import {deleteBoard} from "../../../actions/projects/boards";
-import {addTask} from "../../../actions/projects/tasks";
+import boardTasks from "../../../selectors/boardTasks";
+import {BoardNameEdit} from "./InlineEditable";
 
 const useStyles = makeStyles((theme) => ({
   cardPadding: {
@@ -22,9 +22,9 @@ const useStyles = makeStyles((theme) => ({
   },
 
   title: {
-    fontWeight: "700",
-    fontSize: 'medium'
+    fontSize: 'inherit'
   },
+
   menu: {
     "& li": {
       padding: theme.spacing(.75, 2),
@@ -39,12 +39,19 @@ const useStyles = makeStyles((theme) => ({
 const Board = ({board, idx}) => {
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = useState(null);
+  const [openEdit, setOpenEdit] = useState(false);
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch()
+  const _boardTasks = useSelector((state) => boardTasks(state, board))
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
+
+  const handleOpenEdit = () => {
+    setAnchorEl(null)
+    setOpenEdit(true)
+  }
 
   const handleClose = () => {
     setAnchorEl(null);
@@ -53,16 +60,6 @@ const Board = ({board, idx}) => {
   const handleDelete = () => {
     setAnchorEl(null);
     dispatch(deleteBoard(board.id, idx))
-  }
-
-  const handleAddNewTask = (taskName) => {
-    setAnchorEl(null);
-    const name = taskName.trim()
-    if (name) {
-      dispatch(addTask(name, board.id, idx))
-    } else {
-      dispatch(createSnackAlert('task name is required', 400))
-    }
   }
 
   const handleDeleteWarning = () => {
@@ -79,14 +76,20 @@ const Board = ({board, idx}) => {
     <>
       <Card>
         <CardHeader
-          classes={{root: classes.cardPadding}}
-          title={<Typography className={classes.title} variant='title'>{board.name}</Typography>}
+          classes={{root: classes.cardPadding, title: classes.title}}
+          title={<BoardNameEdit
+            id={board.id}
+            name={board.name}
+            openEdit={openEdit}
+            setOpenEdit={setOpenEdit}/>}
           action={
-            <IconButton size="small"
-                        aria-label="board controls"
-                        onClick={handleClick}>
+            <IconButton
+              size="small"
+              aria-label="board controls"
+              onClick={handleClick}>
               <MoreVert/>
-            </IconButton>}/>
+            </IconButton>}
+        />
         <Menu id="navbar-menu"
               anchorEl={anchorEl}
               keepMounted
@@ -102,15 +105,15 @@ const Board = ({board, idx}) => {
                 vertical: 'top',
                 horizontal: 'right'
               }} classes={{paper: classes.menu}}>
+
+          <MenuItem className={classes.menuText}
+                    onClick={handleOpenEdit}>Edit</MenuItem>
           <MenuItem className={classes.menuText} color={'error'}
                     onClick={handleDeleteWarning}>Remove</MenuItem>
         </Menu>
         <CardContent classes={{root: classes.cardPadding}}>
-          {board['board_tasks'] &&
-          <Tasks
-            tasks={board['board_tasks']}
-            handleAddNewTask={handleAddNewTask}
-            boardIndex={idx}/>}
+          {_boardTasks &&
+          <Tasks tasks={_boardTasks} boardId={board.id}/>}
         </CardContent>
       </Card>
       <ActionDialog
