@@ -18,14 +18,6 @@ const useStyles = makeStyles({
     maxWidth: '100%',
     display: 'flex'
   },
-  saveButton: {
-    '& button': {
-      height: '2rem',
-      width: '2rem',
-      display: 'inline'
-    },
-    display: 'inline'
-  },
   textField: {
     '& input': {
       fontSize: '1.25rem'
@@ -58,11 +50,11 @@ const InlineForm = ({id, setOpenEdit, field, fieldValue, multi, max}) => {
     if (!value.trim()) {
       setError(`task ${field} is required!`)
     } else {
-      const data = {}
-      data[field] = value
-      console.log(data, field)
-      if (value !== name)
+      if (value.trim() !== fieldValue) {
+        const data = {}
+        data[field] = value.trim()
         dispatch(updateTask(id, data))
+      }
       setOpenEdit(false)
     }
   }
@@ -83,7 +75,7 @@ const InlineForm = ({id, setOpenEdit, field, fieldValue, multi, max}) => {
           multiline={multi}
           maxRows={3}
           fullWidth required/>
-        <div className={classes.saveButton}><SaveButton/></div>
+        <div><SaveButton/></div>
       </form>
     </ClickAwayListener>
   )
@@ -132,11 +124,11 @@ export const TaskDescriptionEdit = ({id, isRequesting, description}) => {
                     max={700}
                     multi/>
         : description ? <Typography color={'textSecondary'} variant={'caption'} component={'p'}>
-        {description}
-        <IconButton size={'small'} onClick={handleOpen}>
-        <Edit classes={{root: classes.iconSmall}}/>
-        </IconButton>
-        </Typography> : <Button color={'secondary'} startIcon={<Add/>} onClick={handleOpen}>add description</Button>
+          {description}
+          <IconButton size={'small'} onClick={handleOpen}>
+            <Edit classes={{root: classes.iconSmall}}/>
+          </IconButton>
+        </Typography> : <Button startIcon={<Add/>} onClick={handleOpen}>add description</Button>
       }
     </>)
 }
