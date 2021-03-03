@@ -18,8 +18,36 @@ export const createBoard = (name, id) => (dispatch, getState) => {
     } else {
       dispatch(createSnackAlert(err.message, 400))
     }
-    dispatch({type: action.BOARDS_REQUEST_FAILED})
+    dispatch({type: action.BOARD_REQUEST_FAILED})
   })
+}
+
+/**
+ * **update board**
+ * @param {string} id an id of the task
+ * @param {object} data a data to be updated
+ */
+export const updateBoard = (id, data) => (dispatch, getState) => {
+  const body = JSON.stringify(data)
+  axios.patch(`/api/projects/req/board/${id}/`, body, tokenConfig(getState().auth.token))
+    .then((res) => {
+      dispatch({
+        type: action.BOARD_UPDATED,
+        payload: {
+          id,
+          data: res.data.response
+        }
+      });
+      dispatch(createSnackAlert(res.data.message, res.status))
+    })
+    .catch((err) => {
+      if (err.response) {
+        dispatch(createSnackAlert(err.response.data, err.response.status))
+      } else {
+        dispatch(createSnackAlert(err.message, 400))
+      }
+      dispatch({type: action.BOARD_REQUEST_FAILED})
+    });
 }
 
 /**
@@ -41,6 +69,6 @@ export const deleteBoard = (id, index) => (dispatch, getState) => {
     } else {
       dispatch(createSnackAlert(err.message, 400))
     }
-    dispatch({type: action.BOARDS_REQUEST_FAILED})
+    dispatch({type: action.BOARD_REQUEST_FAILED})
   })
 }
