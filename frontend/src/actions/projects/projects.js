@@ -40,7 +40,7 @@ export const getProject = (id) => (dispatch, getState) => {
     }
     batch(() => {
       dispatch({type: action.PROJECT_REQUEST_FAILED})
-      dispatch({type: action.BOARDS_REQUEST_FAILED})
+      dispatch({type: action.BOARD_REQUEST_FAILED})
     })
   })
 }
