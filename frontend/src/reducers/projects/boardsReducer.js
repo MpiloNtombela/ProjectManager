@@ -23,10 +23,20 @@ const boardsReducer = (state = initialState, {type, payload}) => produce(state, 
       draft.boards.push(payload)
       draft.isCreating = false
       break;
+    case action.BOARD_UPDATED:
+      if (payload.id) {
+        const _board = draft.boards.find(board => board.id === payload.id)
+        for (let key of Object.keys(payload.data)) {
+          if (_board[key])
+            _board[key] = payload.data[key]
+        }
+      }
+      draft.isRequesting = false
+      break
     case action.BOARD_DELETED:
       draft.boards.splice(payload, 1)
       break;
-    case action.BOARDS_REQUEST_FAILED:
+    case action.BOARD_REQUEST_FAILED:
       draft.isBoardsLoading = false
       draft.isCreating = false
       break;
