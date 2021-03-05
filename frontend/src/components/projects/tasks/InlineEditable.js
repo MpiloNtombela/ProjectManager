@@ -10,7 +10,7 @@ import IconButton from "@material-ui/core/IconButton";
 import {useDispatch} from "react-redux";
 import {updateTask} from "../../../actions/projects/tasks";
 import Button from "@material-ui/core/Button";
-import Add from "@material-ui/icons/Add";
+import {Notes} from "@material-ui/icons";
 
 const useStyles = makeStyles({
   form: {
@@ -23,10 +23,10 @@ const useStyles = makeStyles({
       fontSize: '1.25rem'
     }
   },
-  iconSmall: {
-    height: '1rem',
-    width: '1rem'
-  }
+
+  editBtnLabel: {
+    fontSize: 'small'
+  },
 })
 
 const InlineForm = ({id, setOpenEdit, field, fieldValue, multi, max}) => {
@@ -98,7 +98,7 @@ export const TaskNameEdit = ({id, name, isRequesting}) => {
                     fieldValue={name}
                     setOpenEdit={setOpenEdit}
                     max={100}/>
-        : <Typography color={'primary'} onClick={handleOpen} variant={'h5'} component={'p'}>
+        : <Typography onClick={handleOpen} variant={'h6'} component={'p'}>
           {name} <IconButton size={'small'}><Edit/></IconButton>
         </Typography>
       }
@@ -108,7 +108,6 @@ export const TaskNameEdit = ({id, name, isRequesting}) => {
 
 export const TaskDescriptionEdit = ({id, isRequesting, description}) => {
   const [openEdit, setOpenEdit] = useState(false)
-  const classes = useStyles()
   const handleOpen = () => {
     if (isRequesting)
       return
@@ -123,12 +122,14 @@ export const TaskDescriptionEdit = ({id, isRequesting, description}) => {
                     setOpenEdit={setOpenEdit}
                     max={700}
                     multi/>
-        : description ? <Typography color={'textSecondary'} variant={'caption'} component={'p'}>
-          {description}
-          <IconButton size={'small'} onClick={handleOpen}>
-            <Edit classes={{root: classes.iconSmall}}/>
-          </IconButton>
-        </Typography> : <Button startIcon={<Add/>} onClick={handleOpen}>add description</Button>
+        : <>
+          <Typography color={'textSecondary'} variant={'body2'} component={'p'}>
+            {description}
+          </Typography>
+          <Button color={'secondary'} startIcon={<Notes/>} onClick={handleOpen}>
+            edit description
+          </Button>
+        </>
       }
     </>)
 }

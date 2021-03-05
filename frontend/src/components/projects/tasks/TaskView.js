@@ -4,12 +4,9 @@ import Dialog from "@material-ui/core/Dialog";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
 import TaskViewSkeleton from "../../skeletons/projects/TaskViewSkeleton";
-import IconButton from "@material-ui/core/IconButton";
-import Close from "@material-ui/icons/Close";
 import DialogContent from "@material-ui/core/DialogContent";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
-import Avatar from "@material-ui/core/Avatar";
 import Box from "@material-ui/core/Box";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
@@ -29,38 +26,29 @@ import AddMembers from "./AddMembers";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import PersonAdd from "@material-ui/icons/PersonAdd";
 // import {useImmer} from "use-immer";
-import Chip from "@material-ui/core/Chip";
-import {Add, ExpandMore} from "@material-ui/icons";
 import TasksMembers from "./TaskMembers";
 import {TaskDescriptionEdit, TaskNameEdit} from "./InlineEditable";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
 import Tooltip from "@material-ui/core/Tooltip";
-import Accordion from "@material-ui/core/Accordion";
-import AccordionSummary from "@material-ui/core/AccordionSummary";
-import AccordionDetails from "@material-ui/core/AccordionDetails";
+import IconButton from "@material-ui/core/IconButton";
+import {Close} from "@material-ui/icons";
 
 const useStyles = makeStyles(theme => ({
+  root: {
+    margin: 0,
+    width: '100%'
+  },
   paper: {
     maxWidth: '820px'
   },
 
   dialogContentRoot: {
-    padding: theme.spacing(2, 2, 0, 2)
+    padding: 0,
+    margin: 0
   },
-  appBar: {
-    background: theme.palette.glass.dark
+  gridItem: {
+    padding: 0
   },
-  appBarTitle: {
-    flexGrow: 1
-  },
-  flexAvatar: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    '& > *': {
-      margin: '.25rem'
-    }
-  },
+
   actionButton: {
     display: 'flex',
     justifyContent: 'flex-end',
@@ -70,28 +58,24 @@ const useStyles = makeStyles(theme => ({
       fontWeight: '600'
     }
   },
-  addMemberIcon: {
-    '& .add-icon': {
-      background: 'transparent',
-      border: `2px solid ${theme.palette.secondary.main}`,
-      color: theme.palette.secondary.main
-    }
-  },
-  description: {
-    padding: '0',
-    margin: '.75rem 0',
-    borderBottom: '.075rem solid rgba(0, 0, 0, .3)',
-  },
-  descriptionSummary: {
-    padding: 0,
-    margin: 0,
-    minHeight: '2rem'
-  },
+
   feedList: {
     margin: 0
   },
   subHeader: {
     fontSize: 'medium'
+  },
+  main: {
+    padding: '1.5rem .75rem'
+  },
+  sideBar: {
+    background: theme.palette.background.default,
+    padding: '1.5rem .75rem'
+  },
+  closeBtn: {
+    position: 'absolute',
+    right: '.75rem',
+    top: '.25rem'
   }
 }))
 
@@ -135,77 +119,41 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
       {isTaskLoading ? <TaskViewSkeleton/>
         : task ?
           <>
-            <AppBar position="sticky" elevation={0} color={'primary'} className={smMatches ? '' : classes.appBar}>
-              <Toolbar variant="dense">
-                <Typography variant="h6" className={classes.appBarTitle}>
-                  Task View
-                </Typography>
-                <IconButton
-                  onClick={handleClose}
-                  size={'small'}
-                  disabled={isRequesting}>
-                  <Close/>
-                </IconButton>
-              </Toolbar>
-              {isRequesting && <LinearProgress variant={'indeterminate'} color={'secondary'}/>}
-            </AppBar>
+            {isRequesting && <LinearProgress variant={'indeterminate'} color={'secondary'}/>}
+            <IconButton onClick={handleClose} className={classes.closeBtn} size={'small'}><Close/></IconButton>
             <DialogContent classes={{root: classes.dialogContentRoot}}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={8}>
+              <Grid container className={classes.root}>
+                <Grid item xs={12} sm={8} className={classes.main}>
                   <TaskNameEdit id={task.id} name={task.name} isRequesting={isRequesting}/>
-                  <Accordion elevation={0} className={classes.description}>
-                    <AccordionSummary
-                      className={classes.descriptionSummary}
-                      classes={{content: classes.descriptionSummary}}
-                      expandIcon={<ExpandMore/>}
-                      aria-controls="task-description"
-                      id="task-description">
-                      <Typography className={classes.subHeader} component={'h5'}>Description</Typography>
-                    </AccordionSummary>
-                    <AccordionDetails color={'textSecondary'}>
-                      <TaskDescriptionEdit id={task.id} description={task.description} isRequesting={isRequesting}/>
-                    </AccordionDetails>
-                  </Accordion>
-                  <Typography className={classes.subHeader} component={'h5'}>Task Members</Typography>
-                  <div className={classes.flexAvatar}>
-                    <TasksMembers id={task.id} members={task.members} isRequesting={isRequesting}/>
-                    <Chip avatar={<Avatar className={'add-icon'}><Add/></Avatar>}
-                          className={classes.addMemberIcon}
-                          label={'add member'}
-                          variant={"outlined"}
-                          onClick={handleClick}
-                          color={'secondary'}/>
-                  </div>
-                  <Box sx={{my: 3}}>
-                    <Typography className={classes.subHeader} component={'h5'}>Subtasks</Typography>
-                    {task['subtasks'].length ?
-                      <div>
-                        <Box sx={{my: 2}}>
-                          {/*<LinearProgress style={{height: '.50rem', borderRadius: '9999rem'}} color="secondary"
+                  <Box sx={{mt: 1, mb: 2}}>
+                    <TaskDescriptionEdit id={task.id} description={task.description} isRequesting={isRequesting}/>
+                  </Box>
+                  <Typography className={classes.subHeader} component={'h5'}>Subtasks</Typography>
+                  {task['subtasks'].length ?
+                    <div>
+                      <Box sx={{my: 2}}>
+                        {/*<LinearProgress style={{height: '.50rem', borderRadius: '9999rem'}} color="secondary"
                                         variant="determinate"
                                         value={7}/>*/}
-                        </Box>
-                        {task['subtasks'].map(subtask => (
-                          <div key={subtask.id}>
-                            <FormControlLabel
-                              style={{marginLeft: 0}}
-                              control={
-                                <Checkbox
-                                  // icon={<PanoramaFishEye/>}
-                                  // checkedIcon={<CheckCircleOutlined/>}
-                                  checked={subtask.complete}
-                                />
-                              }
-                              label={<Typography variant='body2' component='span'>{subtask.name}</Typography>}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                      : <Typography
-                        color={'textSecondary'}
-                        variant={"subtitle1"}>No subtasks created yet</Typography>
-                    }
-                  </Box>
+                      </Box>
+                      {task['subtasks'].map(subtask => (
+                        <div key={subtask.id}>
+                          <FormControlLabel
+                            style={{marginLeft: 0}}
+                            control={
+                              <Checkbox
+                                checked={subtask.complete}
+                              />
+                            }
+                            label={<Typography variant='body2' component='span'>{subtask.name}</Typography>}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    : <Typography
+                      color={'textSecondary'}
+                      variant={"subtitle1"}>No subtasks created yet</Typography>
+                  }
                   <Divider/>
                   <Box sx={{my: 1}}>
                     <Typography className={classes.subHeader} component="h5">Comments</Typography>
@@ -220,7 +168,8 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
                     }
                   </Box>
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                {/*---------------------- aside ----------------------*/}
+                <Grid item xs={12} sm={4} className={classes.sideBar}>
                   <Typography className={classes.subHeader} component='h2'>Control Panel</Typography>
                   <Box sx={{my: 1}}>
                     <Button
@@ -229,7 +178,8 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
                       variant='outlined'
                       disableElevation
                       fullWidth
-                      color='secondary'>
+                      color='secondary'
+                      onClick={handleClick}>
                       add members</Button>
                   </Box>
                   <Box sx={{my: 1}}>
@@ -253,13 +203,15 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
                       color='secondary'>
                       add Deadline</Button>
                   </Box>
-                  <Box sx={{mb: 3}}/>
+                  <Box sx={{my: 2}}>
+                    <Typography className={classes.subHeader} component='h2'>Members</Typography>
+                    <TasksMembers id={task.id} members={task.members} isRequesting={isRequesting}/>
+                  </Box>
                   <Typography className={classes.subHeader} component='h2'>Task Feed</Typography>
-                  <Divider/>
                   {task['task_feed'].length ?
                     <List>
                       {task['task_feed'].map(feed => (
-                        <Tooltip placement={'top'} key={feed.id} title={feed.timestamp} arrow>
+                        <Tooltip placement={"bottom"} key={feed.id} title={feed.timestamp}>
                           <div>
                             <ListItemText className={classes.feedList}
                                           primary={
