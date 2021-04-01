@@ -20,7 +20,7 @@ const tasksReducer = (state = initialState, {type, payload}) => produce(state, (
     case action.TASK_VIEW_REQUESTING:
       draft.isRequesting = true
       break
-
+    
     // request success
     case action.TASK_LOADED:
       draft.task = payload
@@ -54,7 +54,7 @@ const tasksReducer = (state = initialState, {type, payload}) => produce(state, (
           draft.task['members'].findIndex(member => member.id === payload.data.id), 1)
         _task['members'].splice(
           _task['members'].findIndex(member => member.id === payload.data.id), 1)
-
+        
       }
       draft.isRequesting = false
       break
@@ -62,6 +62,28 @@ const tasksReducer = (state = initialState, {type, payload}) => produce(state, (
     case action.TASK_DELETED:
       draft.task = null
       draft.tasks.splice(draft.tasks.findIndex(task => task.id === payload), 1)
+      draft.isRequesting = false
+      break
+    
+    case action.SUBTASK_ADDED:
+      draft.task['subtasks'].push(payload)
+      draft.isRequesting = false
+      break
+    
+    case action.SUBTASK_UPDATED:
+      if (payload.id) {
+        const _subtask = draft.task['subtasks'].find(subtask => subtask.id === payload.id)
+        for (let key of Object.keys(payload.data)) {
+          if(Object.prototype.hasOwnProperty.call(_subtask, key))
+            _subtask[key] = payload.data[key]
+        }
+      }
+      draft.isRequesting = false
+      break
+    
+    case action.SUBTASK_DELETED:
+      draft.task['subtasks'].splice(
+        draft.task['subtasks'].findIndex(subtask => subtask.id === payload), 1)
       draft.isRequesting = false
       break
     case action.COMMENT_ADDED:
@@ -73,15 +95,16 @@ const tasksReducer = (state = initialState, {type, payload}) => produce(state, (
         draft.task['task_comments'].findIndex(comment => comment.id === payload), 1)
       draft.isRequesting = false
       break
-
+    
     // request failed
     case action.TASK_REQUEST_FAILED:
+    case action.SUBTASK_REQUEST_FAILED:
     case action.COMMENT_REQUEST_FAILED:
       draft.isTaskLoading = false
       draft.isAdding = false
       draft.isRequesting = false
       break
-
+    
     // clear
     case action.CLEAR_PROJECT_STATE:
     case action.CLEAR_TASK_STATE:
