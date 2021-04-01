@@ -126,7 +126,7 @@ export const TaskDescriptionEdit = ({id, isRequesting, description}) => {
           <Typography color={'textSecondary'} variant={'body2'} component={'p'}>
             {description}
           </Typography>
-          <Button color={'secondary'} startIcon={<Notes/>} onClick={handleOpen}>
+          <Button size={'small'} color={'secondary'} startIcon={<Notes/>} onClick={handleOpen}>
             edit description
           </Button>
         </>

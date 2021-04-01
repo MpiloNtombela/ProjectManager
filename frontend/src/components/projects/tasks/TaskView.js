@@ -8,29 +8,27 @@ import DialogContent from "@material-ui/core/DialogContent";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
 import Divider from "@material-ui/core/Divider";
-import List from "@material-ui/core/List";
-import ListItemText from "@material-ui/core/ListItemText";
 import Button from "@material-ui/core/Button";
 import DateRange from "@material-ui/icons/DateRange";
 // import PersonAdd from "@material-ui/icons/PersonAdd";
-import PlaylistAddCheck from "@material-ui/icons/PlaylistAddCheck";
 import {useDispatch, useSelector} from "react-redux";
 import TaskComments from "./TaskComments";
-import TaskCommentForm from "./TaskCommentForm";
-import {addComment} from "../../../actions/projects/tasks";
+import TaskCommentForm from "./forms/TaskCommentForm";
+import {addComment, deleteTask} from "../../../actions/projects/tasks";
 import createSnackAlert from "../../../actions/snackAlerts";
-import AddMembers from "./AddMembers";
 import LinearProgress from "@material-ui/core/LinearProgress";
-import PersonAdd from "@material-ui/icons/PersonAdd";
-// import {useImmer} from "use-immer";
 import TasksMembers from "./TaskMembers";
 import {TaskDescriptionEdit, TaskNameEdit} from "./InlineEditable";
-import Tooltip from "@material-ui/core/Tooltip";
-import IconButton from "@material-ui/core/IconButton";
-import {Close} from "@material-ui/icons";
+import DeadlineForm from "./forms/DeadlineForm";
+import TaskFeeds from "./TaskFeeds";
+import SubtaskForm from "./forms/SubtaskForm";
+import Subtasks from "./Subtasks";
+import TaskViewBar from "./TaskViewBar";
+import MembersForm from "./forms/MembersForm";
+import Chip from "@material-ui/core/Chip";
+import Alarm from "@material-ui/icons/Alarm";
+import {timeDiffFromNow} from "../../../utils";
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -40,7 +38,7 @@ const useStyles = makeStyles(theme => ({
   paper: {
     maxWidth: '820px'
   },
-
+  
   dialogContentRoot: {
     padding: 0,
     margin: 0
@@ -48,20 +46,17 @@ const useStyles = makeStyles(theme => ({
   gridItem: {
     padding: 0
   },
-
+  
   actionButton: {
     display: 'flex',
     justifyContent: 'flex-end',
-
+    
     '& .deleteButton': {
       color: theme.palette.error.main,
       fontWeight: '600'
     }
   },
-
-  feedList: {
-    margin: 0
-  },
+  
   subHeader: {
     fontSize: 'medium'
   },
@@ -69,7 +64,6 @@ const useStyles = makeStyles(theme => ({
     padding: '1.5rem .75rem'
   },
   sideBar: {
-    background: theme.palette.background.default,
     padding: '1.5rem .75rem'
   },
   closeBtn: {
@@ -79,28 +73,30 @@ const useStyles = makeStyles(theme => ({
   }
 }))
 
-// TODO:  commit and add ability to add subtasks
 
-
-const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
+const TaskView = ({openTask, setOpenTask}) => {
   const smMatches = useMediaQuery(theme => theme.breakpoints.down('sm'));
   const classes = useStyles()
   const {isTaskLoading, task, isRequesting} = useSelector(state => state.tasksState)
   const dispatch = useDispatch()
-  const [anchorEl, setAnchorEl] = React.useState(null);
-
-  const handleClick = (event) => {
-    setAnchorEl(anchorEl ? null : event.currentTarget);
+  const [deadlineAnchorEl, setDeadlineAnchorEl] = React.useState(null);
+  
+  
+  const handleDeadlineClick = (event) => {
+    setDeadlineAnchorEl(deadlineAnchorEl ? null : event.currentTarget);
   };
-
+  
   const handleClose = () => {
     setOpenTask(false)
   }
-
+  
   const handleOnClose = (e) => {
     e.preventDefault()
   }
-
+  const handleDelete = () => {
+    dispatch(deleteTask(task.id))
+  }
+  
   const handleAddComment = (commentBody) => {
     const comment = commentBody.trim()
     if (comment) {
@@ -109,51 +105,32 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
       dispatch(createSnackAlert('write a comment first!', 400))
     }
   }
-
+  
   return (
-    <Dialog fullWidth fullScreen={smMatches} open={openTask}
-            scroll='body'
-            classes={{paper: classes.paper}}
-            aria-labelledby="tasks-details"
-            onClose={handleOnClose}>
+    <Dialog fullWidth fullScreen={smMatches} open={openTask} scroll='body' classes={{paper: classes.paper}}
+            aria-labelledby="tasks-details" onClose={handleOnClose}>
       {isTaskLoading ? <TaskViewSkeleton/>
         : task ?
           <>
+            <TaskViewBar avatar={task.creator.avatar} handleClose={handleClose} handleDelete={handleDelete}/>
             {isRequesting && <LinearProgress variant={'indeterminate'} color={'secondary'}/>}
-            <IconButton onClick={handleClose} className={classes.closeBtn} size={'small'}><Close/></IconButton>
             <DialogContent classes={{root: classes.dialogContentRoot}}>
               <Grid container className={classes.root}>
                 <Grid item xs={12} sm={8} className={classes.main}>
                   <TaskNameEdit id={task.id} name={task.name} isRequesting={isRequesting}/>
-                  <Box sx={{mt: 1, mb: 2}}>
+                  <Box sx={{mt: 1, mb: 2, mx: 2}}>
                     <TaskDescriptionEdit id={task.id} description={task.description} isRequesting={isRequesting}/>
                   </Box>
-                  <Typography className={classes.subHeader} component={'h5'}>Subtasks</Typography>
-                  {task['subtasks'].length ?
+                  <Box sx={{mt: 1, mb: 2}}>
+                    {task['subtasks'].length > 0 &&
                     <div>
-                      <Box sx={{my: 2}}>
-                        {/*<LinearProgress style={{height: '.50rem', borderRadius: '9999rem'}} color="secondary"
-                                        variant="determinate"
-                                        value={7}/>*/}
-                      </Box>
-                      {task['subtasks'].map(subtask => (
-                        <div key={subtask.id}>
-                          <FormControlLabel
-                            style={{marginLeft: 0}}
-                            control={
-                              <Checkbox
-                                checked={subtask.complete}
-                              />
-                            }
-                            label={<Typography variant='body2' component='span'>{subtask.name}</Typography>}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                    : <Typography
-                      color={'textSecondary'}
-                      variant={"subtitle1"}>No subtasks created yet</Typography>
-                  }
+                      <Typography className={classes.subHeader} component={'h5'}>Subtasks</Typography>
+                      <Subtasks subtasks={task['subtasks']}/>
+                    </div>}
+                    <Box sx={{mx: 2}}>
+                      <SubtaskForm id={task.id}/>
+                    </Box>
+                  </Box>
                   <Divider/>
                   <Box sx={{my: 1}}>
                     <Typography className={classes.subHeader} component="h5">Comments</Typography>
@@ -162,7 +139,7 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
                     </Box>
                     {task['task_comments'].length ?
                       <TaskComments comments={task['task_comments']}/>
-                      : <Typography color={'textSecondary'} variant={'subtitle1'} component={'h2'}>
+                      : <Typography color={'textSecondary'} variant={'body2'} component={'h2'}>
                         Ooh so empty, there is literally nothing here...
                       </Typography>
                     }
@@ -170,67 +147,22 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
                 </Grid>
                 {/*---------------------- aside ----------------------*/}
                 <Grid item xs={12} sm={4} className={classes.sideBar}>
-                  <Typography className={classes.subHeader} component='h2'>Control Panel</Typography>
-                  <Box sx={{my: 1}}>
-                    <Button
-                      size="small"
-                      startIcon={<PersonAdd/>}
-                      variant='outlined'
-                      disableElevation
-                      fullWidth
-                      color='secondary'
-                      onClick={handleClick}>
-                      add members</Button>
-                  </Box>
-                  <Box sx={{my: 1}}>
-                    <Button
-                      size="small"
-                      startIcon={<PlaylistAddCheck/>}
-                      variant='outlined'
-                      disableElevation
-                      fullWidth
-                      color='secondary'>
-                      add subtask
-                    </Button>
-                  </Box>
-                  <Box key={1} sx={{my: 1}}>
-                    <Button
-                      size="small"
-                      startIcon={<DateRange/>}
-                      variant='outlined'
-                      disableElevation
-                      fullWidth
-                      color='secondary'>
-                      add Deadline</Button>
-                  </Box>
+                  {task.deadline &&
+                    <Chip icon={<Alarm/>} label={`task due ${timeDiffFromNow(task.deadline)}`}/>}
+                  <Button size="small" startIcon={<DateRange/>} disableElevation
+                          fullWidth color='secondary' onClick={handleDeadlineClick}>
+                    new Deadline
+                  </Button>
                   <Box sx={{my: 2}}>
                     <Typography className={classes.subHeader} component='h2'>Members</Typography>
                     <TasksMembers id={task.id} members={task.members} isRequesting={isRequesting}/>
+                    <MembersForm/>
                   </Box>
                   <Typography className={classes.subHeader} component='h2'>Task Feed</Typography>
                   {task['task_feed'].length ?
-                    <List>
-                      {task['task_feed'].map(feed => (
-                        <Tooltip placement={"bottom"} key={feed.id} title={feed.timestamp}>
-                          <div>
-                            <ListItemText className={classes.feedList}
-                                          primary={
-                                            <Typography color={'textSecondary'} variant={'caption'}>
-                                              {feed.user.username}
-                                            </Typography>
-                                          }
-                                          secondary={
-                                            <Typography component='h6' color="textPrimary" variant={"body2"}>
-                                              {feed["feed"]}
-                                            </Typography>
-                                          }/>
-                            <Divider/>
-                          </div>
-                        </Tooltip>
-                      ))}
-                    </List>
+                    <TaskFeeds feeds={task['task_feed']}/>
                     : <Typography color={'textSecondary'} component={'small'} variant={"caption"}>
-                      Changes made to this task will appear here
+                      task changes appear here
                     </Typography>}
                 </Grid>
               </Grid>
@@ -240,17 +172,16 @@ const TaskView = ({openTask, setOpenTask, handleTaskDelete}) => {
                         disableElevation
                         variant='text'
                         onClick={handleClose}
-                        disabled={isRequesting}>close
-                </Button>
-                <Button onClick={handleTaskDelete}
-                        className='deleteButton'
-                        disableElevation
-                        variant='text'
-                        disabled={isRequesting}>Delete Task
+                        disabled={isRequesting}>
+                  close
                 </Button>
               </Box>
             </DialogContent>
-            <AddMembers anchorEl={anchorEl} setAnchorEl={setAnchorEl}/>
+            <DeadlineForm
+              anchorEl={deadlineAnchorEl}
+              setAnchorEl={setDeadlineAnchorEl}
+              deadline={task.deadline}
+              id={task.id}/>
           </> : <Typography>not found</Typography>}
     </Dialog>
   );
