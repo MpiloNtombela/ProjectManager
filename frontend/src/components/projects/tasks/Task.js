@@ -4,12 +4,12 @@ import CardActionArea from "@material-ui/core/CardActionArea";
 import CardHeader from "@material-ui/core/CardHeader";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
-import {Comment, InsertDriveFile, People} from "@material-ui/icons";
+import {DoneAll} from "@material-ui/icons";
 import Card from "@material-ui/core/Card";
 import {useDispatch} from "react-redux";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import TaskView from "./TaskView";
-import {deleteTask, getTask} from "../../../actions/projects/tasks";
+import {getTask} from "../../../actions/projects/tasks";
 import AvatarGroup from "@material-ui/core/AvatarGroup";
 import Avatar from "@material-ui/core/Avatar";
 
@@ -38,9 +38,7 @@ const Task = ({task}) => {
     dispatch(getTask(task.id))
     setOpenTask(true)
   };
-  const handleTaskDelete = () => {
-    dispatch(deleteTask(task.id))
-  }
+  
   return (
     <>
       <Card className={classes.root}
@@ -48,7 +46,8 @@ const Task = ({task}) => {
         <CardActionArea style={{display: 'block'}} component='div'>
           <CardHeader
             classes={{root: classes.cardPadding}}
-            title={<Typography variant={"subtitle2"}>{task.name}</Typography>}/>
+            title={<Typography variant={"subtitle2"}>{task.name}</Typography>}
+          icon={<DoneAll/>}/>
           <Grid container justifyContent={"flex-end"} alignItems="center" spacing={1} style={{width: '100%'}}>
             <AvatarGroup max={3} classes={{avatar: classes.avatar}}>
               {task['members'].map(member => (
@@ -58,7 +57,7 @@ const Task = ({task}) => {
           </Grid>
         </CardActionArea>
       </Card>
-      <TaskView id={task.id} setOpenTask={setOpenTask} openTask={openTask} handleTaskDelete={handleTaskDelete}/>
+      <TaskView setOpenTask={setOpenTask} openTask={openTask}/>
     </>
   );
 };
