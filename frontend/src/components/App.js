@@ -12,6 +12,8 @@ import FormSkeleton from "./skeletons/FormSkeleton";
 import theme from "./styles/theme";
 import ProjectTemplate from "./projects/ProjectTemplate";
 import StyledEngineProvider from '@material-ui/core/StyledEngineProvider'
+import LocalizationProvider from "@material-ui/lab/LocalizationProvider";
+import AdapterDateFns from '@material-ui/lab/AdapterDateFns'
 
 const Login = lazy(() => import('./accounts/login/Login'))
 const Register = lazy(() => import('./accounts/Register'))
@@ -31,6 +33,7 @@ const App = () => {
   return (
     <StyledEngineProvider injectFirst={true}>
       <ThemeProvider theme={theme}>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
           <BrowserRouter>
             <Navbar/>
             <Switch>
@@ -47,6 +50,7 @@ const App = () => {
             </Switch>
             <SnackAlerts/>
           </BrowserRouter>
+        </LocalizationProvider>
       </ThemeProvider>
     </StyledEngineProvider>
   )
