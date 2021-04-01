@@ -1,4 +1,3 @@
-from django.core.exceptions import ObjectDoesNotExist
 from hashid_field.rest import HashidSerializerCharField
 from rest_framework import serializers
 
@@ -99,7 +98,6 @@ class ProjectMembersSerializer(serializers.ModelSerializer):
 class TaskCommentSerializer(serializers.ModelSerializer):
     id = HashidSerializerCharField(source_field='projects.TaskComment.id', read_only=True)
     commenter = ProjectUserSerializer(required=False)
-    timestamp = serializers.DateTimeField(format='%d %b %y | %H:%M', required=False)
 
     class Meta:
         model = TaskComment
@@ -108,14 +106,13 @@ class TaskCommentSerializer(serializers.ModelSerializer):
 
 class TaskFeedSerializer(serializers.ModelSerializer):
     user = ProjectUserSerializer()
-    timestamp = serializers.DateTimeField(format='%d %b %y | %H:%M', required=False)
 
     class Meta:
         model = TaskFeed
         fields = ['id', 'feed', 'user', 'timestamp']
 
 
-class MiniTaskSerializer(serializers.ModelSerializer):
+class SubtaskSerializer(serializers.ModelSerializer):
     id = HashidSerializerCharField(source_field='projects.Subtask.id', read_only=True)
 
     class Meta:
@@ -129,13 +126,13 @@ class TaskViewSerializer(serializers.ModelSerializer):
     members = ProjectUserSerializer(many=True, required=False)
     is_creator = serializers.SerializerMethodField()
     can_edit = serializers.SerializerMethodField()
-    subtasks = MiniTaskSerializer(many=True, required=False)
+    subtasks = SubtaskSerializer(many=True, required=False)
     task_comments = TaskCommentSerializer(many=True, required=False)
     task_feed = TaskFeedSerializer(many=True, required=True)
 
     class Meta:
         model = Task
-        fields = ['id', 'name', 'is_creator', 'can_edit', 'created_on', 'description', 'creator', 'members',
+        fields = ['id', 'name', 'is_creator', 'can_edit', 'created_on', 'deadline', 'description', 'creator', 'members',
                   'subtasks', 'task_comments', 'task_feed']
 
     def get_can_edit(self, obj) -> bool:
