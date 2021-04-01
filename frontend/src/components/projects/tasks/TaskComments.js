@@ -11,11 +11,12 @@ import List from "@material-ui/core/List";
 // import whyDidYouRender from "@welldone-software/why-did-you-render";
 import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import IconButton from "@material-ui/core/IconButton";
-import {Delete} from "@material-ui/icons";
+import {Close} from "@material-ui/icons";
 import {useDispatch} from "react-redux";
 import {deleteComment} from "../../../actions/projects/tasks";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import Tooltip from "@material-ui/core/Tooltip";
+import {timeDiffFromNow, toZonedFormat} from "../../../utils";
 
 const useStyles = makeStyles({
   commentItem: {
@@ -55,11 +56,11 @@ const TaskComments = ({comments}) => {
             </ListItemAvatar>
             <ListItemText
               primary={
-                <Tooltip title={comment.timestamp} arrow>
+                <Tooltip title={toZonedFormat(comment.timestamp)} arrow>
                   <Typography color={'textSecondary'} variant={'caption'} component={'p'}
                               className={classes.commentInfo}>
                     {comment["commenter"].username} -
-                    <Typography component={'span'} variant={'caption'}> {comment.timestamp}</Typography>
+                    <Typography component={'span'} variant={'caption'}>{timeDiffFromNow(comment.timestamp)}</Typography>
                   </Typography>
                 </Tooltip>}
               secondary={<Typography color={'textPrimary'} variant={'body2'}>{comment.comment}</Typography>}
@@ -72,7 +73,7 @@ const TaskComments = ({comments}) => {
                 size={'small'}
                 edge="end"
                 aria-label="delete comment">
-                <Delete/>
+                <Close/>
               </IconButton>
             </ListItemSecondaryAction>
           </ListItem>
