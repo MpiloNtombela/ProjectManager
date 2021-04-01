@@ -1,11 +1,11 @@
 import React, {memo, useState} from 'react';
 import PropTypes from 'prop-types'
 import TextField from "@material-ui/core/TextField";
-import {CancelButton, SaveButton} from "../../reuse/ReButtons";
+import {CancelButton, SaveButton} from "../../../reuse/ReButtons";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import {useDispatch} from "react-redux";
-import {addTask} from "../../../actions/projects/tasks";
-import createSnackAlert from "../../../actions/snackAlerts";
+import {addTask} from "../../../../actions/projects/tasks";
+import createSnackAlert from "../../../../actions/snackAlerts";
 
 const useStyles = makeStyles({
   root: {
