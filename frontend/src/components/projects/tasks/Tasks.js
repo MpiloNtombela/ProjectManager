@@ -2,7 +2,7 @@ import React, {memo, useState} from 'react';
 import PropTypes from 'prop-types';
 import {PlaylistAdd} from "@material-ui/icons";
 import Button from "@material-ui/core/Button";
-import NewTaskForm from "./NewTaskForm";
+import NewTaskForm from "./forms/NewTaskForm";
 import {useSelector} from "react-redux";
 import Task from "./Task";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";

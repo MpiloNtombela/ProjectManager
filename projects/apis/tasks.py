@@ -1,12 +1,16 @@
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import status, generics
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from projects.models import Task, Board, Project, TaskComment
-from projects.serializers import TaskViewSerializer, TaskSerializer, TaskCommentSerializer, ProjectUserSerializer
+from projects.models import Task, Board, Project, TaskComment, Subtask
+from projects.serializers import TaskViewSerializer, TaskSerializer, TaskCommentSerializer, ProjectUserSerializer, \
+    SubtaskSerializer
 from users.models import User
+
+ERROR_404_MESSAGE = _("sorry we can't find what you're want")
 
 
 class ProjectTaskListCreateAPI(generics.ListCreateAPIView):
@@ -175,6 +179,86 @@ class TaskRetrieveUpdateDestroyAPI(generics.RetrieveUpdateDestroyAPIView):
         return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
 
+class SubtaskListCreateAPI(generics.ListCreateAPIView):
+    serializer_class = SubtaskSerializer
+    queryset = Subtask.objects.select_related('task')
+
+    def list(self, request, *args, **kwargs):
+        """
+        lists subtasks for tasks
+        :param request: request object
+        :param args: args
+        :param kwargs: <pk> task id
+        :return: a list/array of subtask
+        """
+        data = {}
+        try:
+            qs = Subtask.objects.select_related('task').filter(task_id=self.kwargs['pk'])
+        except ObjectDoesNotExist:
+            data['message'] = ERROR_404_MESSAGE
+            return Response(data=data, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = SubtaskSerializer(instance=qs, many=True, context={'request': request})
+        return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        """
+        creates a new subtask
+        :param request: request object
+        :param args: args
+        :param kwargs: <pk> task id
+        :return: newly created subtask
+        """
+        data = {}
+        try:
+            task = Task.objects.get(id=self.kwargs['pk'])
+        except ObjectDoesNotExist:
+            data['message'] = _("sorry, we encountered an error, task may have been deleted")
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+        serializer = SubtaskSerializer(data={'name': request.data['name']}, context={'request': request})
+        if serializer.is_valid(raise_exception=True):
+            serializer.save(creator=request.user, task=task)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors)
+
+
+class SubtaskRetrieveUpdateDestroyAPI(generics.RetrieveUpdateDestroyAPIView):
+    """
+    api to update or destroy/delete subtasks
+    """
+    serializer_class = SubtaskSerializer
+    queryset = Subtask.objects.select_related('task')
+
+    def destroy(self, request, *args, **kwargs):
+        """
+        destroys or delete a subtask given the id
+        :param request: request object
+        :param args: args
+        :param kwargs: <pk> subtask id
+        """
+        data = {}
+        subtask = get_object_or_404(Subtask, pk=self.kwargs['pk'])
+        self.perform_destroy(instance=subtask)
+        data['message'] = _('subtask deleted successfully')
+        return Response(data=data, status=status.HTTP_200_OK)
+
+    def patch(self, request, *args, **kwargs):
+        data = {}
+        try:
+            subtask = Subtask.objects.get(id=self.kwargs['pk'])
+        except ObjectDoesNotExist:
+            data['message'] = _("sorry, we encountered an error, task may have been deleted")
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+        serializer = SubtaskSerializer(subtask, data={'complete': request.data['complete']}, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            data['response'] = request.data
+            return Response(data, status=status.HTTP_200_OK)
+        data['message'] = _('Oops... bad request!')
+        data['response'] = serializer.errors
+        return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+
 class TaskCommentListCreateAPI(generics.ListCreateAPIView):
     serializer_class = TaskCommentSerializer
     queryset = TaskComment.objects.select_related('commenter')
@@ -191,7 +275,7 @@ class TaskCommentListCreateAPI(generics.ListCreateAPIView):
         try:
             qs = TaskComment.objects.select_related('commenter').filter(task_id=self.kwargs['pk'])
         except ObjectDoesNotExist:
-            data['message'] = _("we can't find what you're looking for")
+            data['message'] = ERROR_404_MESSAGE
             return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
         serializer = TaskCommentSerializer(instance=qs, many=True, context={'request': request})

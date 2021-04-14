@@ -25,6 +25,10 @@ const projectsReducer = (state = initialState, {type, payload}) => produce(state
       draft.isLoading = false
       break
 
+    case action.RESET_INVITE_LINK:
+      draft.project.invitation.url = payload
+      break
+
     // request failed
     case action.PROJECTS_REQUEST_FAILED:
     case action.PROJECT_REQUEST_FAILED:
