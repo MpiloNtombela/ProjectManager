@@ -14,7 +14,7 @@ const ActionDialog = ({open, title, content, onActionClick, onCancelClick, actio
       onClose={onCancelClick}
       maxWidth="sm"
       fullWidth>
-      {title && <DialogTitle id="forgot-password-form">
+      {title && <DialogTitle id="dialog-title">
         {title}
       </DialogTitle>}
       <DialogContent>
