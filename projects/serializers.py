@@ -1,7 +1,16 @@
+from dry_rest_permissions.generics import DRYPermissionsField
 from hashid_field.rest import HashidSerializerCharField
 from rest_framework import serializers
 
-from projects.models import Task, Board, TaskComment, TaskFeed, Subtask, Project
+from projects.models import (
+    Task,
+    Board,
+    TaskComment,
+    TaskFeed,
+    Subtask,
+    Project,
+    Invitation,
+)
 from users.models import User
 
 
@@ -12,47 +21,58 @@ class DynamicFieldsModelSerializer(serializers.ModelSerializer):
     """
 
     def __init__(self, *args, **kwargs):
-        fields = kwargs.pop('fields', None)
+        fields = kwargs.pop("fields", None)
         super(DynamicFieldsModelSerializer, self).__init__(*args, **kwargs)
 
         if fields is not None:
-            # Drop any fields that are not specified in the `fields` argument.
             allowed = set(fields)
             existing = set(self.fields)
             for field_name in existing - allowed:
                 self.fields.pop(field_name)
 
 
+class InvitationSerializer(serializers.ModelSerializer):
+    url = serializers.URLField(source="get_frontend_abs_url")
+
+    class Meta:
+        model = Invitation
+        exclude = ["project", 'id']
+
+class AcceptInvitationSerializer(serializers.ModelSerializer):
+    project_name = serializers.CharField(read_only=True, source='project.name')
+    creator_name = serializers.CharField(read_only=True, source='project.creator.username')
+
+    class Meta:
+        model = Invitation
+        fields = ["project_name", 'creator_name']
+
+
 class ProjectUserSerializer(serializers.ModelSerializer):
-    id = HashidSerializerCharField(source_field='users.User.id', read_only=True)
+    id = HashidSerializerCharField(source_field="users.User.id", read_only=True)
 
     class Meta:
         model = User
-        fields = ['id', 'username', 'avatar']
+        fields = ["id", "username", "avatar"]
 
 
 class BSerializer(serializers.ModelSerializer):
-    id = HashidSerializerCharField(source_field='projects.Board.id', read_only=True)
+    id = HashidSerializerCharField(source_field="projects.Board.id", read_only=True)
 
     class Meta:
         model = Board
-        fields = ['id', 'name']
+        fields = ["id", "name"]
 
 
 class TaskSerializer(serializers.ModelSerializer):
-    id = HashidSerializerCharField(source_field='projects.Task.id', read_only=True)
+    id = HashidSerializerCharField(source_field="projects.Task.id", read_only=True)
     creator = ProjectUserSerializer(required=False)
     members = ProjectUserSerializer(required=False, many=True)
     can_edit = serializers.SerializerMethodField()
     board = BSerializer(required=False)
 
-    # comment_count = serializers.SerializerMethodField()
-
     class Meta:
         model = Task
-        fields = ['id', 'name', 'can_edit', 'board', 'creator', 'members']
-
-    # def get_comment_count(self, obj) -> int:
+        fields = ["id", "name", "can_edit", "board", "creator", "members"]
 
     def get_can_edit(self, obj) -> bool:
         """
@@ -60,7 +80,7 @@ class TaskSerializer(serializers.ModelSerializer):
         :param obj:
         :return:
         """
-        user = self.context['request'].user
+        user = self.context["request"].user
         return obj.user_part_of_task(user)
 
     @staticmethod
@@ -69,39 +89,43 @@ class TaskSerializer(serializers.ModelSerializer):
 
 
 class BoardSerializer(serializers.ModelSerializer):
-    id = HashidSerializerCharField(source_field='projects.Board.id', read_only=True)
+    id = HashidSerializerCharField(source_field="projects.Board.id", read_only=True)
 
     class Meta:
         model = Board
-        fields = ['id', 'name', 'created_on']
+        fields = ["id", "name", "created_on"]
 
 
 class ProjectSerializer(serializers.ModelSerializer):
-    id = HashidSerializerCharField(source_field='projects.Project.id', read_only=True)
+    id = HashidSerializerCharField(source_field="projects.Project.id", read_only=True)
     creator = ProjectUserSerializer()
     members = ProjectUserSerializer(many=True)
+    permissions = DRYPermissionsField()
+    invitation = InvitationSerializer()
 
     class Meta:
         model = Project
-        fields = ['id', 'name', 'creator', 'members']
+        fields = ["id", "name", "creator", "members", "invitation", "permissions"]
 
 
 class ProjectMembersSerializer(serializers.ModelSerializer):
-    id = HashidSerializerCharField(source_field='projects.Project.id', read_only=True)
+    id = HashidSerializerCharField(source_field="projects.Project.id", read_only=True)
     members = ProjectUserSerializer(many=True)
 
     class Meta:
         model = Project
-        fields = ['id', 'members']
+        fields = ["id", "members"]
 
 
 class TaskCommentSerializer(serializers.ModelSerializer):
-    id = HashidSerializerCharField(source_field='projects.TaskComment.id', read_only=True)
+    id = HashidSerializerCharField(
+        source_field="projects.TaskComment.id", read_only=True
+    )
     commenter = ProjectUserSerializer(required=False)
 
     class Meta:
         model = TaskComment
-        fields = ['id', 'commenter', 'comment', 'timestamp']
+        fields = ["id", "commenter", "comment", "timestamp"]
 
 
 class TaskFeedSerializer(serializers.ModelSerializer):
@@ -109,19 +133,19 @@ class TaskFeedSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TaskFeed
-        fields = ['id', 'feed', 'user', 'timestamp']
+        fields = ["id", "feed", "user", "timestamp"]
 
 
 class SubtaskSerializer(serializers.ModelSerializer):
-    id = HashidSerializerCharField(source_field='projects.Subtask.id', read_only=True)
+    id = HashidSerializerCharField(source_field="projects.Subtask.id", read_only=True)
 
     class Meta:
         model = Subtask
-        fields = ['id', 'name', 'complete', 'created_on', 'updated_on']
+        fields = ["id", "name", "complete", "created_on", "updated_on"]
 
 
 class TaskViewSerializer(serializers.ModelSerializer):
-    id = HashidSerializerCharField(source_field='projects.Task.id', read_only=True)
+    id = HashidSerializerCharField(source_field="projects.Task.id", read_only=True)
     creator = ProjectUserSerializer(required=False)
     members = ProjectUserSerializer(many=True, required=False)
     is_creator = serializers.SerializerMethodField()
@@ -132,13 +156,27 @@ class TaskViewSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Task
-        fields = ['id', 'name', 'is_creator', 'can_edit', 'created_on', 'deadline', 'description', 'creator', 'members',
-                  'subtasks', 'task_comments', 'task_feed']
+        fields = [
+            "id",
+            "name",
+            "is_creator",
+            "can_edit",
+            "created_on",
+            "deadline",
+            "description",
+            "creator",
+            "members",
+            "subtasks",
+            "task_comments",
+            "task_feed",
+        ]
 
     def get_can_edit(self, obj) -> bool:
-        user = self.context['request'].user
+        user = self.context["request"].user
         return obj.user_part_of_task(user)
 
     def get_is_creator(self, obj) -> bool:
-        user = self.context['request'].user
+        user = self.context["request"].user
         return user == obj.creator
+
+    
