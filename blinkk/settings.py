@@ -22,6 +22,8 @@ TEMPLATE_DEBUG = DEBUG
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -37,6 +39,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
+    'dry_rest_permissions',
     'hashid_field',
     'rest_framework',
     'rest_framework.authtoken',
