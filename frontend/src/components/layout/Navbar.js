@@ -90,9 +90,9 @@ const Navbar = () => {
         elevation={0}
         className={classes.appBar}>
         <Container classes={{root: classes.noPadding}} maxWidth="xl">
-          <Toolbar className={classes.toolbar}>
+          <Toolbar className={classes.toolbar} variant={'dense'}>
             <Typography variant="h6" color="inherit" noWrap className={classes.toolbarTitle}>
-              <Link className={classes.toolbarTitle} to="/">ReCollab.io</Link>
+              <Link className={classes.toolbarTitle} to="/">dogekit.io</Link>
             </Typography>
             <nav>
               {auth.isAuthenticated && auth.user ?

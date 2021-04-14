@@ -7,15 +7,20 @@ name = "pypi"
 django = "*"
 djangorestframework = "*"
 django-allauth = "*"
-dj-rest-auth = "*"
 django-hashid-field = "*"
 django-autoslug = "*"
 django-filter = "*"
 django-sortedm2m = "*"
 python-decouple = "*"
 django-debug-toolbar = "*"
+django-dry-rest-permissions = "*"
+dj-rest-auth = "*"
 
 [dev-packages]
+black = "*"
 
 [requires]
 python_version = "3.9"
+
+[pipenv]
+allow_prereleases = true

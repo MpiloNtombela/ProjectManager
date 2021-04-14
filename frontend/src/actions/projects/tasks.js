@@ -159,7 +159,7 @@ export const addComment = (comment, id) => (dispatch, getState) => {
     } else {
       dispatch(createSnackAlert(err.message, 400))
     }
-    dispatch({type: action.TASK_REQUEST_FAILED})
+    dispatch({type: action.COMMENT_REQUEST_FAILED})
   })
 }
 
@@ -179,5 +179,76 @@ export const deleteComment = (id) => (dispatch, getState) => {
       dispatch(createSnackAlert(err.message, 400))
     }
     dispatch({type: action.COMMENT_REQUEST_FAILED})
+  })
+}
+
+/**
+ * @description add a subtask
+ * @param {string} name subtask name
+ * @param {string} id task id
+ * */
+export const addSubtask = (name, id) => (dispatch, getState) => {
+  dispatch({type: action.TASK_VIEW_REQUESTING})
+  const body = JSON.stringify({name})
+  axios.post(`/api/projects/req/task/${id}/subtasks/`, body, tokenConfig(getState().auth.token))
+    .then(res => {
+      dispatch({
+        type: action.SUBTASK_ADDED,
+        payload: res.data
+      })
+    }).catch((err) => {
+    if (err.response) {
+      dispatch(createSnackAlert(err.response.data, err.response.status))
+    } else {
+      dispatch(createSnackAlert(err.message, 400))
+    }
+    dispatch({type: action.SUBTASK_REQUEST_FAILED})
+  })
+}
+
+/**
+ * **allow editing/updating of subtask**
+ * @param {string} id subtask id
+ * @param {object} data subtask data
+ */
+export const updateSubtask = (id, data) => (dispatch, getState) => {
+  dispatch({type: action.TASK_VIEW_REQUESTING});
+  const body = JSON.stringify(data)
+  axios.patch(`/api/projects/req/subtask/${id}/`, body, tokenConfig(getState().auth.token))
+    .then((res) => {
+      dispatch({
+        type: action.SUBTASK_UPDATED,
+        payload: {
+          id,
+          data: res.data.response
+        }
+      });
+    })
+    .catch((err) => {
+      if (err.response) {
+        dispatch(createSnackAlert(err.response.data, err.response.status))
+      } else {
+        dispatch(createSnackAlert(err.message, 400))
+      }
+      dispatch({type: action.SUBTASK_REQUEST_FAILED})
+    });
+}
+
+
+export const deleteSubtask = (id) => (dispatch, getState) => {
+  dispatch({type: action.TASK_VIEW_REQUESTING})
+  axios.delete(`/api/projects/req/subtask/${id}/`, tokenConfig(getState().auth.token))
+    .then(() => {
+      dispatch({
+        type: action.SUBTASK_DELETED,
+        payload: id
+      })
+    }).catch((err) => {
+    if (err.response) {
+      dispatch(createSnackAlert(err.response.data, err.response.status))
+    } else {
+      dispatch(createSnackAlert(err.message, 400))
+    }
+    dispatch({type: action.SUBTASK_REQUEST_FAILED})
   })
 }

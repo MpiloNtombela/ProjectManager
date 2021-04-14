@@ -9,14 +9,19 @@ class IsPartOfProject(permissions.BasePermission):
     messages = _("Permission denied, you're not part of the project")
 
     def has_object_permission(self, request, view, obj):
-        return request.user == obj.creator or request.user in [team.members.all() for team in obj.teams.all()][0]
+        return obj.has_user(request.user)
 
 
-class IsCreatorOrAdmin(permissions.BasePermission):
+class IsCreator(permissions.BasePermission):
     """
     checks and restrict permission to only creator of the object or the project admin(s)
     """
     messages = _("You don't have permission to perform the action")
 
     def has_object_permission(self, request, view, obj):
-        return request.user == obj.creator or request.user == obj.project.creator
+        return request.user == obj.creator
+
+
+class IsProjectCreator(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        return request.user == obj.project.creator

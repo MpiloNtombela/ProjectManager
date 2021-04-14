@@ -1,13 +1,14 @@
 import React from 'react';
-import PropTypes from 'prop-types'
-import makeStyles from '@material-ui/core/styles/makeStyles';
-import Popper from '@material-ui/core/Popper';
-import MembersForm from "./MembersForm";
+import PropTypes from 'prop-types';
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
+import Popper from "@material-ui/core/Popper";
+import makeStyles from "@material-ui/core/styles/makeStyles";
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    zIndex: 10001
+    zIndex: 1300,
+    width: '250px',
+    maxWidth: '95vw'
   },
   paper: {
     margin: '.25rem .5rem',
@@ -18,28 +19,28 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const AddMember = ({anchorEl, setAnchorEl}) => {
-  const classes = useStyles();
-
+const RePopper = ({anchorEl, setAnchorEl, children}) => {
+  const classes = useStyles()
   const handleClose = () => {
     setAnchorEl(null)
   }
-
+  
   const open = Boolean(anchorEl);
-  const id = open ? 'add-member-form' : undefined;
-
+  
   return (
-    <Popper id={id} open={open} anchorEl={anchorEl} className={classes.root}>
+    <Popper open={open} anchorEl={anchorEl} className={classes.root}>
       <ClickAwayListener onClickAway={handleClose}>
         <div className={classes.paper}>
-          <MembersForm/>
+          {children}
         </div>
       </ClickAwayListener>
     </Popper>
   );
 };
-AddMember.propTypes = {
-  anchorEl: PropTypes.object,
-  setAnchorEl: PropTypes.func.isRequired
-}
-export default AddMember
+
+RePopper.propTypes = {
+  anchorEl: PropTypes.any,
+  setAnchorEl: PropTypes.func.isRequired,
+  children: PropTypes.node,
+};
+export default RePopper;
