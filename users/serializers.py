@@ -48,3 +48,11 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = ['id', 'user', 'bio', 'teams']
         depth = 1
+
+
+class BasicUserSerializer(serializers.ModelSerializer):
+    id = HashidSerializerCharField(source_field="users.User.id", read_only=True)
+
+    class Meta:
+        model = User
+        fields = ["id", "username", "avatar"]
