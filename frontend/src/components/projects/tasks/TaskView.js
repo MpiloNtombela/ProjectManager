@@ -21,7 +21,7 @@ import LinearProgress from "@material-ui/core/LinearProgress";
 import TasksMembers from "./TaskMembers";
 import {TaskDescriptionEdit, TaskNameEdit} from "./InlineEditable";
 import DeadlineForm from "./forms/DeadlineForm";
-import TaskFeeds from "./TaskFeeds";
+import TaskLogs from "./TaskLogs";
 import SubtaskForm from "./forms/SubtaskForm";
 import Subtasks from "./Subtasks";
 import TaskViewBar from "./TaskViewBar";
@@ -158,9 +158,9 @@ const TaskView = ({openTask, setOpenTask}) => {
                     <TasksMembers id={task.id} members={task.members} isRequesting={isRequesting}/>
                     <MembersForm/>
                   </Box>
-                  <Typography className={classes.subHeader} component='h2'>Task Feed</Typography>
-                  {task['task_feed'].length ?
-                    <TaskFeeds feeds={task['task_feed']}/>
+                  <Typography className={classes.subHeader} component='h2'>Task Logs</Typography>
+                  {task['task_logs'].length ?
+                    <TaskLogs logs={task['task_logs']}/>
                     : <Typography color={'textSecondary'} component={'small'} variant={"caption"}>
                       task changes appear here
                     </Typography>}

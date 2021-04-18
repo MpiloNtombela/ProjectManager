@@ -78,6 +78,10 @@ const InvitationView = () => {
     acceptInvitation({ key, token });
   };
 
+  const handleIgnore = () => {
+    history.push("/");
+  };
+
   return (
     <Box
       display={"flex"}
@@ -127,7 +131,8 @@ const InvitationView = () => {
                   size={"small"}
                   variant={"outlined"}
                   color={"secondary"}
-                  disabled={isLoading}>
+                  disabled={isLoading}
+                  onClick={handleIgnore}>
                   Ignore Invite
                 </Button>{" "}
                 <Button

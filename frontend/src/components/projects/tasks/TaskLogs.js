@@ -8,28 +8,28 @@ import List from "@material-ui/core/List";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 
 const useStyles = makeStyles({
-  feedList: {
+  logList: {
     margin: 0
   },
 })
 
-const TaskFeeds = ({feeds}) => {
+const TaskLogs = ({logs}) => {
   const classes = useStyles()
   return (
     <List>
-      {feeds.map(feed => (
-        <Tooltip placement={"bottom"} key={feed.id} title={feed.timestamp}>
+      {logs.map(log => (
+        <Tooltip placement={"bottom"} key={log.id} title={log.timestamp}>
           <div>
             <ListItemText
-              className={classes.feedList}
+              className={classes.logList}
               primary={
                 <Typography color={'textSecondary'} variant={'caption'}>
-                  {feed.user.username}
+                  {log.user.username}
                 </Typography>
               }
               secondary={
                 <Typography component='h6' color="textPrimary" variant={"body2"}>
-                  {feed["feed"]}
+                  {log["log"]}
                 </Typography>
               }/>
             <Divider/>
@@ -40,9 +40,9 @@ const TaskFeeds = ({feeds}) => {
   )
 };
 
-TaskFeeds.propTypes = {
-  feeds: PropTypes.array
+TaskLogs.propTypes = {
+  logs: PropTypes.array
 };
 
 
-export default TaskFeeds;
+export default TaskLogs;
