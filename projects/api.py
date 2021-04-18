@@ -1,21 +1,14 @@
 from django.utils.translation import ugettext_lazy as _
-from dry_rest_permissions.generics import DRYPermissions, DRYObjectPermissions
 from rest_framework import generics, status, filters
 from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-
-
-from projects.apis.core import CheckProjectPermissionMixin
-from projects.models import Project, Invitation
-from projects.permissions import IsCreator, IsProjectCreator, IsPartOfProject
-from projects.serializers import (
-    ProjectSerializer,
-    ProjectUserSerializer,
-    InvitationSerializer,
-    AcceptInvitationSerializer,
-)
+from base.api import CheckProjectPermissionMixin
+from projects.models import Invitation
+from projects.permissions import IsProjectCreator
+from projects.serializers import ProjectSerializer, AcceptInvitationSerializer, InvitationSerializer
+from users.serializers import BasicUserSerializer
 
 
 class ProjectRetrieveAPI(CheckProjectPermissionMixin, generics.RetrieveAPIView):
@@ -39,13 +32,13 @@ class ProjectRetrieveAPI(CheckProjectPermissionMixin, generics.RetrieveAPIView):
 
 
 class ProjectMembersListAPI(CheckProjectPermissionMixin, generics.ListAPIView):
-    serializer_class = ProjectUserSerializer
+    serializer_class = BasicUserSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ["username"]
 
     def list(self, request, *args, **kwargs):
         project = self.get_object()
-        serializer = ProjectUserSerializer(project.members, many=True)
+        serializer = BasicUserSerializer(project.members, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -55,7 +48,7 @@ class AcceptInviteAPI(generics.RetrieveUpdateAPIView):
     queryset = Invitation.objects.select_related("project")
     error_message = _('link provided is invalid or expired')
 
-    def retrieve(self, request, *args, **kwargs):
+    def retrieve(self, request, *args, **kwargs) -> object:
         data = {}
         key = request.query_params.get("key", None)
         data["message"] = self.error_message
@@ -103,7 +96,7 @@ class InvitationRetrieveUpdate(generics.RetrieveUpdateAPIView):
 
     def put(self, request, *args, **kwargs):
         param = request.query_params.get("action", None)
-        if param is None or param.lower() not in ["key", "status"]:
+        if param is None or param.lower() not in {"key", "status"}:
             data = {
                 "message": _("Oops error, seems the request was tempered")
             }
