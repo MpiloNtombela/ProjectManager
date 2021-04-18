@@ -35,6 +35,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users.apps.UsersConfig',
+    'tasks.apps.TasksConfig',
+    'boards.apps.BoardsConfig',
     'projects.apps.ProjectsConfig',
     'allauth',
     'allauth.account',
@@ -46,7 +48,7 @@ INSTALLED_APPS = [
     'dj_rest_auth',
     'dj_rest_auth.registration',
     'django_filters',
-    'sortedm2m',
+    # 'sortedm2m',
     'frontend',
     # debugging purposes
     'debug_toolbar'
