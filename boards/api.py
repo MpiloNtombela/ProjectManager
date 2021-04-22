@@ -64,6 +64,7 @@ class BoardRetrieveUpdateDestroyAPI(generics.RetrieveUpdateDestroyAPIView):
     """
     serializer_class = BoardSerializer
     queryset = Board.objects.select_related('project')
+
     # permission_classes = [IsAuthenticated]
 
     def destroy(self, request, *args, **kwargs):

@@ -26,6 +26,25 @@ class AcceptInvitationSerializer(serializers.ModelSerializer):
         fields = ["project_name", 'creator_name']
 
 
+class BasicProjectSerializer(serializers.ModelSerializer):
+    id = HashidSerializerCharField(source_field="projects.Project.id", read_only=True)
+    creator = BasicUserSerializer(read_only=True, default=serializers.CurrentUserDefault())
+    is_creator = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Project
+        fields = ["id", "name", "creator", "is_creator"]
+
+    def get_is_creator(self, obj) -> bool:
+        user = self.context['request'].user
+        return user == obj.creator
+
+    def create(self, validated_data):
+        name = validated_data.get('name')
+        project = Project.objects.create(creator=self.context['request'].user, name=name)
+        return project
+
+
 class ProjectSerializer(serializers.ModelSerializer):
     id = HashidSerializerCharField(source_field="projects.Project.id", read_only=True)
     creator = BasicUserSerializer()
@@ -45,5 +64,3 @@ class ProjectMembersSerializer(serializers.ModelSerializer):
     class Meta:
         model = Project
         fields = ["id", "members"]
-
-
