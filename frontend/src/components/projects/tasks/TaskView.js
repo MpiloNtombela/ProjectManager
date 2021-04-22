@@ -157,6 +157,9 @@ const TaskView = ({openTask, setOpenTask}) => {
                     <Typography className={classes.subHeader} component='h2'>Members</Typography>
                     <TasksMembers id={task.id} members={task.members} isRequesting={isRequesting}/>
                     <MembersForm/>
+
+
+                   
                   </Box>
                   <Typography className={classes.subHeader} component='h2'>Task Logs</Typography>
                   {task['task_logs'].length ?
