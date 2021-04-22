@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import generics, status, filters
 from rest_framework.generics import get_object_or_404
@@ -5,10 +6,23 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from base.api import CheckProjectPermissionMixin
-from projects.models import Invitation
+from projects.models import Invitation, Project
 from projects.permissions import IsProjectCreator
-from projects.serializers import ProjectSerializer, AcceptInvitationSerializer, InvitationSerializer
+from projects.serializers import ProjectSerializer, AcceptInvitationSerializer, InvitationSerializer, BasicProjectSerializer
 from users.serializers import BasicUserSerializer
+
+
+class ProjectListCreateAPI(generics.ListCreateAPIView):
+    serializer_class = BasicProjectSerializer
+    queryset = Project.objects.select_related('creator').prefetch_related('members')
+
+    def get_queryset(self):
+        return super().get_queryset().filter(Q(creator=self.request.user) | Q(members__id=self.request.user.id)).distinct()
+
+    def get_serializer_context(self) -> object:
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
+        return context
 
 
 class ProjectRetrieveAPI(CheckProjectPermissionMixin, generics.RetrieveAPIView):
@@ -85,7 +99,7 @@ class InvitationRetrieveUpdate(generics.RetrieveUpdateAPIView):
     queryset = Invitation.objects.select_related("project", "project__creator")
 
     def get_object(self):
-        inv = get_object_or_404(self.get_queryset(), project_id=self.kwargs["pk"])
+        inv = get_object_or_404(self.get_queryset(), project_id=self.kwargs.get("pk"))
         self.check_object_permissions(self.request, inv)
         return inv
 
