@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
@@ -10,12 +10,12 @@ import Tooltip from "@material-ui/core/Tooltip";
 import Typography from "@material-ui/core/Typography";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import { tokenConfig } from "../../common/axiosConfig";
-import { useMutation } from "react-query";
-import { RESET_INVITE_LINK } from "../../../actions/projectTypes";
+import { useMutation, useQuery, useQueryClient } from "react-query";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import { copyTextToClipboard, shareData } from "../../../utils";
 import { alpha } from "@material-ui/core/styles/colorManipulator";
 import FeatureDetect from "../../common/FeatureDetect";
+import { useImmer } from "use-immer";
 
 const useStyles = makeStyles((theme) => ({
   inviteCard: {
@@ -39,7 +39,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-const inviteAction = async (reqData) => {
+const updateInvitation = async (reqData) => {
   const { id, action, token } = reqData;
   return await axios.put(
     `/api/projects/req/project/${id}/invites?action=${action}`,
@@ -48,20 +48,22 @@ const inviteAction = async (reqData) => {
   );
 };
 
-function InvitationAction({ id, anchorEl, setAnchorEl }) {
+const Invitation = ({ id, data }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
-  const invitation = useSelector(
-    (state) => state.projectsState.project.invitation
-  );
+  const queryClient = useQueryClient();
   const { token } = useSelector((state) => state.auth);
-  const [active, setActive] = useState(invitation.active);
+
+  const [invitation, setInvitaion] = useImmer(data);
 
   const { mutate: toggle, isLoading: isToggleLoading } = useMutation(
-    inviteAction,
+    updateInvitation,
     {
       onSuccess: ({ data: { active } }) => {
-        setActive(active);
+        setInvitaion((draft) => {
+          draft.active = active;
+        });
+        queryClient.invalidateQueries("project-invite-config");
       },
       onError: ({ response: { data, status } }) => {
         dispatch(createSnackAlert(data, status));
@@ -69,26 +71,26 @@ function InvitationAction({ id, anchorEl, setAnchorEl }) {
     }
   );
 
-  const handleToggle = () => {
-    toggle({ id, action: "status", token });
-  };
-
   const {
     mutate: resetLink,
     isLoading: isResetLoading,
     isSuccess: isResetSuccess,
-  } = useMutation(inviteAction, {
+  } = useMutation(updateInvitation, {
     onSuccess: ({ data: { url } }) => {
-      dispatch({
-        type: RESET_INVITE_LINK,
-        payload: url,
+      setInvitaion((draft) => {
+        draft.url = url;
       });
+      queryClient.invalidateQueries("project-invite-config");
       dispatch(createSnackAlert("invite link changed", 200));
     },
     onError: ({ response: { data, status } }) => {
       dispatch(createSnackAlert(data, status));
     },
   });
+
+  const handleToggle = () => {
+    toggle({ id, action: "status", token });
+  };
 
   const handleReset = () => {
     resetLink({ id, action: "key", token });
@@ -107,7 +109,7 @@ function InvitationAction({ id, anchorEl, setAnchorEl }) {
   };
 
   return (
-    <RePopper anchorEl={anchorEl} setAnchorEl={setAnchorEl}>
+    <>
       <div className={classes.inviteCard}>
         <Typography variant={"h6"} component={"h5"}>
           Invite link
@@ -129,7 +131,7 @@ function InvitationAction({ id, anchorEl, setAnchorEl }) {
               shareData(_shareData);
             }}>
             share
-          </Button> 
+          </Button>
         </FeatureDetect>
         <Button size={"small"} disabled={isLoading} onClick={handleCopy}>
           copy
@@ -148,24 +150,56 @@ function InvitationAction({ id, anchorEl, setAnchorEl }) {
             edge="end"
             disabled={isLoading}
             onChange={handleToggle}
-            checked={active}
+            checked={invitation.active}
           />
         </Typography>
         <Typography className={classes.caution} variant={"caption"}>
-          {active
+          {invitation.active
             ? "Anyone with link can join project"
             : "Invite link has been deactivated"}
         </Typography>
       </div>
       {isLoading && <LinearProgress variant={"indeterminate"} />}
+    </>
+  );
+};
+
+const getInvite = async (id, token) => {
+  return await axios.get(
+    `/api/projects/req/project/${id}/invites`,
+    tokenConfig(token)
+  );
+};
+
+const InvitationPopper = ({ id, anchorEl, setAnchorEl }) => {
+  const { token } = useSelector((state) => state.auth);
+  const { isLoading, isSuccess, data, isError, error } = useQuery(
+    ["project-invite-config", id, token],
+    () => getInvite(id, token),
+    {
+      enabled: Boolean(anchorEl),
+      refetchOnWindowFocus: false,
+      staleTime: 200000,
+    }
+  );
+
+  return (
+    <RePopper anchorEl={anchorEl} setAnchorEl={setAnchorEl}>
+      {isLoading && <h6>Loading...</h6>}
+      {isError && <h6>Oops... error!</h6>}
+      {isSuccess && <Invitation id={id} data={data.data} />}
     </RePopper>
   );
-}
+};
 
-InvitationAction.propTypes = {
+Invitation.propTypes = {
+  id: PropTypes.string.isRequired,
+  data: PropTypes.object,
+};
+InvitationPopper.propTypes = {
   id: PropTypes.string.isRequired,
   anchorEl: PropTypes.any,
   setAnchorEl: PropTypes.func.isRequired,
 };
 
-export default InvitationAction;
+export default InvitationPopper;
