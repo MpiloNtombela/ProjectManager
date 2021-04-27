@@ -12,7 +12,7 @@ import AppBar from "@material-ui/core/AppBar";
 import Toolbar from "@material-ui/core/Toolbar";
 import Button from "@material-ui/core/Button";
 import PersonAdd from "@material-ui/icons/PersonAdd";
-import InvitationAction from "./projectActions/InvitationAction";
+import InvitationPopper from "./projectActions/InvitationAction";
 
 const useStyles = makeStyles((theme) => {
   const BACKGROUND =
@@ -104,7 +104,7 @@ const ProjectBar = ({ title, id }) => {
           </Button>
         </Toolbar>
       </AppBar>
-      <InvitationAction
+      <InvitationPopper
         id={id}
         anchorEl={inviteAnchorEl}
         setAnchorEl={setInviteAnchorEl}
