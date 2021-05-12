@@ -82,6 +82,8 @@ REST_FRAMEWORK = {
 }
 
 if DEBUG:
+    import mimetypes
+    mimetypes.add_type("application/javascript", '.js', True)
     REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'] += 'rest_framework.authentication.SessionAuthentication',
 
 REST_AUTH_SERIALIZERS = {
