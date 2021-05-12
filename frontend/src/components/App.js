@@ -16,17 +16,19 @@ import LocalizationProvider from "@material-ui/lab/LocalizationProvider";
 import AdapterDateFns from "@material-ui/lab/AdapterDateFns";
 import InvitationView from "./projects/InvitationView";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { ReactQueryDevtools } from 'react-query/devtools'
+import { ReactQueryDevtools } from "react-query/devtools";
+import BarLoader from "./layout/BarLoader";
+import Paper from "@material-ui/core/Paper";
+import CssBaseline from "@material-ui/core/CssBaseline";
 
 const Login = lazy(() => import("./accounts/login/Login"));
 const Register = lazy(() => import("./accounts/Register"));
-const PasswordChange = lazy(() => import("./accounts/passwordChange"));
 const PasswordReset = lazy(() => import("./accounts/passwordReset"));
 const ConfirmEmail = lazy(() => import("./accounts/ConfirmEmail"));
 const SetupPreviewPage = lazy(() =>
   import("./projects/setup/SetupPreviewPage")
 );
-// const Error404 = lazy(() => import('./feedback/Error404'))
+const Error404 = lazy(() => import("./feedback/Error404"));
 
 const App = () => {
   const dispatch = useDispatch();
@@ -40,32 +42,39 @@ const App = () => {
       <ThemeProvider theme={theme}>
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <QueryClientProvider client={queryClient}>
-            <BrowserRouter>
-              <Navbar />
-              <Switch>
-                <PrivateRoute exact path="/" component={Home} />
-                <PrivateRoute
-                  path="/project/:id/"
-                  component={ProjectTemplate}
-                />
-                <Suspense fallback={<FormSkeleton />}>
-                  <PrivateRoute path="/profile" component={InvitationView} />
-                  <PrivateRoute path="/doge/:key/" component={InvitationView} />
-                  <Route path="/login" component={Login} />
-                  <Route path="/test" component={SetupPreviewPage} />
-                  <Route path="/register" component={Register} />
-                  <Route
-                    path="/api/auth/registration/account-confirm-email/:key/"
-                    component={ConfirmEmail}
-                  />
-                  <Route
-                    path="/api/auth/password/reset/confirm/:uid/:token/"
-                    component={PasswordReset}
-                  />
-                </Suspense>
-              </Switch>
-              <SnackAlerts />
-            </BrowserRouter>
+            <Paper square elevation={0}>
+              <CssBaseline />
+              <Suspense fallback={<BarLoader />}>
+                <BrowserRouter>
+                  {/* <Navbar /> */}
+                  <Switch>
+                    <PrivateRoute exact path="/" component={Home} />
+                    <PrivateRoute
+                      path="/project/:id/"
+                      component={ProjectTemplate}
+                    />
+                    <PrivateRoute path="/profile" component={InvitationView} />
+                    <PrivateRoute
+                      path="/projects/invite"
+                      component={InvitationView}
+                    />
+                    <Route path="/login" component={Login} />
+                    <Route path="/test" component={SetupPreviewPage} />
+                    <Route path="/register" component={Register} />
+                    <Route
+                      path="/api/auth/registration/account-confirm-email/:key/"
+                      component={ConfirmEmail}
+                    />
+                    <Route
+                      path="/api/auth/password/reset/confirm/:uid/:token/"
+                      component={PasswordReset}
+                    />
+                    <Route path="*" component={Error404} />
+                  </Switch>
+                  <SnackAlerts />
+                </BrowserRouter>
+              </Suspense>
+            </Paper>
             <ReactQueryDevtools initialIsOpen={false} />
           </QueryClientProvider>
         </LocalizationProvider>
