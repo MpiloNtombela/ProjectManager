@@ -1,4 +1,5 @@
 import React, {useEffect, useState} from 'react';
+import PropTypes from 'prop-types'
 import TextField from '@material-ui/core/TextField';
 import Autocomplete from '@material-ui/core/Autocomplete';
 import makeStyles from "@material-ui/core/styles/makeStyles";
@@ -7,8 +8,7 @@ import addableTaskMembers from "../../../../selectors/addableTaskMembers";
 import {addRemoveMember} from "../../../../actions/projects/tasks";
 import Avatar from "@material-ui/core/Avatar";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
-import Button from "@material-ui/core/Button";
-import PersonAdd from "@material-ui/icons/PersonAdd";
+
 
 const useStyles = makeStyles({
   paper: {
@@ -39,20 +39,12 @@ const useStyles = makeStyles({
 })
 
 
-const MembersForm = () => {
+const MembersForm = ({open, onClose}) => {
   const classes = useStyles()
   const members = useSelector(state => addableTaskMembers(state))
   const {task, isRequesting} = useSelector(state => state.tasksState)
   const dispatch = useDispatch()
   const [value, setValue] = useState(null)
-  const [open, setOpen] = useState(false)
-  
-  const handleOpen = () => {
-    setOpen(true)
-  }
-  const handleClose = () => {
-    setOpen(false)
-  }
   
   const handleChange = (e, newValue) => {
     setValue(newValue)
@@ -79,7 +71,7 @@ const MembersForm = () => {
   return (
     <>
       {open ?
-        <ClickAwayListener onClickAway={handleClose}>
+        <ClickAwayListener onClickAway={onClose}>
           <div>
             <Autocomplete
               value={value}
@@ -101,13 +93,13 @@ const MembersForm = () => {
               classes={{paper: classes.paper, listbox: classes.listbox}}
             />
           </div>
-        </ClickAwayListener> :
-        <Button size="small" startIcon={<PersonAdd/>}
-                disableElevation fullWidth color='secondary'
-                onClick={handleOpen}>
-          add members
-        </Button>}
+        </ClickAwayListener> :""}
     </>
   );
 };
+
+MembersForm.propTypes = {
+  open : PropTypes.bool.isRequired,
+  onClose: PropTypes.func
+}
 export default MembersForm

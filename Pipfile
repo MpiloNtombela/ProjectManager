@@ -12,12 +12,13 @@ django-autoslug = "*"
 django-filter = "*"
 django-sortedm2m = "*"
 python-decouple = "*"
-django-debug-toolbar = "*"
 django-dry-rest-permissions = "*"
 dj-rest-auth = "*"
+django-debug-toolbar = "*"
 
 [dev-packages]
 black = "*"
+coverage = "*"
 
 [requires]
 python_version = "3.9"

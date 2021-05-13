@@ -1,14 +1,21 @@
-from django.core.exceptions import ValidationError
-from django.http import Http404
-from django.shortcuts import get_list_or_404 as _get_list_or_404
+from uuid import UUID
 
 
-def get_list_or_404(queryset, *filter_args, **filter_kwargs):
+def is_valid_uuid(test_uuid: str, uuid_version: int) -> bool:
     """
-    Same as Django's standard get_list_or_404 shortcut, but make sure to also raise 404
-    if the filter_kwargs don't match the required types.
+    is_valid_uuid - checks if the given string is a valide uuid
+
+    :param test_uuid: a uuid string to test
+    :type test_uuid: str
+    :param uuid_version: a uuid version (from 1 to 5)
+    :type uuid_version: int
+    :rtype: bool
     """
+
     try:
-        return _get_list_or_404(queryset, *filter_args, **filter_kwargs)
-    except (TypeError, ValueError, ValidationError):
-        raise Http404
+        _uuid = UUID(str(test_uuid), version=uuid_version)
+    except ValueError:
+        return False
+    return test_uuid == str(_uuid)
+
+

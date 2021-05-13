@@ -24,6 +24,8 @@ urlpatterns = [
     path('api-auth/drf/', include('rest_framework.urls')),
     # path('apis/u/', include('users.urls')),
     path('api/projects/', include('projects.urls')),
+    path('api/projects/', include('boards.urls')),
+    path('api/projects/', include('tasks.urls')),
     path('__debug__/', include(debug_toolbar.urls))
 ]
 
