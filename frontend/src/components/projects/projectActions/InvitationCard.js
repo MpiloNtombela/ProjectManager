@@ -4,6 +4,7 @@ import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import createSnackAlert from "../../../actions/snackAlerts";
 import RePopper from "../../reuse/RePopper";
+import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import Switch from "@material-ui/core/Switch";
 import Tooltip from "@material-ui/core/Tooltip";
@@ -16,6 +17,12 @@ import { copyTextToClipboard, shareData } from "../../../utils";
 import { alpha } from "@material-ui/core/styles/colorManipulator";
 import FeatureDetect from "../../common/FeatureDetect";
 import { useImmer } from "use-immer";
+import BarLoader from "../../layout/BarLoader";
+import LinkIcon from "@material-ui/icons/Link";
+import FileCopyRounded from "@material-ui/icons/FileCopy";
+import RotateLeft from "@material-ui/icons/RotateLeft";
+import { AvatarIconButton } from "../../reuse/ReButtons";
+import ShareRounded from "@material-ui/icons/Share";
 
 const useStyles = makeStyles((theme) => ({
   inviteCard: {
@@ -92,7 +99,7 @@ const Invitation = ({ id, data }) => {
     toggle({ id, action: "status", token });
   };
 
-  const handleReset = () => {
+  const handleNewLink = () => {
     resetLink({ id, action: "key", token });
   };
 
@@ -110,56 +117,79 @@ const Invitation = ({ id, data }) => {
 
   return (
     <>
+      {isLoading && <LinearProgress variant={"indeterminate"} />}
       <div className={classes.inviteCard}>
         <Typography variant={"h6"} component={"h5"}>
           Invite link
         </Typography>
-        <Tooltip title={invitation.url} placement={"top"} arrow>
-          <Typography
-            noWrap
-            variant={"caption"}
-            color={"textPrimary"}
-            component={"p"}>
-            {invitation.url}
-          </Typography>
-        </Tooltip>
-        <FeatureDetect feature={navigator.share}>
+        {!invitation.url ? (
           <Button
+            onClick={handleNewLink}
+            startIcon={<LinkIcon />}
+            sx={{ my: 2 }}
             size={"small"}
-            disabled={isLoading}
-            onClick={() => {
-              shareData(_shareData);
-            }}>
-            share
+            variant="contained"
+            color="primary">
+            Get Invite url
           </Button>
-        </FeatureDetect>
-        <Button size={"small"} disabled={isLoading} onClick={handleCopy}>
-          copy
-        </Button>
-        <Button
-          size={"small"}
-          className={classes.dangerBtn}
-          disabled={isLoading || isResetSuccess}
-          onClick={handleReset}>
-          reset
-        </Button>
+        ) : (
+          <>
+            <Tooltip title={invitation.url} placement={"top"} arrow>
+              <TextField
+                fullWidth
+                size={"small"}
+                variant={"outlined"}
+                defaultValue={invitation.url}
+              />
+            </Tooltip>
+            <FeatureDetect feature={navigator.share}>
+              <AvatarIconButton
+                icon={<ShareRounded fontSize={"small"} />}
+                onClick={() => {
+                  shareData(_shareData);
+                }}
+                color={"secondary"}
+                disabled={isLoading}
+                size={"small"}
+                text={"copy"}
+              />
+            </FeatureDetect>
+            <AvatarIconButton
+              icon={<FileCopyRounded fontSize={"small"} />}
+              onClick={handleCopy}
+              color={"secondary"}
+              disabled={isLoading}
+              size={"small"}
+              text={"copy"}
+            />
+            <AvatarIconButton
+              icon={<RotateLeft fontSize={"small"} />}
+              size={"small"}
+              color={"error"}
+              disabled={isLoading || isResetSuccess}
+              onClick={handleNewLink}
+              text={"new link"}
+            />
 
-        <Typography variant={"subtitle2"}>
-          <strong>Link Active </strong>
-          <Switch
-            edge="end"
-            disabled={isLoading}
-            onChange={handleToggle}
-            checked={invitation.active}
-          />
-        </Typography>
-        <Typography className={classes.caution} variant={"caption"}>
-          {invitation.active
-            ? "Anyone with link can join project"
-            : "Invite link has been deactivated"}
-        </Typography>
+            <Typography variant={"subtitle2"}>
+              <Typography variant={"overline"} component={"strong"}>
+                Link Active{" "}
+              </Typography>
+              <Switch
+                edge="end"
+                disabled={isLoading}
+                onChange={handleToggle}
+                checked={invitation.active}
+              />
+            </Typography>
+            <Typography className={classes.caution} variant={"caption"}>
+              {invitation.active
+                ? "Anyone with link can join project"
+                : "Invite link has been deactivated"}
+            </Typography>
+          </>
+        )}
       </div>
-      {isLoading && <LinearProgress variant={"indeterminate"} />}
     </>
   );
 };
@@ -171,7 +201,7 @@ const getInvite = async (id, token) => {
   );
 };
 
-const InvitationPopper = ({ id, anchorEl, setAnchorEl }) => {
+const InvitationCard = ({ id, anchorEl, setAnchorEl }) => {
   const { token } = useSelector((state) => state.auth);
   const { isLoading, isSuccess, data, isError, error } = useQuery(
     ["project-invite-config", id, token],
@@ -185,8 +215,10 @@ const InvitationPopper = ({ id, anchorEl, setAnchorEl }) => {
 
   return (
     <RePopper anchorEl={anchorEl} setAnchorEl={setAnchorEl}>
-      {isLoading && <h6>Loading...</h6>}
-      {isError && <h6>Oops... error!</h6>}
+      {isLoading && <BarLoader />}
+      {isError && (
+        <Typography variant={"h6"}>Failed to load invite!</Typography>
+      )}
       {isSuccess && <Invitation id={id} data={data.data} />}
     </RePopper>
   );
@@ -196,10 +228,10 @@ Invitation.propTypes = {
   id: PropTypes.string.isRequired,
   data: PropTypes.object,
 };
-InvitationPopper.propTypes = {
+InvitationCard.propTypes = {
   id: PropTypes.string.isRequired,
   anchorEl: PropTypes.any,
   setAnchorEl: PropTypes.func.isRequired,
 };
 
-export default InvitationPopper;
+export default InvitationCard;
