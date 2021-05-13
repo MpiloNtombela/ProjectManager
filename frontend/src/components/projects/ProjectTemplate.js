@@ -1,6 +1,7 @@
 import Paper from "@material-ui/core/Paper";
-import Container from "@material-ui/core/Container";
 import React, { Suspense } from "react";
+import Tabs from "@material-ui/core/Tabs";
+import Tab from "@material-ui/core/Tab";
 import ProjectPageSkeleton from "../skeletons/projects/ProjectPageSkeleton";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,33 +14,39 @@ import {
   PROJECT_LOADED,
   TASKS_LOADED,
 } from "../../actions/projectTypes";
+import ProjectDrawer from "./ProjectDrawer";
+import useMediaQuery from "@material-ui/core/useMediaQuery";
 
 const ProjectView = React.lazy(() => import("./ProjectView"));
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    position: "fixed",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    background:
-      theme.palette.mode === "light"
-        ? "#eee"
-        : theme.palette.background.default,
-    overflowY: "auto",
-    minWidth: "100%",
-    paddingTop: "3.75rem",
-    scrollbarWidth: "tiny",
-    "&::-webkit-scrollbar": {
-      width: ".25rem",
+const useStyles = (matches) =>
+  makeStyles((theme) => ({
+    root: {
+      minHeight: "100vh",
+      background: theme.palette.primary.main,
+      minWidth: "100%",
+      scrollbarWidth: "tiny",
+      "&::-webkit-scrollbar": {
+        width: ".50rem",
+        height: ".50rem",
+      },
+      "&::-webkit-scrollbar-thumb": {
+        background: theme.palette.secondary.light,
+      },
     },
-  },
-  container: {
-    height: "100%",
-    padding: 0,
-  },
-}));
+    tabs: {
+      background: theme.palette.background.default,
+      position: "sticky",
+      top: theme.sizing.toolbarHeight,
+      zIndex: 1,
+      marginBottom: theme.spacing(1),
+    },
+    container: {
+      marginTop: theme.mixins.toolbar.minHeight,
+      minHeight: `calc(100vh - ${theme.mixins.toolbar.minHeight}px)`,
+      marginLeft: () => (matches ? theme.spacing(8) : theme.spacing(0)),
+    },
+  }));
 
 const ROOT_URL = `/api/projects/req/project`;
 const getProj = async (id, token) =>
@@ -52,64 +59,81 @@ const getTasks = async (id, token) =>
   await axios.get(`${ROOT_URL}/${id}/tasks/`, tokenConfig(token));
 
 const ProjectTemplate = () => {
-  const classes = useStyles();
+  const matchesSmUp = useMediaQuery((theme) => theme.breakpoints.up("sm"));
+  const classes = useStyles(matchesSmUp)();
   const dispatch = useDispatch();
 
   const { id } = useParams();
   const { token } = useSelector((state) => state.auth);
 
-  const {
-    isLoading: isProjectLoading,
-    isError: isProjectError,
-  } = useQuery(["project", id, token], () => getProj(id, token), {
-    onSuccess: ({ data }) => {
-      return dispatch({
-        type: PROJECT_LOADED,
-        payload: data,
-      });
-    },
-    // refetchInterval: 50000,
-    refetchOnWindowFocus: false,
-  });
+  const { isLoading: isProjectLoading, isError: isProjectError } = useQuery(
+    ["project", id, token],
+    () => getProj(id, token),
+    {
+      onSuccess: ({ data }) => {
+        return dispatch({
+          type: PROJECT_LOADED,
+          payload: data,
+        });
+      },
+      // refetchInterval: 50000,
+      refetchOnWindowFocus: false,
+    }
+  );
 
-  const {
-    isLoading: isBoardsLoading,
-    isError: isBoardsError,
-  } = useQuery(["boards", id, token], () => getBoards(id, token), {
-    onSuccess: ({ data }) => {
-      return dispatch({
-        type: BOARDS_LOADED,
-        payload: data,
-      });
-    },
-    // refetchInterval: 10000,
-    refetchOnWindowFocus: false,
-  });
+  const { isLoading: isBoardsLoading, isError: isBoardsError } = useQuery(
+    ["boards", id, token],
+    () => getBoards(id, token),
+    {
+      onSuccess: ({ data }) => {
+        return dispatch({
+          type: BOARDS_LOADED,
+          payload: data,
+        });
+      },
+      // refetchInterval: 10000,
+      refetchOnWindowFocus: false,
+    }
+  );
 
-  const {
-    isLoading: isTasksLoading,
-    isError: isTasksError,
-  } = useQuery(["tasks", id, token], () => getTasks(id, token), {
-    onSuccess: ({ data }) => {
-      return dispatch({
-        type: TASKS_LOADED,
-        payload: data,
-      });
-    },
-    // refetchInterval: 10000,
-    refetchOnWindowFocus: false,
-  });
+  const { isLoading: isTasksLoading, isError: isTasksError } = useQuery(
+    ["tasks", id, token],
+    () => getTasks(id, token),
+    {
+      onSuccess: ({ data }) => {
+        return dispatch({
+          type: TASKS_LOADED,
+          payload: data,
+        });
+      },
+      // refetchInterval: 10000,
+      refetchOnWindowFocus: false,
+    }
+  );
 
-  const isLoading = Boolean(isProjectLoading || isBoardsLoading || isTasksLoading)
-  const isError = Boolean(isProjectError || isBoardsError || isTasksError)
-
+  const isLoading = Boolean(
+    isProjectLoading || isBoardsLoading || isTasksLoading
+  );
+  const isError = Boolean(isProjectError || isBoardsError || isTasksError);
   return (
     <Paper square elevation={0} className={classes.root}>
-      <Container maxWidth="xl" className={classes.container}>
-        <Suspense fallback={<ProjectPageSkeleton />}>
-          <ProjectView isLoading={isLoading} isError={isError}/>
-        </Suspense>
-      </Container>
+      <Suspense fallback={<ProjectPageSkeleton />}>
+        <ProjectDrawer />
+        <div className={classes.container}>
+          <Tabs
+            className={classes.tabs}
+            value={0}
+            aria-label="project tabs"
+            textColor={"secondary"}
+            indicatorColor={'secondary'}
+            variant="scrollable">
+            <Tab label="Board View" />
+            <Tab label="Calendar View" />
+            <Tab label="Attachments" />
+          </Tabs>
+          <ProjectView isLoading={isLoading} isError={isError} />
+        </div>
+      </Suspense>
     </Paper>
   );
 };
