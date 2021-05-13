@@ -9,36 +9,13 @@ from dry_rest_permissions.generics import authenticated_users
 from hashid_field import HashidAutoField
 from hashids import Hashids
 
+from base.models import BaseModel
 from users.models import Team
 
 User = get_user_model()
 
 
-class BaseFields(models.Model):
-    """
-    Abstract class shared by other models with common fields:
-    -name
-    -description
-    -created_on (timestamp)
-    -updated_on
-    """
-
-    creator = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="created_%(class)ss"
-    )
-    name = models.CharField(max_length=100)
-    description = models.CharField(max_length=1000, blank=True)
-    created_on = models.DateTimeField(auto_now_add=True, auto_now=False)
-    updated_on = models.DateTimeField(auto_now=True, auto_now_add=False)
-
-    class Meta:
-        abstract = True
-
-    def __str__(self):
-        return self.name
-
-
-class Project(BaseFields):
+class Project(BaseModel):
     """
     Project model inherits fields from BaseField model
     """
@@ -76,6 +53,7 @@ class Project(BaseFields):
         :type user: User
         """
         self.members.add(user)
+        self.save()
 
     def remove_member(self, user: User):
         """
@@ -143,6 +121,24 @@ class Project(BaseFields):
         return f"/project/{self.id}/"
 
 
+class ProjectLog(models.Model):
+    """
+    model for project log, keeps track of all the actions(i.e changes) happening in the project
+    """
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="user_project_log"
+    )
+    project = models.ForeignKey(
+        Project, on_delete=models.CASCADE, related_name="project_log"
+    )
+    log = models.CharField(max_length=500)
+    timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
+
+    def __str__(self) -> str:
+        return self.project.name
+
+
 class Invitation(models.Model):
     """
     Invitation - handles project invitations
@@ -154,12 +150,25 @@ class Invitation(models.Model):
     project = models.OneToOneField(
         Project, on_delete=models.CASCADE, related_name="invitation"
     )
-    key = models.CharField(unique=True, max_length=30, blank=True, editable=False)
+    key = models.UUIDField(blank=True, null=True, editable=False)
+    passcode = models.CharField(max_length=10, blank=True, editable=False)
+    anyone = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
 
     def __str__(self):
         return self.project.name
+
+    def gen_passcode(self) -> str:
+        """
+        gen_passcode generates a new passcode for the invitation
+        :rtype: str
+        """
+        _x: int = datetime.now().microsecond
+        _salt: str = f"{get_random_secret_key()}{self.project.id}{_x}"
+        _hash: Hashids = Hashids(salt=_salt, min_length=7)
+        passcode = str(_hash.encode(_x))
+        return passcode
 
     def gen_key(self) -> str:
         """
@@ -168,13 +177,12 @@ class Invitation(models.Model):
         :return: new invitation key
         :rtype: str
         """
-        _x: int = datetime.now().microsecond
-        _salt: str = f"{get_random_secret_key()}{self.project.id}{_x}"
-        _hash: Hashids = Hashids(salt=_salt, min_length=22)
-        key = str(_hash.encode(_x))
+        key =  uuid.uuid4()
         self.key = key
+        passcode = self.gen_passcode()
+        self.passcode = passcode
         self.save()
-        return key
+        return {key:key, passcode:passcode}
 
     def change_active_status(self):
         self.active = not self.active
@@ -184,152 +192,7 @@ class Invitation(models.Model):
         """
         get_frontend_abs_url - frontend url for invitation
 
-        [extended_summary]
-
         :return: invitation url
         :rtype: str
         """
-        return f"http://127.0.0.1:8000/doge/{self.key}"
-
-
-class ProjectFeed(models.Model):
-    """
-    model for project feed, keeps track of all the actions(i.e changes) happening in the project
-    """
-
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="user_project_feed"
-    )
-    project = models.ForeignKey(
-        Project, on_delete=models.CASCADE, related_name="project_feed"
-    )
-    feed = models.CharField(max_length=500)
-    timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
-
-    def __str__(self) -> str:
-        return self.project.name
-
-
-class Board(BaseFields):
-    """
-    Board model inherits fields from BaseField model
-    """
-
-    id = HashidAutoField(
-        primary_key=True, salt=settings.HASHID_BOARD_SALT, min_length=11
-    )
-    project = models.ForeignKey(
-        Project, on_delete=models.CASCADE, related_name="project_boards"
-    )
-
-
-class Task(BaseFields):
-    """
-    Task model inherits fields from BaseField model
-    """
-
-    id = HashidAutoField(
-        primary_key=True, salt=settings.HASHID_TASK_SALT, min_length=11
-    )
-    project = models.ForeignKey(
-        Project, on_delete=models.CASCADE, related_name="project_tasks"
-    )
-    board = models.ForeignKey(
-        Board, on_delete=models.CASCADE, related_name="board_tasks"
-    )
-    members = models.ManyToManyField(User, blank=True, related_name="joined_tasks")
-    deadline = models.DateTimeField(blank=True, null=True)
-
-    def deadline_is_valid(self) -> bool:
-        """
-        deadline_is_valid - checks if the task deadline is not greater than project deadline and is not past datetime
-        :rtype: bool
-        """
-        return datetime.now() < self.deadline < self.project.deadline
-
-    def user_is_valid(self, user: User) -> bool:
-        """
-        user_is_valid - checks if user can be added to task members
-
-        :param user: user object to be checked
-        :type user: User
-        :return: boolean indication whether user is valid
-        :rtype: bool
-        """
-
-        if user == self.creator:
-            return True
-        return self.project.has_user(user)
-
-    def add_user(self, user: User):
-        """
-        add_user - adds user to task members
-
-        :param user: user obj to be added
-        :type user: User
-        """
-        self.members.add(user)
-
-    def remove_user(self, user: User):
-        """
-        remove_user - removes user to task members
-
-        :param user: user obj to be removed
-        :type user: User
-        """
-        if self.user_part_of_task(user):
-            self.members.remove(user)
-
-    def user_part_of_task(self, user: User) -> bool:
-        """
-        user_part_of_task - checks if given user is part of the task
-
-        :param user: user obj to be checked
-        :type user: User
-        :rtype: bool
-        """
-        return user == self.creator or user.joined_tasks.filter(id=self.id).exists()
-
-
-class Subtask(BaseFields):
-    id = HashidAutoField(primary_key=True, salt=settings.HASHID_TASK_SALT, min_length=7)
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="subtasks")
-    complete = models.BooleanField(default=False)
-
-
-class TaskComment(models.Model):
-    """
-    model for task comments
-    """
-
-    id = HashidAutoField(primary_key=True, salt=settings.HASHID_TASK_SALT, min_length=7)
-    commenter = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="commenter"
-    )
-    task = models.ForeignKey(
-        Task, on_delete=models.CASCADE, related_name="task_comments"
-    )
-    comment = models.CharField(max_length=750)
-    timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
-
-    def __str__(self):
-        return self.task.name
-
-    def can_be_deleted_by(self, user):
-        return user == self.commenter or user == self.task.project.creator
-
-
-class TaskFeed(models.Model):
-    """
-    model for task feed, keeps track of all the actions(i.e changes) happening in the task
-    """
-
-    user = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="user_task_feed"
-    )
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="task_feed")
-    feed = models.CharField(max_length=500)
-    timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
-
-    def __str__(self):
-        return self.task.name
+        return f"http://127.0.0.1:8000/projects/invite?action=join&kit={self.project.id}&key={self.key}" if self.key else None
