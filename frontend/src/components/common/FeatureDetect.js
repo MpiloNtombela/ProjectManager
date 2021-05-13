@@ -6,7 +6,7 @@ const FeatureDetect = ({ feature, children }) => {
 };
 
 FeatureDetect.propTypes = {
-  feature: PropTypes.any.isRequired,
+  feature: PropTypes.any,
   children: PropTypes.node.isRequired,
 };
 
