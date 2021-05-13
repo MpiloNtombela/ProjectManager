@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime
 
 from django.core.management.utils import get_random_secret_key
@@ -52,7 +53,6 @@ class Project(BaseModel):
         :type user: User
         """
         self.members.add(user)
-        print(user)
         self.save()
 
     def remove_member(self, user: User):
@@ -150,12 +150,25 @@ class Invitation(models.Model):
     project = models.OneToOneField(
         Project, on_delete=models.CASCADE, related_name="invitation"
     )
-    key = models.CharField(unique=True, max_length=30, blank=True, editable=False)
+    key = models.UUIDField(blank=True, null=True, editable=False)
+    passcode = models.CharField(max_length=10, blank=True, editable=False)
+    anyone = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
 
     def __str__(self):
         return self.project.name
+
+    def gen_passcode(self) -> str:
+        """
+        gen_passcode generates a new passcode for the invitation
+        :rtype: str
+        """
+        _x: int = datetime.now().microsecond
+        _salt: str = f"{get_random_secret_key()}{self.project.id}{_x}"
+        _hash: Hashids = Hashids(salt=_salt, min_length=7)
+        passcode = str(_hash.encode(_x))
+        return passcode
 
     def gen_key(self) -> str:
         """
@@ -164,13 +177,12 @@ class Invitation(models.Model):
         :return: new invitation key
         :rtype: str
         """
-        _x: int = datetime.now().microsecond
-        _salt: str = f"{get_random_secret_key()}{self.project.id}{_x}"
-        _hash: Hashids = Hashids(salt=_salt, min_length=22)
-        key = str(_hash.encode(_x))
+        key =  uuid.uuid4()
         self.key = key
+        passcode = self.gen_passcode()
+        self.passcode = passcode
         self.save()
-        return key
+        return {key:key, passcode:passcode}
 
     def change_active_status(self):
         self.active = not self.active
@@ -180,9 +192,7 @@ class Invitation(models.Model):
         """
         get_frontend_abs_url - frontend url for invitation
 
-        [extended_summary]
-
         :return: invitation url
         :rtype: str
         """
-        return f"http://127.0.0.1:8000/doge/{self.key}"
+        return f"http://127.0.0.1:8000/projects/invite?action=join&kit={self.project.id}&key={self.key}" if self.key else None

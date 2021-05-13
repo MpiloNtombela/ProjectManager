@@ -8,12 +8,13 @@ from rest_framework.response import Response
 from base.api import CheckProjectPermissionMixin
 from projects.models import Invitation, Project
 from projects.permissions import IsProjectCreator
-from projects.serializers import ProjectSerializer, AcceptInvitationSerializer, InvitationSerializer, BasicProjectSerializer
+from projects.serializers import ProjectSerializer, AcceptInvitationSerializer, InvitationSerializer
 from users.serializers import BasicUserSerializer
+from projects.utils import is_valid_uuid
 
 
 class ProjectListCreateAPI(generics.ListCreateAPIView):
-    serializer_class = BasicProjectSerializer
+    serializer_class = ProjectSerializer
     queryset = Project.objects.select_related('creator').prefetch_related('members')
 
     def get_queryset(self):
@@ -25,7 +26,7 @@ class ProjectListCreateAPI(generics.ListCreateAPIView):
         return context
 
 
-class ProjectRetrieveAPI(CheckProjectPermissionMixin, generics.RetrieveAPIView):
+class ProjectRetrieveAPI(CheckProjectPermissionMixin, generics.RetrieveDestroyAPIView):
     """
     apis to retrieve project
     """
@@ -59,20 +60,27 @@ class ProjectMembersListAPI(CheckProjectPermissionMixin, generics.ListAPIView):
 class AcceptInviteAPI(generics.RetrieveUpdateAPIView):
     serializer_class = AcceptInvitationSerializer
     permission_classes = [IsAuthenticated]
-    queryset = Invitation.objects.select_related("project")
+    queryset = Invitation.objects.select_related("project", 'project__creator')
     error_message = _('link provided is invalid or expired')
+
+    def get_object(self):
+        inv = get_object_or_404(
+            Invitation.objects.select_related("project", "project__creator"),
+            project_id=self.request.query_params.get('kit'),
+            key=self.request.query_params.get('key'),
+            active=True
+        )
+        return inv
+
 
     def retrieve(self, request, *args, **kwargs) -> object:
         data = {}
+        id = request.query_params.get("kit", None)
         key = request.query_params.get("key", None)
         data["message"] = self.error_message
-        if key is None or len(key) < 20:
+        if id is None or key is None or not is_valid_uuid(key, 4):
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-        inv = get_object_or_404(
-            Invitation.objects.select_related("project", "project__creator"),
-            key=key,
-            active=True
-        )
+        inv = self.get_object()
         serializer = AcceptInvitationSerializer(inv, context={"request": request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
@@ -80,13 +88,13 @@ class AcceptInviteAPI(generics.RetrieveUpdateAPIView):
         data = {}
         key = request.query_params.get("key", None)
         data["message"] = self.error_message
-        if key is None or len(key) < 20:
+        if key is None or not is_valid_uuid(key, 4):
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-        inv = get_object_or_404(
-            Invitation.objects.select_related("project", "project__creator"),
-            key=key,
-            active=True
-        )
+        inv = self.get_object()
+        if not inv.anyone:
+            if not request.data['passcode'] or request.data['passcode'] != inv.passcode:
+                data['message'] = f"{_('Invalid passcode')}"
+                return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
         inv.project.add_member(request.user)
         data["message"] = f"{_('You have joined')} {inv.project.name}"
         data["response"] = {"id": str(inv.project.id)}

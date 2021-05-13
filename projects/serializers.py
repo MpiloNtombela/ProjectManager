@@ -14,47 +14,66 @@ class InvitationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Invitation
-        exclude = ["project", 'id']
+        exclude = ["project", "id"]
 
 
 class AcceptInvitationSerializer(serializers.ModelSerializer):
-    project_name = serializers.CharField(read_only=True, source='project.name')
-    creator_name = serializers.CharField(read_only=True, source='project.creator.username')
+    project_id = serializers.CharField(read_only=True, source="project.id")
+    project_name = serializers.CharField(read_only=True, source="project.name")
+    creator_name = serializers.CharField(
+        read_only=True, source="project.creator.username"
+    )
+    part_of_project = serializers.SerializerMethodField()
 
     class Meta:
         model = Invitation
-        fields = ["project_name", 'creator_name']
+        fields = ["project_id", "project_name", "creator_name", "part_of_project"]
+
+    def get_part_of_project(self, obj):
+        user = self.context["request"].user
+        return obj.project.has_user(user)
 
 
-class BasicProjectSerializer(serializers.ModelSerializer):
+# class BasicProjectSerializer(serializers.ModelSerializer):
+#     id = HashidSerializerCharField(source_field="projects.Project.id", read_only=True)
+#     creator = BasicUserSerializer(read_only=True, default=serializers.CurrentUserDefault())
+#     is_creator = serializers.SerializerMethodField()
+
+#     class Meta:
+#         model = Project
+#         fields = ["id", "name", "creator", "is_creator"]
+
+#     def get_is_creator(self, obj) -> bool:
+#         user = self.context['request'].user
+#         return user == obj.creator
+
+#     def create(self, validated_data):
+#         name = validated_data.get('name')
+#         project = Project.objects.create(creator=self.context['request'].user, name=name)
+#         return project
+
+
+class ProjectSerializer(serializers.ModelSerializer):
     id = HashidSerializerCharField(source_field="projects.Project.id", read_only=True)
-    creator = BasicUserSerializer(read_only=True, default=serializers.CurrentUserDefault())
+    creator = BasicUserSerializer(required=False)
     is_creator = serializers.SerializerMethodField()
+    members = BasicUserSerializer(many=True, required=False)
+    permissions = DRYPermissionsField()
 
     class Meta:
         model = Project
-        fields = ["id", "name", "creator", "is_creator"]
+        fields = ["id", "name", "creator", "is_creator", "members", "permissions"]
 
     def get_is_creator(self, obj) -> bool:
         user = self.context['request'].user
         return user == obj.creator
 
     def create(self, validated_data):
-        name = validated_data.get('name')
-        project = Project.objects.create(creator=self.context['request'].user, name=name)
+        name = validated_data.get("name")
+        project = Project.objects.create(
+            creator=self.context["request"].user, name=name
+        )
         return project
-
-
-class ProjectSerializer(serializers.ModelSerializer):
-    id = HashidSerializerCharField(source_field="projects.Project.id", read_only=True)
-    creator = BasicUserSerializer()
-    members = BasicUserSerializer(many=True)
-    permissions = DRYPermissionsField()
-    invitation = InvitationSerializer()
-
-    class Meta:
-        model = Project
-        fields = ["id", "name", "creator", "members", "invitation", "permissions"]
 
 
 class ProjectMembersSerializer(serializers.ModelSerializer):
