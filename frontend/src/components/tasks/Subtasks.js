@@ -8,7 +8,7 @@ import {Close} from "@material-ui/icons";
 import ListItemText from "@material-ui/core/ListItemText";
 import Checkbox from "@material-ui/core/Checkbox";
 import ListItem from "@material-ui/core/ListItem";
-import {deleteSubtask, updateSubtask} from "../../../actions/projects/tasks";
+import {deleteSubtask, updateSubtask} from "../../actions/projects/tasks";
 import {useDispatch} from "react-redux";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import Card from "@material-ui/core/Card";
