@@ -9,7 +9,7 @@ import Card from "@material-ui/core/Card";
 import {useDispatch} from "react-redux";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import TaskView from "./TaskView";
-import {getTask} from "../../../actions/projects/tasks";
+import {getTask} from "../../actions/projects/tasks";
 import AvatarGroup from "@material-ui/core/AvatarGroup";
 import Avatar from "@material-ui/core/Avatar";
 

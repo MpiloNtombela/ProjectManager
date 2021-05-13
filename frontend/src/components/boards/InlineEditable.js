@@ -3,10 +3,10 @@ import PropTypes from 'prop-types'
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
-import {SaveButton} from "../../reuse/ReButtons";
+import {SaveButton} from "../reuse/ReButtons";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import {useDispatch} from "react-redux";
-import {updateBoard} from "../../../actions/projects/boards";
+import {updateBoard} from "../../actions/projects/boards";
 
 const useStyles = makeStyles({
   form: {

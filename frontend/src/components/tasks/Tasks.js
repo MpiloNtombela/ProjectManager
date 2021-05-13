@@ -6,7 +6,7 @@ import NewTaskForm from "./forms/NewTaskForm";
 import { useSelector } from "react-redux";
 import Task from "./Task";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
-import TaskSkeleton from "../../skeletons/projects/TaskSkeleton";
+import TaskSkeleton from "../skeletons/projects/TaskSkeleton";
 
 const Tasks = ({ tasks, boardId }) => {
   const [isNewTask, setIsNewTask] = useState(false);
