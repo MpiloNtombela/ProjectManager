@@ -150,16 +150,12 @@ const TaskView = ({openTask, setOpenTask}) => {
                   {task.deadline &&
                     <Chip icon={<Alarm/>} label={`task due ${timeDiffFromNow(task.deadline)}`}/>}
                   <Button size="small" startIcon={<DateRange/>} disableElevation
-                          fullWidth color='secondary' onClick={handleDeadlineClick}>
+                          fullWidth color='primary' onClick={handleDeadlineClick}>
                     new Deadline
                   </Button>
                   <Box sx={{my: 2}}>
                     <Typography className={classes.subHeader} component='h2'>Members</Typography>
                     <TasksMembers id={task.id} members={task.members} isRequesting={isRequesting}/>
-                    <MembersForm/>
-
-
-                   
                   </Box>
                   <Typography className={classes.subHeader} component='h2'>Task Logs</Typography>
                   {task['task_logs'].length ?
