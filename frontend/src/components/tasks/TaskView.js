@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import Dialog from "@material-ui/core/Dialog";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
-import TaskViewSkeleton from "../../skeletons/projects/TaskViewSkeleton";
+import TaskViewSkeleton from "../skeletons/projects/TaskViewSkeleton";
 import DialogContent from "@material-ui/core/DialogContent";
 import Grid from "@material-ui/core/Grid";
 import Typography from "@material-ui/core/Typography";
@@ -15,8 +15,8 @@ import DateRange from "@material-ui/icons/DateRange";
 import {useDispatch, useSelector} from "react-redux";
 import TaskComments from "./TaskComments";
 import TaskCommentForm from "./forms/TaskCommentForm";
-import {addComment, deleteTask} from "../../../actions/projects/tasks";
-import createSnackAlert from "../../../actions/snackAlerts";
+import {addComment, deleteTask} from "../../actions/projects/tasks";
+import createSnackAlert from "../../actions/snackAlerts";
 import LinearProgress from "@material-ui/core/LinearProgress";
 import TasksMembers from "./TaskMembers";
 import {TaskDescriptionEdit, TaskNameEdit} from "./InlineEditable";
@@ -28,7 +28,7 @@ import TaskViewBar from "./TaskViewBar";
 import MembersForm from "./forms/MembersForm";
 import Chip from "@material-ui/core/Chip";
 import Alarm from "@material-ui/icons/Alarm";
-import {timeDiffFromNow} from "../../../utils";
+import {timeDiffFromNow} from "../../utils";
 
 const useStyles = makeStyles(theme => ({
   root: {

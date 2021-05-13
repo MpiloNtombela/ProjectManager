@@ -13,10 +13,10 @@ import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import IconButton from "@material-ui/core/IconButton";
 import {Close} from "@material-ui/icons";
 import {useDispatch} from "react-redux";
-import {deleteComment} from "../../../actions/projects/tasks";
+import {deleteComment} from "../../actions/projects/tasks";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import Tooltip from "@material-ui/core/Tooltip";
-import {timeDiffFromNow, toZonedFormat} from "../../../utils";
+import {timeDiffFromNow, toZonedFormat} from "../../utils";
 
 const useStyles = makeStyles({
   commentItem: {
