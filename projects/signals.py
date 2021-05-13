@@ -12,14 +12,28 @@ def initial_project_setup(sender, instance, created, **kwargs):
     if created:
         Invitation.objects.create(project=instance)
         instance.invitation.save()
-        instance.invitation.gen_key()
-        Board.objects.bulk_create([
-            Board(name=_('To Do'), project=instance, creator=instance.creator),
-            Board(name=_('Currently Doing'), project=instance, creator=instance.creator),
-            Board(name=_('Completed'), project=instance, creator=instance.creator),
-        ])
-        task = Task.objects.create(creator=instance.creator,
-                                   board=Board.objects.filter(project=instance).first(),
-                                   name=_('A cool first task. Click to open TaskView'),
-                                   description=_("TaskView shows the progress of the task and everything related to it"))
+        Board.objects.bulk_create(
+            [
+                Board(name=_("To Do"), project=instance, creator=instance.creator),
+                Board(
+                    name=_("In Progress"), project=instance, creator=instance.creator
+                ),
+                Board(name=_("Completed"), project=instance, creator=instance.creator),
+            ]
+        )
+        task = Task.objects.create(
+            creator=instance.creator,
+            board=Board.objects.filter(project=instance).first(),
+            name=_("A cool first task. Click to open TaskView"),
+            description=_(
+                "TaskView shows the progress of the task and everything related to it"
+            ),
+        )
         task.save()
+
+
+@receiver(post_save, sender=Invitation)
+def add_creator_to_members(sender, instance, created, **kwargs):
+    if created:
+        project = instance.project
+        project.add_member(project.creator)
