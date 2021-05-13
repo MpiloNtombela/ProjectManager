@@ -12,7 +12,6 @@ import LinearProgress from "@material-ui/core/LinearProgress";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
-import { TramRounded } from "@material-ui/icons";
 import Add from "@material-ui/icons/Add";
 import axios from "axios";
 import PropTypes from "prop-types";
@@ -99,7 +98,6 @@ const NewProjectForm = ({ open, handleClose }) => {
       onClose={handleClose}
       aria-labelledby="title">
       {isLoading && <LinearProgress variant={"indeterminate"} />}
-      <DialogTitle id="title">Give the project a name</DialogTitle>
       <form onSubmit={handleSubmit}>
         <DialogContent>
           <TextField
@@ -115,13 +113,16 @@ const NewProjectForm = ({ open, handleClose }) => {
             value={name}
             onChange={handleChange}
             variant={"standard"}
+            helperText={'Hint: you can always change name later'}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} disabled={isLoading}>
             Cancel
           </Button>
-          <Button disabled={isLoading}>create</Button>
+          <Button disabled={isLoading} type={"submit"}>
+            create
+          </Button>
         </DialogActions>
       </form>
     </Dialog>
@@ -170,27 +171,23 @@ const Home = () => {
   return (
     <Box component="main" sx={{ my: 3 }}>
       <Container maxWidth="md">
-        {isLoading && <BarLoader />}
+        <Box
+          sx={{ my: 2 }}
+          display={"flex"}
+          justifyContent={"flex-end"}
+          width={"100%"}>
+          <Button
+            onClick={handleOpenForm}
+            variant={"contained"}
+            startIcon={<Add />}
+            size={"small"}>
+            create project
+          </Button>
+        </Box>
         <Typography variant="h6" component="h2">
           Your Projects
         </Typography>
-        {created.length ? (
-          <Box
-            sx={{ my: 2 }}
-            display={"flex"}
-            justifyContent={"flex-end"}
-            width={"100%"}>
-            <Button
-              onClick={handleOpenForm}
-              variant={"contained"}
-              startIcon={<Add />}
-              size={"small"}>
-              create project
-            </Button>
-          </Box>
-        ) : (
-          ""
-        )}
+
         <Grid container spacing={1}>
           {created.length ? (
             created.map((project) => (
