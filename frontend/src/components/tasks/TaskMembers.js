@@ -2,7 +2,7 @@ import React, { memo, useState } from "react";
 import PropTypes from "prop-types";
 import { useDispatch } from "react-redux";
 import Avatar from "@material-ui/core/Avatar";
-import { addRemoveMember } from "../../../actions/projects/tasks";
+import { addRemoveMember } from "../../actions/projects/tasks";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemAvatar from "@material-ui/core/ListItemAvatar";
 import ListItemText from "@material-ui/core/ListItemText";

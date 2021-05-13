@@ -11,9 +11,9 @@ import Tasks from "../tasks/Tasks";
 import Card from "@material-ui/core/Card";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import { useDispatch, useSelector } from "react-redux";
-import ActionDialog from "../../reuse/ReDialogs";
-import { deleteBoard } from "../../../actions/projects/boards";
-import boardTasks from "../../../selectors/boardTasks";
+import ActionDialog from "../reuse/ReDialogs";
+import { deleteBoard } from "../../actions/projects/boards";
+import boardTasks from "../../selectors/boardTasks";
 import { BoardNameEdit } from "./InlineEditable";
 
 export const BOARD_WIDTH = "250px";

@@ -3,12 +3,12 @@ import PropTypes from 'prop-types'
 import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
-import {SaveButton} from "../../reuse/ReButtons";
+import {SaveButton} from "../reuse/ReButtons";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import Edit from "@material-ui/icons/Edit";
 import IconButton from "@material-ui/core/IconButton";
 import {useDispatch} from "react-redux";
-import {updateTask} from "../../../actions/projects/tasks";
+import {updateTask} from "../../actions/projects/tasks";
 import Button from "@material-ui/core/Button";
 import {Notes} from "@material-ui/icons";
 

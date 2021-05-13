@@ -1,9 +1,9 @@
 import React, {useState} from 'react';
 import PropTypes from 'prop-types';
 import TextField from "@material-ui/core/TextField";
-import RePopper from "../../../reuse/RePopper";
+import RePopper from "../../reuse/RePopper";
 import {useDispatch} from "react-redux";
-import {updateTask} from "../../../../actions/projects/tasks";
+import {updateTask} from "../../../actions/projects/tasks";
 import MobileDateTimePicker from "@material-ui/lab/MobileDateTimePicker";
 
 const DeadlineForm = ({setAnchorEl, anchorEl, deadline, id}) => {

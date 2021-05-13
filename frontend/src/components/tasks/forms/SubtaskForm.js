@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
-import RePopper from "../../../reuse/RePopper";
+import RePopper from "../../reuse/RePopper";
 import TextField from "@material-ui/core/TextField";
-import { CancelButton, SaveButton } from "../../../reuse/ReButtons";
+import { CancelButton, SaveButton } from "../../reuse/ReButtons";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import { useDispatch } from "react-redux";
-import { addSubtask } from "../../../../actions/projects/tasks";
-import createSnackAlert from "../../../../actions/snackAlerts";
+import { addSubtask } from "../../../actions/projects/tasks";
+import createSnackAlert from "../../../actions/snackAlerts";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import PlaylistAddCheck from "@material-ui/icons/PlaylistAddCheck";
 import Button from "@material-ui/core/Button";
