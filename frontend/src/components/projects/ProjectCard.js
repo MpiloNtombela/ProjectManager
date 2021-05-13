@@ -1,15 +1,17 @@
 import IconButton from "@material-ui/core/IconButton";
 import Avatar from "@material-ui/core/Avatar";
+import AvatarGroup from "@material-ui/core/AvatarGroup";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import CardHeader from "@material-ui/core/CardHeader";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import Typography from "@material-ui/core/Typography";
-import { ExpandMore, Share } from "@material-ui/icons";
+import { ExpandMore, StarsRounded } from "@material-ui/icons";
 import PropTypes from "prop-types";
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
-import InvitationPopper from "./projectActions/InvitationAction";
+import InvitationPopper from "./projectActions/InvitationCard";
+import Badge from "@material-ui/core/Badge";
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -26,6 +28,14 @@ const useStyles = makeStyles((theme) => ({
   title: {
     fontWeight: "bold",
     opacity: ".85",
+  },
+  badge: {
+    right: "20%",
+    bottom: "15%",
+  },
+  adminIcon: {
+    height: ".75rem",
+    width: ".75rem",
   },
 }));
 
@@ -45,15 +55,30 @@ const ProjectCard = ({ project }) => {
     <Card className={classes.card}>
       <CardHeader
         avatar={
-          <Avatar
-            aria-label="creator"
-            className={classes.avatar}
-            src={project.creator.avatar}
-            alt={project.creator.username}
-          />
+          <AvatarGroup max={4}>
+            {project.members.map((member) => (
+              <div key={member.id}>
+                {project.creator.id === member.id ? (
+                  <Badge
+                    classes={{ badge: classes.badge }}
+                    overlap={"circular"}
+                    anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                    badgeContent={
+                      <StarsRounded
+                        color={"secondary"}
+                        classes={{ root: classes.adminIcon }}
+                        fontSize={"small"}
+                      />
+                    }>
+                    <Avatar alt={member.username} src={member.avatar} />
+                  </Badge>
+                ) : (
+                  <Avatar src={member.avatar} alt={"mpiloh"} />
+                )}
+              </div>
+            ))}
+          </AvatarGroup>
         }
-        title={project.creator.username}
-        subheader="September 14, 2016"
         action={
           project.is_creator && (
             <IconButton size={"small"} onClick={handleExpandClick}>
@@ -69,9 +94,9 @@ const ProjectCard = ({ project }) => {
         }}>
         <Typography
           className={classes.title}
-          variant={"subtitle1"}
+          variant={"h6"}
           color="textPrimary"
-          component="h2">
+          component="h6">
           {project.name}
         </Typography>
       </CardContent>
