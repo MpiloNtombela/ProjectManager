@@ -11,10 +11,16 @@ from users.serializers import BasicUserSerializer
 
 class InvitationSerializer(serializers.ModelSerializer):
     url = serializers.URLField(source="get_frontend_abs_url")
+    passcode = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Invitation
         exclude = ["project", "id"]
+
+    def get_passcode(self, obj) -> str:
+        if self.context["request"].user == obj.project.creator:
+            return obj.passcode
+        return ""
 
 
 class AcceptInvitationSerializer(serializers.ModelSerializer):
@@ -65,7 +71,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         fields = ["id", "name", "creator", "is_creator", "members", "permissions"]
 
     def get_is_creator(self, obj) -> bool:
-        user = self.context['request'].user
+        user = self.context["request"].user
         return user == obj.creator
 
     def create(self, validated_data):

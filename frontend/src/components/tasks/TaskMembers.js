@@ -37,7 +37,7 @@ const useStyles = makeStyles({
   },
 });
 
-const TaskMembers = ({ id, members, isRequesting }) => {
+const TaskMembers = ({ boardId, id, members, isRequesting }) => {
   const classes = useStyles();
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
@@ -50,7 +50,7 @@ const TaskMembers = ({ id, members, isRequesting }) => {
   };
 
   const handleRemoveMember = (userId) => {
-    dispatch(addRemoveMember(id, userId, "remove"));
+    dispatch(addRemoveMember(boardId, id, userId, "remove"));
   };
   return (
     <>
@@ -99,6 +99,7 @@ const TaskMembers = ({ id, members, isRequesting }) => {
 };
 
 TaskMembers.propTypes = {
+  boardId: PropTypes.string,
   id: PropTypes.string.isRequired,
   members: PropTypes.array.isRequired,
   isRequesting: PropTypes.bool,

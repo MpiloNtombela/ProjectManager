@@ -63,7 +63,7 @@ const MembersForm = ({open, onClose}) => {
   }
   useEffect(() => {
     if (value && value.id) {
-      dispatch(addRemoveMember(task.id, value.id, 'add'))
+      dispatch(addRemoveMember(task.board.id, task.id, value.id, 'add'))
       setValue(null)
     }
   }, [value])

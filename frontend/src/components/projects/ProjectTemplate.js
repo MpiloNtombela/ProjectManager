@@ -11,8 +11,7 @@ import { tokenConfig } from "../common/axiosConfig";
 import { useQuery } from "react-query";
 import {
   BOARDS_LOADED,
-  PROJECT_LOADED,
-  TASKS_LOADED,
+  PROJECT_LOADED
 } from "../../actions/projectTypes";
 import ProjectDrawer from "./ProjectDrawer";
 import useMediaQuery from "@material-ui/core/useMediaQuery";
@@ -35,7 +34,7 @@ const useStyles = (matches) =>
       },
     },
     tabs: {
-      background: theme.palette.background.default,
+      background: theme.palette.background.paper,
       position: "sticky",
       top: theme.sizing.toolbarHeight,
       zIndex: 1,
@@ -55,8 +54,8 @@ const getProj = async (id, token) =>
 const getBoards = async (id, token) =>
   await axios.get(`${ROOT_URL}/${id}/boards/`, tokenConfig(token));
 
-const getTasks = async (id, token) =>
-  await axios.get(`${ROOT_URL}/${id}/tasks/`, tokenConfig(token));
+// const getTasks = async (id, token) =>
+//   await axios.get(`${ROOT_URL}/${id}/tasks/`, tokenConfig(token));
 
 const ProjectTemplate = () => {
   const matchesSmUp = useMediaQuery((theme) => theme.breakpoints.up("sm"));
@@ -96,27 +95,12 @@ const ProjectTemplate = () => {
     }
   );
 
-  const { isLoading: isTasksLoading, isError: isTasksError } = useQuery(
-    ["tasks", id, token],
-    () => getTasks(id, token),
-    {
-      onSuccess: ({ data }) => {
-        return dispatch({
-          type: TASKS_LOADED,
-          payload: data,
-        });
-      },
-      // refetchInterval: 10000,
-      refetchOnWindowFocus: false,
-    }
-  );
-
   const isLoading = Boolean(
-    isProjectLoading || isBoardsLoading || isTasksLoading
+    isProjectLoading || isBoardsLoading
   );
-  const isError = Boolean(isProjectError || isBoardsError || isTasksError);
+  const isError = Boolean(isProjectError || isBoardsError);
   return (
-    <Paper square elevation={0} className={classes.root}>
+    <Paper square elevation={2} className={classes.root}>
       <Suspense fallback={<ProjectPageSkeleton />}>
         <ProjectDrawer />
         <div className={classes.container}>

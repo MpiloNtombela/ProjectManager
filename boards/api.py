@@ -1,3 +1,4 @@
+from base.utils import get_list_or_404
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext_lazy as _
 from rest_framework import generics, status
@@ -14,10 +15,15 @@ class ProjectBoardsListCreateAPI(generics.ListCreateAPIView):
     apis to get or create board(s)
     """
     serializer_class = BoardSerializer
-    queryset = Board.objects.select_related('project', 'creator')
     permission_classes = [AllowAny]
 
     # permission_classes = [IsAuthenticated, IsPartOfProject]
+
+    def get_queryset(self):
+        queryset = Board.objects.select_related('project').prefetch_related('board_tasks')
+        queryset = self.get_serializer_class().dynamic_load(queryset)
+        return queryset
+
 
     def list(self, request, *args, **kwargs):
         """
@@ -28,13 +34,9 @@ class ProjectBoardsListCreateAPI(generics.ListCreateAPIView):
         :return: list/array of boards
         """
         data = {}
-        try:
-            qs = Board.objects.select_related('project').filter(project_id=self.kwargs['pk'])
-        except ObjectDoesNotExist:
-            data['message'] = _("we can't find what you're looking for")
-            return Response(data=data, status=status.HTTP_404_NOT_FOUND)
+        qs = get_list_or_404(self.get_queryset(), project_id=kwargs.get('pk'))
 
-        serializer = BoardSerializer(instance=qs, many=True, context={'request': request})
+        serializer = self.get_serializer(instance=qs, many=True, context={'request': request})
         return Response(data=serializer.data, status=status.HTTP_200_OK)
 
     def create(self, request, *args, **kwargs):
@@ -46,12 +48,8 @@ class ProjectBoardsListCreateAPI(generics.ListCreateAPIView):
         :return: newly created board
         """
         data = {}
-        try:
-            project = Project.objects.get(id=self.kwargs['pk'])
-        except ObjectDoesNotExist:
-            data['message'] = _("sorry, we encountered an error saving the board")
-            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-        serializer = BoardSerializer(data=request.data)
+        project = generics.get_object_or_404(Project, id=kwargs.get('pk'))
+        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             serializer.save(creator=request.user, project=project)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -76,12 +74,8 @@ class BoardRetrieveUpdateDestroyAPI(generics.RetrieveUpdateDestroyAPIView):
         :return: API Response
         """
         data = {}
-        try:
-            inst = self.get_object()
-        except ObjectDoesNotExist:
-            data['message'] = _("board may already have been deleted")
-            return Response(status=status.HTTP_404_NOT_FOUND)
-        self.perform_destroy(instance=inst)
+        board = self.get_object()
+        self.perform_destroy(instance=board)
         data['message'] = _('board deleted successfully')
         return Response(data=data, status=status.HTTP_200_OK)
 
@@ -94,13 +88,9 @@ class BoardRetrieveUpdateDestroyAPI(generics.RetrieveUpdateDestroyAPIView):
         :return: API Response
         """
         data = {}
-        try:
-            board = self.get_object()
-        except ObjectDoesNotExist:
-            data['message'] = _("Uhh Ohh something went wrong")
-            return Response(data=data, status=status.HTTP_404_NOT_FOUND)
-        _serializer = self.get_serializer_class()
-        serializer = _serializer(board, data=request.data, partial=True)
+        board = self.get_object()
+        # _serializer = self.get_serializer_class()
+        serializer = self.get_serializer_class(board, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             data['message'] = _('board updated successfully')

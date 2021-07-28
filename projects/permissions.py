@@ -23,5 +23,10 @@ class IsCreator(permissions.BasePermission):
 
 
 class IsProjectCreator(permissions.BasePermission):
+    """
+    checks and restrict permission to only creator of the object or the project admin(s)
+    """
+    messages = _("You don't have permission to perform the action")
+
     def has_object_permission(self, request, view, obj):
         return request.user == obj.project.creator

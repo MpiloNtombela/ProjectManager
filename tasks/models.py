@@ -2,6 +2,8 @@ from datetime import datetime
 
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
+from dry_rest_permissions.generics import authenticated_users
 
 from hashid_field import HashidAutoField
 
@@ -23,6 +25,10 @@ class Task(BaseModel):
     )
     members = models.ManyToManyField(User, blank=True, related_name="joined_tasks")
     deadline = models.DateTimeField(blank=True, null=True)
+    moved_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        ordering = ["moved_at"]
 
     def deadline_is_valid(self) -> bool:
         """
@@ -69,6 +75,36 @@ class Task(BaseModel):
         :rtype: bool
         """
         return user == self.creator or user.joined_tasks.filter(id=self.id).exists()
+
+    def move(self, destination: Board) -> object:
+        """
+        move - moves the task to new board
+
+        :param destination: the board that the task is being moved to
+        :type destination: Board
+        :return: task object
+        :rtype: object
+        """
+        self.board = destination
+        self.moved_at = timezone.now()
+        self.save()
+
+    @staticmethod
+    @authenticated_users
+    def has_read_permission(request):
+        return True
+
+    @authenticated_users
+    def has_object_read_permission(self, request) -> bool:
+        return self.board.project.has_user(request.user)
+
+    @authenticated_users
+    def has_object_write_permission(self, request):
+        return self.user_part_of_task(request.user)
+
+    @authenticated_users
+    def has_object_update_permission(self, request):
+        return self.user_part_of_task(request.user)
 
 
 class Subtask(BaseModel):
