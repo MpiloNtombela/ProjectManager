@@ -9,6 +9,7 @@ import Button from "@material-ui/core/Button";
 import Switch from "@material-ui/core/Switch";
 import Tooltip from "@material-ui/core/Tooltip";
 import Typography from "@material-ui/core/Typography";
+import Box from "@material-ui/core/Box";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import { tokenConfig } from "../../common/axiosConfig";
 import { useMutation, useQuery, useQueryClient } from "react-query";
@@ -142,35 +143,44 @@ const Invitation = ({ id, data }) => {
                 defaultValue={invitation.url}
               />
             </Tooltip>
-            <FeatureDetect feature={navigator.share}>
+            {invitation.passcode && (
+              <Typography
+                sx={{ mt: 1 }}
+                color={"textSecondary"}
+                variant={"caption"}>
+                passcode: {invitation.passcode}
+              </Typography>
+            )}
+            <Box sx={{ my: 2 }}>
+              <FeatureDetect feature={navigator.share}>
+                <AvatarIconButton
+                  icon={<ShareRounded fontSize={"small"} />}
+                  onClick={() => {
+                    shareData(_shareData);
+                  }}
+                  color={"primary"}
+                  disabled={isLoading}
+                  size={"small"}
+                  text={"share link"}
+                />
+              </FeatureDetect>
               <AvatarIconButton
-                icon={<ShareRounded fontSize={"small"} />}
-                onClick={() => {
-                  shareData(_shareData);
-                }}
-                color={"secondary"}
+                icon={<FileCopyRounded fontSize={"small"} />}
+                onClick={handleCopy}
+                color={"primary"}
                 disabled={isLoading}
                 size={"small"}
-                text={"copy"}
+                text={"copy link"}
               />
-            </FeatureDetect>
-            <AvatarIconButton
-              icon={<FileCopyRounded fontSize={"small"} />}
-              onClick={handleCopy}
-              color={"secondary"}
-              disabled={isLoading}
-              size={"small"}
-              text={"copy"}
-            />
-            <AvatarIconButton
-              icon={<RotateLeft fontSize={"small"} />}
-              size={"small"}
-              color={"error"}
-              disabled={isLoading || isResetSuccess}
-              onClick={handleNewLink}
-              text={"new link"}
-            />
-
+              <AvatarIconButton
+                icon={<RotateLeft fontSize={"small"} />}
+                size={"small"}
+                color={"error"}
+                disabled={isLoading || isResetSuccess}
+                onClick={handleNewLink}
+                text={"new link"}
+              />
+            </Box>
             <Typography variant={"subtitle2"}>
               <Typography variant={"overline"} component={"strong"}>
                 Link Active{" "}
@@ -182,11 +192,11 @@ const Invitation = ({ id, data }) => {
                 checked={invitation.active}
               />
             </Typography>
-            <Typography className={classes.caution} variant={"caption"}>
-              {invitation.active
-                ? "Anyone with link can join project"
-                : "Invite link has been deactivated"}
-            </Typography>
+            {!invitation.active && (
+              <Typography className={classes.caution} variant={"caption"}>
+                Invite link deactivated
+              </Typography>
+            )}
           </>
         )}
       </div>
@@ -203,7 +213,7 @@ const getInvite = async (id, token) => {
 
 const InvitationCard = ({ id, anchorEl, setAnchorEl }) => {
   const { token } = useSelector((state) => state.auth);
-  const { isLoading, isSuccess, data, isError, error } = useQuery(
+  const { isLoading, isSuccess, data, isError } = useQuery(
     ["project-invite-config", id, token],
     () => getInvite(id, token),
     {

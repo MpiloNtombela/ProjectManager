@@ -10,6 +10,19 @@ const theme = createMuiTheme({
     secondary: {
       main: "#9400D3",
     },
+    alpha: {
+      5: "0D",
+      10: "1A",
+      20: "33",
+      30: "4D",
+      40: "66",
+      50: "80",
+      60: "99",
+      70: "B3",
+      80: "CC",
+      90: "E6",
+      100: "FF",
+    },
   },
   shape: {
     // borderRadius: 12

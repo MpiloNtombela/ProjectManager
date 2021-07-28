@@ -20,12 +20,14 @@ export const TASK_LOADED = 'TASK_LOADED'
 export const TASK_ADDED = 'TASK_ADDED'
 export const TASK_UPDATED = 'TASK_UPDATED';
 export const TASK_MEMBER_ALTERED = 'TASK_MEMBER_ALTERED';
+export const TASK_MOVED = 'TASK_MOVED';
 export const TASK_DELETED = 'TASK_DELETED';
 export const SUBTASK_ADDED = 'SUBTASK_ADDED';
 export const SUBTASK_UPDATED = 'SUBTASK_UPDATED';
 export const SUBTASK_DELETED = 'SUBTASK_DELETED';
 export const COMMENT_ADDED = 'COMMENT_ADDED';
 export const COMMENT_DELETED = 'COMMENT_DELETED';
+// export const
 
 // request failed
 export const PROJECTS_REQUEST_FAILED = 'PROJECTS_REQUEST_FAILED'

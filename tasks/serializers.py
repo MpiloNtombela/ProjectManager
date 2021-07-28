@@ -1,9 +1,10 @@
+from dry_rest_permissions.generics import DRYPermissionsField
 from hashid_field.rest import HashidSerializerCharField
 from rest_framework import serializers
 
 from users.serializers import BasicUserSerializer
-from boards.serializers import BSerializer
 from tasks.models import TaskComment, TaskLog, Subtask, Task
+from boards.models import Board
 
 
 class TaskCommentSerializer(serializers.ModelSerializer):
@@ -33,9 +34,19 @@ class SubtaskSerializer(serializers.ModelSerializer):
         fields = ["id", "name", "complete", "created_on", "updated_on"]
 
 
+class BSerializer(serializers.ModelSerializer):
+    id = HashidSerializerCharField(source_field="boards.Board.id", read_only=True)
+
+    class Meta:
+        model = Board
+        fields = ['id', 'name']
+
+
+
 class TaskViewSerializer(serializers.ModelSerializer):
     id = HashidSerializerCharField(source_field="tasks.Task.id", read_only=True)
     creator = BasicUserSerializer(required=False)
+    board = BSerializer(required=False)
     members = BasicUserSerializer(many=True, required=False)
     is_creator = serializers.SerializerMethodField()
     can_edit = serializers.SerializerMethodField()
@@ -52,12 +63,14 @@ class TaskViewSerializer(serializers.ModelSerializer):
             "can_edit",
             "created_on",
             "deadline",
+            'moved_at',
             "description",
             "creator",
             "members",
             "subtasks",
             "task_comments",
             "task_logs",
+            "board",
         ]
 
     def get_can_edit(self, obj) -> bool:
@@ -74,11 +87,12 @@ class TaskSerializer(serializers.ModelSerializer):
     creator = BasicUserSerializer(required=False)
     members = BasicUserSerializer(required=False, many=True)
     can_edit = serializers.SerializerMethodField()
-    board = BSerializer(required=False)
+    board_name = serializers.CharField(source="board.name", required=False)
+    permissions = DRYPermissionsField()
 
     class Meta:
         model = Task
-        fields = ["id", "name", "can_edit", "board", "creator", "members"]
+        fields = ["id", "name", "can_edit", "board_name", "creator", 'moved_at', "members", 'permissions']
 
     def get_can_edit(self, obj) -> bool:
         """

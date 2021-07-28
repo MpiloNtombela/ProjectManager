@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useState } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import Drawer from "@material-ui/core/Drawer";
 import Box from "@material-ui/core/Box";
@@ -7,24 +7,30 @@ import Toolbar from "@material-ui/core/Toolbar";
 import List from "@material-ui/core/List";
 import Grid from "@material-ui/core/Grid";
 import Fab from "@material-ui/core/Fab";
-// import CssBaseline from "@material-ui/core/CssBaseline";
 import Typography from "@material-ui/core/Typography";
-// import MenuIcon from "@material-ui/icons/Menu";
 import ListItem from "@material-ui/core/ListItem";
-// import useMediaQuery from "@material-ui/core/useMediaQuery";
 import BottomDrawer from "../layout/BottomDrawer";
 import Hidden from "@material-ui/core/Hidden";
 import TextBottomIconButton from "../layout/TextBottomIconButton";
 import { useSelector } from "react-redux";
-import { ViewWeek, Attachment, History, BubbleChart, Menu, PersonAdd, Tune } from "@material-ui/icons";
+import {
+  ViewWeek,
+  Attachment,
+  History,
+  BubbleChart,
+  Menu,
+  PersonAdd,
+  Tune,
+} from "@material-ui/icons";
 import IconButton from "@material-ui/core/IconButton";
+import InvitationCard from "./projectActions/InvitationCard";
 
 const drawerWidth = 75;
 
 const useStyles = makeStyles((theme) => ({
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
-    background: theme.palette.background.paper,
+    background: theme.palette.background.paper + theme.palette.alpha['80'],
     color: theme.palette.primary.main,
   },
   toolbar: {
@@ -32,6 +38,7 @@ const useStyles = makeStyles((theme) => ({
   },
   drawer: {
     width: drawerWidth,
+    border: 0,
     flexShrink: 0,
     whiteSpace: "nowrap",
     overflowX: "hidden",
@@ -51,7 +58,8 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export default function ProjectDrawer() {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState(false);
   const classes = useStyles();
   const { project } = useSelector((state) => state.projectsState);
 
@@ -61,6 +69,11 @@ export default function ProjectDrawer() {
   const handleClose = () => {
     if (!open) return;
     setOpen(false);
+  };
+
+  const handleInviteClick = (e) => {
+    if (!project.is_creator) return;
+    setAnchorEl(anchorEl ? null : e.currentTarget);
   };
 
   const actionButtons = [
@@ -76,7 +89,12 @@ export default function ProjectDrawer() {
     },
     {
       name: "Logs",
-      icon:  <History/>,
+      icon: <History />,
+      func: handleClose,
+    },
+    {
+      name: "Test",
+      icon: <PersonAdd />,
       func: handleClose,
     },
   ];
@@ -100,10 +118,10 @@ export default function ProjectDrawer() {
                 {project.name}
               </Typography>
 
-              <IconButton size={'medium'}>
+              <IconButton size={"medium"} onClick={handleInviteClick}>
                 <PersonAdd />
               </IconButton>
-              <IconButton size={'medium'}>
+              <IconButton size={"medium"}>
                 <Tune />
               </IconButton>
             </>
@@ -124,10 +142,10 @@ export default function ProjectDrawer() {
       </Hidden>
       <Hidden smUp>
         <BottomDrawer open={open} setOpen={setOpen}>
-          <Grid container spacing={2}>
+          <Grid sx={{ my: 1 }} container spacing={2}>
             {actionButtons.map(({ name, icon, func }, idx) => (
               <Grid item xs key={idx}>
-                <TextBottomIconButton icon={icon} text={name} onClick={func} />
+                <TextBottomIconButton icon={icon} text={name} />
               </Grid>
             ))}
           </Grid>
@@ -141,6 +159,7 @@ export default function ProjectDrawer() {
           <Menu />
         </Fab>
       </Hidden>
+      {project && <InvitationCard id={project.id} anchorEl={anchorEl} setAnchorEl={setAnchorEl}/>}
     </div>
   );
 }

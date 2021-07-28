@@ -147,16 +147,21 @@ const InvitationView = () => {
             </Box>
             {invitation.data.part_of_project ? (
               <>
-                <Typography variant={"h6"} sx={{my: 2}}>
-                  You are already part of the project
-                </Typography>
-                <Button
-                  variant={"contained"}
-                  size={"small"}
-                  onClick={() => {
-                    history.push(`/project/${invitation.data.project_id}`);
-                  }}>
-                  open project
+                <Box sx={{mb: 1}}>
+                  <Typography variant={"h6"} sx={{ my: 2 }}>
+                    You are already part of the project
+                  </Typography>
+                  <Button
+                    variant={"contained"}
+                    size={"small"}
+                    onClick={() => {
+                      history.push(`/project/${invitation.data.project_id}`);
+                    }}>
+                    open the project
+                  </Button>
+                </Box>
+                <Button size={"small"} color={"secondary"} onClick={() => history.push("/")}>
+                  Go Home
                 </Button>
               </>
             ) : (
