@@ -4,12 +4,24 @@
 
 #### Stack
 
-- Django (Python)
+- Django (Python - [pipenv](https://pipenv.pypa.io/en/latest/))
 
 - Django-rest-framework (APIs)
 
-- ReactJS
+- ReactJS (JS - [yarn](https://yarnpkg.com/getting-started))
 
-- Redux
+- Redux (State management)
+
+> If you wanna try it out ▶
+> 
+> > it uses `python-decoupe` for environment[.env] vars (required in settings.py
+> > 
+> > Install python dependencies ``pipenv install``
+> > 
+> > install client-side dep ``yarn install``
+> > 
+> > 
+> 
+> 
 
 # Some screenshots
