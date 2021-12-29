@@ -14,13 +14,27 @@
 
 > If you wanna try it out ▶
 > 
+> Requirements:
+> 
+> 1. [Python (3.10)](https://www.python.org/downloads/)
+> 
+> 2. [NodeJs (16.13)](https://nodejs.org/en/download/)
+> 
 > > it uses `python-decoupe` for environment[.env] vars (required in settings.py
+> > 
+> > ###### Using CMD/Terminal
 > > 
 > > Install python dependencies ``pipenv install``
 > > 
 > > install client-side dep ``yarn install``
 > > 
+> > migrate database ``py manage.py migrate``
 > > 
+> > create admin ``py manage.py createsuperuser``
+> > 
+> > build JS ``yarn run build``
+> > 
+> > run django dev server ``py manage.py runserver``
 > 
 > 
 
