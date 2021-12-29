@@ -6,7 +6,7 @@
     "start": "webpack --mode development --watch",
     "build": "webpack --mode production"
   },
-  "author": "epyc technologies",
+  "author": "Mpilo Ntombela",
   "license": "NOLICENSE",
   "private": true,
   "dependencies": {

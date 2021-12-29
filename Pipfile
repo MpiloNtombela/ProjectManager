@@ -19,9 +19,10 @@ django-debug-toolbar = "*"
 [dev-packages]
 black = "*"
 coverage = "*"
+django-upgrade = "*"
 
 [requires]
-python_version = "3.9"
+python_version = "3.10"
 
 [pipenv]
 allow_prereleases = true
