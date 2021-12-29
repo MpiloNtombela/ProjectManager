@@ -3,7 +3,7 @@ from django.http.response import Http404, HttpResponseBadRequest
 from rest_framework.exceptions import PermissionDenied
 from projects.permissions import IsPartOfProject
 from django.core.exceptions import ObjectDoesNotExist
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from rest_framework import generics, status
 from rest_framework import permissions
 from rest_framework.generics import get_object_or_404

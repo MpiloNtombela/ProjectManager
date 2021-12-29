@@ -152,7 +152,7 @@ class Invitation(models.Model):
     )
     key = models.UUIDField(blank=True, null=True, editable=False)
     passcode = models.CharField(max_length=10, blank=True, editable=False)
-    anyone = models.BooleanField(default=False)
+    anyone = models.BooleanField(default=True)
     active = models.BooleanField(default=True)
     timestamp = models.DateTimeField(auto_now_add=True, auto_now=False)
 
