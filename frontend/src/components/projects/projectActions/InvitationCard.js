@@ -110,8 +110,8 @@ const Invitation = ({ id, data }) => {
   const isLoading = Boolean(isToggleLoading || isResetLoading);
 
   const _shareData = {
-    title: "Hyprkit Project Invite",
-    text: "Hey, join my cool project at hyprkit",
+    title: "Project Invite",
+    text: "Hey, join my cool project",
     url: invitation.url,
   };
 
@@ -182,6 +182,18 @@ const Invitation = ({ id, data }) => {
                 checked={invitation.active}
               />
             </Typography>
+            {/*<>*/}
+            {/*  {invitation.passcode && (*/}
+            {/*    <>*/}
+            {/*      <Typography variant={"overline"} component={"strong"}>*/}
+            {/*        Passcode{" "}*/}
+            {/*      </Typography>*/}
+            {/*      <Typography variant={"caption"}>*/}
+            {/*        {invitation.passcode}*/}
+            {/*      </Typography>*/}
+            {/*    </>*/}
+            {/*  )}*/}
+            {/*</>*/}
             <Typography className={classes.caution} variant={"caption"}>
               {invitation.active
                 ? "Anyone with link can join project"
