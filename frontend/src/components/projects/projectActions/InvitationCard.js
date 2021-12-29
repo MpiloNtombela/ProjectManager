@@ -183,6 +183,16 @@ const Invitation = ({ id, data }) => {
                 checked={invitation.active}
               />
             </Typography>
+            <>
+              {invitation.passcode && (
+                <Typography variant={"subtitle2"}>
+                  <Typography variant={"overline"} component={"strong"}>
+                    Passcode:{" "}
+                  </Typography>
+                  {invitation.passcode}
+                </Typography>
+              )}
+            </>
             <Typography className={classes.caution} variant={"caption"}>
               {invitation.active
                 ? "Anyone with link can join project"
